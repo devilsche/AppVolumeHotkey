@@ -14,6 +14,7 @@ public partial class MainWindow : Window
 {
     private const string DragFormat = "AppVolumeHotkey.Exe";
     private readonly AppHost _host;
+    private readonly System.Collections.ObjectModel.ObservableCollection<RunningAppRow> _running = new();
     private Point _dragStart;
     private bool _forceClose;
 
@@ -25,6 +26,8 @@ public partial class MainWindow : Window
         _host.ConfigChanged += Refresh;
         _host.Volume.StateChanged += RefreshProfiles;
         _host.Audio.SessionsChanged += RefreshRunning;
+        _host.Audio.Polled += UpdateRunningVolumes;
+        RunningList.ItemsSource = _running;
 
         Refresh();
         RefreshRunning();
@@ -56,6 +59,7 @@ public partial class MainWindow : Window
         _host.ConfigChanged -= Refresh;
         _host.Volume.StateChanged -= RefreshProfiles;
         _host.Audio.SessionsChanged -= RefreshRunning;
+        _host.Audio.Polled -= UpdateRunningVolumes;
         base.OnClosed(e);
     }
 
@@ -105,13 +109,37 @@ public partial class MainWindow : Window
             ProfileList.SelectedItem = rows.FirstOrDefault(r => r.Profile.Id == selectedId);
     }
 
+    /// <summary>Liste in place abgleichen, damit Auswahl, Fokus und Scrollposition erhalten bleiben.</summary>
     private void RefreshRunning()
     {
-        var selected = (RunningList.SelectedItem as RunningApp)?.Exe;
         var apps = _host.Audio.GetRunningApps();
-        RunningList.ItemsSource = apps;
-        if (selected is not null)
-            RunningList.SelectedItem = apps.FirstOrDefault(a => string.Equals(a.Exe, selected, StringComparison.OrdinalIgnoreCase));
+        var exes = apps.Select(a => a.Exe).ToHashSet(StringComparer.OrdinalIgnoreCase);
+        for (var i = _running.Count - 1; i >= 0; i--)
+        {
+            if (!exes.Contains(_running[i].Exe))
+                _running.RemoveAt(i);
+        }
+        for (var i = 0; i < apps.Count; i++)
+        {
+            var existing = _running.FirstOrDefault(r => string.Equals(r.Exe, apps[i].Exe, StringComparison.OrdinalIgnoreCase));
+            if (existing is null)
+                _running.Insert(Math.Min(i, _running.Count), new RunningAppRow(apps[i]));
+        }
+        UpdateRunningVolumes();
+    }
+
+    private void UpdateRunningVolumes()
+    {
+        if (!IsVisible)
+            return;
+        foreach (var row in _running)
+            row.VolumePercent = _host.Audio.GetCurrentVolume(row.Exe) is { } v ? (int)Math.Round(v * 100) : -1;
+    }
+
+    protected override void OnActivated(EventArgs e)
+    {
+        base.OnActivated(e);
+        UpdateRunningVolumes();
     }
 
     // ---------- Gruppen ----------
@@ -202,7 +230,7 @@ public partial class MainWindow : Window
 
     private void AddRunning_Click(object sender, RoutedEventArgs e)
     {
-        if (RunningList.SelectedItem is RunningApp app)
+        if (RunningList.SelectedItem is RunningAppRow app)
             AddAppToGroup(app.Exe);
         else
             MessageBox.Show(this, "Bitte zuerst rechts eine laufende App auswählen.", "Keine App ausgewählt",
@@ -211,7 +239,7 @@ public partial class MainWindow : Window
 
     private void RunningList_MouseDoubleClick(object sender, MouseButtonEventArgs e)
     {
-        if (RunningList.SelectedItem is RunningApp app)
+        if (RunningList.SelectedItem is RunningAppRow app)
             AddAppToGroup(app.Exe);
     }
 
@@ -225,7 +253,7 @@ public partial class MainWindow : Window
         if (Math.Abs(diff.X) < SystemParameters.MinimumHorizontalDragDistance &&
             Math.Abs(diff.Y) < SystemParameters.MinimumVerticalDragDistance)
             return;
-        if (FindAncestor<ListBoxItem>(e.OriginalSource as DependencyObject)?.DataContext is not RunningApp app)
+        if (FindAncestor<ListBoxItem>(e.OriginalSource as DependencyObject)?.DataContext is not RunningAppRow app)
             return;
         DragDrop.DoDragDrop(RunningList, new DataObject(DragFormat, app.Exe), DragDropEffects.Copy);
     }

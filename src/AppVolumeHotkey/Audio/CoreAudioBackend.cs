@@ -45,6 +45,9 @@ public sealed class CoreAudioBackend : IAudioBackend, IDisposable
     /// <summary>Liste laufender Apps hat sich geändert.</summary>
     public event Action? SessionsChanged;
 
+    /// <summary>Nach jedem Abfragezyklus (ca. 1 s), z. B. für die Live-Anzeige der Lautstärken.</summary>
+    public event Action? Polled;
+
     public CoreAudioBackend()
     {
         _pollTimer = new DispatcherTimer(TimeSpan.FromSeconds(1), DispatcherPriority.Background, (_, _) => Refresh(), Dispatcher.CurrentDispatcher);
@@ -52,6 +55,17 @@ public sealed class CoreAudioBackend : IAudioBackend, IDisposable
         _fadeTimer.Stop();
         Refresh(raiseEvents: false);
         _pollTimer.Start();
+    }
+
+    /// <summary>Tatsächliche aktuelle Lautstärke der ersten Session (ohne Rücksicht auf laufende Übergänge), für die Anzeige.</summary>
+    public float? GetCurrentVolume(string exe)
+    {
+        foreach (var s in SessionsOf(exe))
+        {
+            try { return s.Control.SimpleAudioVolume.Volume; }
+            catch (Exception) { }
+        }
+        return null;
     }
 
     public float? GetVolume(string exe)
@@ -196,6 +210,7 @@ public sealed class CoreAudioBackend : IAudioBackend, IDisposable
             SessionAdded?.Invoke(exe);
         if (added.Count > 0 || removedAny)
             SessionsChanged?.Invoke();
+        Polled?.Invoke();
     }
 
     private string? ExeForPid(uint pid)

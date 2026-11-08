@@ -43,7 +43,7 @@
         <Border Grid.Row="1" Grid.Column="0" Style="{StaticResource Panel}" Margin="0,0,12,0">
             <DockPanel>
                 <Label DockPanel.Dock="Top" Target="{Binding ElementName=GroupList}" Padding="0" Margin="0,0,0,8">
-                    <TextBlock Text="_Gruppen" Style="{StaticResource SectionHeading}" Margin="0" />
+                    <AccessText Text="_Gruppen" FontSize="16" FontWeight="SemiBold" />
                 </Label>
                 <StackPanel DockPanel.Dock="Bottom" Margin="0,8,0,0">
                     <Button Content="+ _Neue Gruppe" Click="NewGroup_Click" HorizontalAlignment="Stretch" MinHeight="32" Margin="0,0,0,6" />
@@ -101,7 +101,7 @@
                     <DockPanel Margin="0,20,0,0">
                         <DockPanel DockPanel.Dock="Top" LastChildFill="False">
                             <Label DockPanel.Dock="Left" Target="{Binding ElementName=ProfileList}" Padding="0">
-                                <TextBlock Text="_Profile" Style="{StaticResource SectionHeading}" />
+                                <AccessText Text="_Profile" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,8" />
                             </Label>
                             <Button DockPanel.Dock="Right" Content="+ Pro_fil" Click="NewProfile_Click" MinHeight="32" Padding="12,4" />
                         </DockPanel>
@@ -147,9 +147,9 @@
         <Border Grid.Row="1" Grid.Column="2" Style="{StaticResource Panel}">
             <DockPanel>
                 <Label DockPanel.Dock="Top" Target="{Binding ElementName=RunningList}" Padding="0" Margin="0,0,0,8">
-                    <TextBlock Text="_Laufende Apps" Style="{StaticResource SectionHeading}" Margin="0" />
+                    <AccessText Text="_Laufende Apps" FontSize="16" FontWeight="SemiBold" />
                 </Label>
-                <TextBlock DockPanel.Dock="Top" Text="Apps, die gerade Ton ausgeben. In eine Gruppe ziehen." TextWrapping="Wrap" Opacity="0.8" Margin="0,0,0,8" />
+                <TextBlock DockPanel.Dock="Top" Text="Apps, die gerade Ton ausgeben, mit ihrer aktuellen Lautstärke im Windows-Mixer (live). In eine Gruppe ziehen." TextWrapping="Wrap" Opacity="0.8" Margin="0,0,0,8" />
                 <Button DockPanel.Dock="Bottom" x:Name="AddRunningButton" Content="→ _Zur Gruppe hinzufügen" Click="AddRunning_Click"
                         HorizontalAlignment="Stretch" MinHeight="32" Margin="0,8,0,0" />
                 <ListBox x:Name="RunningList" AutomationProperties.Name="Laufende Apps"
@@ -157,13 +157,22 @@
                          MouseDoubleClick="RunningList_MouseDoubleClick">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
-                            <StackPanel Orientation="Horizontal" Margin="0,2" AutomationProperties.Name="{Binding DisplayName}">
+                            <Grid Margin="0,2" AutomationProperties.Name="{Binding AccessibleName}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto" />
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
                                 <Image Source="{Binding Icon}" Width="20" Height="20" Margin="0,0,8,0" VerticalAlignment="Center" />
-                                <StackPanel>
-                                    <TextBlock Text="{Binding DisplayName}" />
-                                    <TextBlock Text="{Binding Exe}" FontSize="11" Opacity="0.7" />
+                                <StackPanel Grid.Column="1">
+                                    <TextBlock Text="{Binding DisplayName}" TextTrimming="CharacterEllipsis" />
+                                    <TextBlock Text="{Binding Exe}" FontSize="11" Opacity="0.7" TextTrimming="CharacterEllipsis" />
+                                    <ProgressBar Value="{Binding VolumePercent, Mode=OneWay}" Maximum="100" Height="4" Margin="0,3,0,0"
+                                                 IsTabStop="False" AutomationProperties.Name="{Binding VolumeText}" />
                                 </StackPanel>
-                            </StackPanel>
+                                <TextBlock Grid.Column="2" Text="{Binding VolumeText}" FontFamily="Consolas" Margin="8,0,0,0"
+                                           VerticalAlignment="Center" MinWidth="40" TextAlignment="Right" />
+                            </Grid>
                         </DataTemplate>
                     </ListBox.ItemTemplate>
                 </ListBox>
