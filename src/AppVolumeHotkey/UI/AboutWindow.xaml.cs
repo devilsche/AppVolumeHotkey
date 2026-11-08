@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.Windows;
 using System.Windows.Navigation;
 using AppVolumeHotkey.Platform;
+using AppVolumeHotkey.Core.Localization;
 
 namespace AppVolumeHotkey.UI;
 
@@ -12,7 +13,7 @@ public partial class AboutWindow : Window
     private AboutWindow()
     {
         InitializeComponent();
-        VersionText.Text = "Version " + AppInfo.Version;
+        VersionText.Text = L.F("About_Version", AppInfo.Version);
         CopyrightText.Text = AppInfo.Copyright;
         RepoLink.NavigateUri = new Uri(AppInfo.RepositoryUrl);
         RepoLinkText.Text = AppInfo.RepositoryUrl;

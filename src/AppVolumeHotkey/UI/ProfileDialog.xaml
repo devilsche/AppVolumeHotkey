@@ -1,8 +1,9 @@
 <Window x:Class="AppVolumeHotkey.UI.ProfileDialog"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:l="clr-namespace:AppVolumeHotkey.Localization"
         xmlns:ui="clr-namespace:AppVolumeHotkey.UI"
-        Title="Profil bearbeiten"
+        Title="{l:T Profile_TitleEdit}"
         Width="560" SizeToContent="Height" MinHeight="420"
         ResizeMode="NoResize" WindowStartupLocation="CenterOwner" ShowInTaskbar="False">
     <Window.Resources>
@@ -20,45 +21,45 @@
         <TextBlock x:Name="Heading" FontSize="20" FontWeight="SemiBold" Margin="0,0,0,16" />
 
         <!-- Name -->
-        <Label Content="_Name" Target="{Binding ElementName=NameBox}" Padding="0,0,0,4" />
-        <TextBox x:Name="NameBox" TextChanged="Any_Changed" AutomationProperties.Name="Name" />
+        <Label Content="{l:T Profile_Name}" Target="{Binding ElementName=NameBox}" Padding="0,0,0,4" />
+        <TextBox x:Name="NameBox" TextChanged="Any_Changed" AutomationProperties.Name="{l:T Profile_NameA11y}" />
         <TextBlock x:Name="NameError" Style="{StaticResource Error}" />
 
         <!-- Hotkey -->
-        <Label Content="_Hotkey" Target="{Binding ElementName=HotkeyInput}" Padding="0,14,0,4" />
-        <ui:HotkeyBox x:Name="HotkeyInput" AutomationProperties.Name="Hotkey" />
-        <TextBlock Text="Hineinklicken und die Tastenkombination oder Maustaste drücken (z. B. Shift+Strg+A, F23, Maus 4, Shift+Maus 5, Mittelklick). Entf löscht."
+        <Label Content="{l:T Profile_Hotkey}" Target="{Binding ElementName=HotkeyInput}" Padding="0,14,0,4" />
+        <ui:HotkeyBox x:Name="HotkeyInput" AutomationProperties.Name="{l:T Profile_HotkeyA11y}" />
+        <TextBlock Text="{l:T Profile_HotkeyHint}"
                    Opacity="0.75" FontSize="12" Margin="0,4,0,0" TextWrapping="Wrap" />
         <TextBlock x:Name="HotkeyError" Style="{StaticResource Error}" />
         <CheckBox x:Name="PassThroughBox" Margin="0,8,0,0"
-                  Content="Maustaste zusätzlich an Spiel und andere Programme _weitergeben" />
+                  Content="{l:T Profile_PassThrough}" />
         <TextBlock x:Name="PassThroughHint" Opacity="0.75" FontSize="12" Margin="26,2,0,0" TextWrapping="Wrap" /> 
 
         <!-- Bezug -->
-        <TextBlock Text="Prozentwerte beziehen sich auf" FontWeight="SemiBold" Margin="0,16,0,6" />
+        <TextBlock Text="{l:T Profile_ModeHeading}" FontWeight="SemiBold" Margin="0,16,0,6" />
         <RadioButton x:Name="RelativeRadio" GroupName="Mode" Checked="Mode_Changed" Margin="0,0,0,4"
-                     Content="den _Ausgangswert jeder App (relativ)" />
-        <TextBlock Text="Beispiel: Discord steht im Mixer auf 80 %, TS3 auf 100 %. Bei 20 % → Discord 16 %, TS3 20 %."
+                     Content="{l:T Profile_ModeRelative}" />
+        <TextBlock Text="{l:T Profile_ModeRelativeHint}"
                    Opacity="0.75" FontSize="12" Margin="26,0,0,6" TextWrapping="Wrap" />
         <RadioButton x:Name="AbsoluteRadio" GroupName="Mode" Checked="Mode_Changed" Margin="0,0,0,4"
-                     Content="die Lautstärke im _Windows-Mixer (feste Werte)" />
-        <TextBlock Text="Bei 20 % → alle Apps der Gruppe auf genau 20 %."
+                     Content="{l:T Profile_ModeAbsolute}" />
+        <TextBlock Text="{l:T Profile_ModeAbsoluteHint}"
                    Opacity="0.75" FontSize="12" Margin="26,0,0,0" TextWrapping="Wrap" />
 
         <!-- Abfolge -->
-        <Label Content="Ab_folge" Target="{Binding ElementName=StepList}" Padding="0,16,0,4" FontWeight="SemiBold" />
+        <Label Content="{l:T Profile_Sequence}" Target="{Binding ElementName=StepList}" Padding="0,16,0,4" FontWeight="SemiBold" />
         <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-            <TextBlock Text="Vorlage:" VerticalAlignment="Center" Margin="0,0,8,0" />
-            <Button Content="Leise ↔ zurück" Click="PresetToggle_Click" MinHeight="32" Padding="10,2" Margin="0,0,6,0"
-                    ToolTip="20 % → Ausgangswert" />
-            <Button Content="Zwischen 20 % und 50 %" Click="PresetTwoValues_Click" MinHeight="32" Padding="10,2" Margin="0,0,6,0"
+            <TextBlock Text="{l:T Profile_Preset}" VerticalAlignment="Center" Margin="0,0,8,0" />
+            <Button Content="{l:T Profile_PresetToggle}" Click="PresetToggle_Click" MinHeight="32" Padding="10,2" Margin="0,0,6,0"
+                    ToolTip="{l:T Profile_PresetToggleTip}" />
+            <Button Content="{l:T Profile_PresetTwo}" Click="PresetTwoValues_Click" MinHeight="32" Padding="10,2" Margin="0,0,6,0"
                     ToolTip="20 % → 50 %" />
-            <Button Content="Drei Stufen" Click="PresetThree_Click" MinHeight="32" Padding="10,2"
-                    ToolTip="20 % → 50 % → Ausgangswert" />
+            <Button Content="{l:T Profile_PresetThree}" Click="PresetThree_Click" MinHeight="32" Padding="10,2"
+                    ToolTip="{l:T Profile_PresetThreeTip}" />
         </StackPanel>
         <ListBox x:Name="StepList" MaxHeight="260" HorizontalContentAlignment="Stretch" AllowDrop="True"
                  KeyDown="StepList_KeyDown" Drop="StepList_Drop" DragOver="StepList_DragOver"
-                 AutomationProperties.Name="Abfolge der Stufen">
+                 AutomationProperties.Name="{l:T Profile_SequenceA11y}">
             <ListBox.ItemTemplate>
                 <DataTemplate DataType="{x:Type ui:StepItem}">
                     <Grid AutomationProperties.Name="{Binding AccessibleName}">
@@ -69,61 +70,61 @@
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
                         <TextBlock Grid.Column="0" Text="⠿" FontSize="16" Margin="0,0,8,0" VerticalAlignment="Center" Cursor="SizeAll"
-                                   PreviewMouseLeftButtonDown="Grip_MouseDown" ToolTip="Zum Umsortieren ziehen" />
+                                   PreviewMouseLeftButtonDown="Grip_MouseDown" ToolTip="{l:T Profile_DragTip}" />
                         <TextBlock Grid.Column="1" Text="{Binding Number}" VerticalAlignment="Center" Margin="0,0,8,0" MinWidth="20" />
                         <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center"
                                     Visibility="{Binding IsPercent, Converter={StaticResource BoolToVis}}">
                             <TextBox Text="{Binding PercentText, UpdateSourceTrigger=PropertyChanged}" Width="70"
-                                     AutomationProperties.Name="{Binding Number, StringFormat='Stufe {0} Prozent'}" />
+                                     AutomationProperties.Name="{Binding PercentName}" />
                             <TextBlock Text="%" VerticalAlignment="Center" Margin="6,0,0,0" />
                         </StackPanel>
                         <Border Grid.Column="2" HorizontalAlignment="Left" BorderThickness="2" CornerRadius="12" Padding="10,3"
                                 BorderBrush="{DynamicResource {x:Static SystemColors.AccentColorBrushKey}}"
                                 Visibility="{Binding IsBaseline, Converter={StaticResource BoolToVis}}">
-                            <TextBlock Text="↺ Ausgangswert" FontWeight="SemiBold" />
+                            <TextBlock Text="{l:T Profile_BaselineChip}" FontWeight="SemiBold" />
                         </Border>
                         <StackPanel Grid.Column="3" Orientation="Horizontal">
                             <Button Content="↑" Click="MoveUp_Click" Tag="{Binding}" MinWidth="32" MinHeight="32" Margin="4,0,0,0"
-                                    AutomationProperties.Name="{Binding Number, StringFormat='Stufe {0} nach oben'}" ToolTip="Nach oben (Alt+↑)" />
+                                    AutomationProperties.Name="{Binding UpName}" ToolTip="{l:T Profile_UpTip}" />
                             <Button Content="↓" Click="MoveDown_Click" Tag="{Binding}" MinWidth="32" MinHeight="32" Margin="4,0,0,0"
-                                    AutomationProperties.Name="{Binding Number, StringFormat='Stufe {0} nach unten'}" ToolTip="Nach unten (Alt+↓)" />
+                                    AutomationProperties.Name="{Binding DownName}" ToolTip="{l:T Profile_DownTip}" />
                             <Button Content="✕" Click="RemoveStep_Click" Tag="{Binding}" MinWidth="32" MinHeight="32" Margin="4,0,0,0"
-                                    AutomationProperties.Name="{Binding Number, StringFormat='Stufe {0} entfernen'}" ToolTip="Entfernen" />
+                                    AutomationProperties.Name="{Binding RemoveName}" ToolTip="{l:T Common_Remove}" />
                         </StackPanel>
                     </Grid>
                 </DataTemplate>
             </ListBox.ItemTemplate>
         </ListBox>
         <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
-            <Button Content="+ _Prozent-Stufe" Click="AddPercent_Click" MinHeight="32" Padding="12,4" Margin="0,0,8,0" />
-            <Button Content="+ A_usgangswert" Click="AddBaseline_Click" MinHeight="32" Padding="12,4" />
+            <Button Content="{l:T Profile_AddPercent}" Click="AddPercent_Click" MinHeight="32" Padding="12,4" Margin="0,0,8,0" />
+            <Button Content="{l:T Profile_AddBaseline}" Click="AddBaseline_Click" MinHeight="32" Padding="12,4" />
         </StackPanel>
         <TextBlock x:Name="StepsError" Style="{StaticResource Error}" />
         <Border BorderThickness="1" CornerRadius="6" Padding="10,8" Margin="0,10,0,0"
                 BorderBrush="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}">
             <StackPanel>
-                <TextBlock Text="So verhält sich der Hotkey:" FontWeight="SemiBold" />
+                <TextBlock Text="{l:T Profile_PreviewHeading}" FontWeight="SemiBold" />
                 <TextBlock x:Name="PreviewText" TextWrapping="Wrap" Margin="0,4,0,0" AutomationProperties.LiveSetting="Polite" />
             </StackPanel>
         </Border>
 
         <!-- Rückmeldung -->
-        <TextBlock Text="Rückmeldung" FontWeight="SemiBold" Margin="0,16,0,6" />
-        <CheckBox x:Name="OverlayOnBox" Content="Overlay beim A_ktivieren anzeigen" Margin="0,0,0,6" />
-        <CheckBox x:Name="OverlayOffBox" Content="Overlay beim _Deaktivieren anzeigen" Margin="0,0,0,6" />
-        <CheckBox x:Name="SoundBox" Content="Bestätigungs_ton abspielen (hilfreich bei exklusivem Vollbild)" />
+        <TextBlock Text="{l:T Profile_Feedback}" FontWeight="SemiBold" Margin="0,16,0,6" />
+        <CheckBox x:Name="OverlayOnBox" Content="{l:T Profile_OverlayOn}" Margin="0,0,0,6" />
+        <CheckBox x:Name="OverlayOffBox" Content="{l:T Profile_OverlayOff}" Margin="0,0,0,6" />
+        <CheckBox x:Name="SoundBox" Content="{l:T Profile_Sound}" />
         <StackPanel Orientation="Horizontal" Margin="26,6,0,0">
-            <Label Content="_Klang" Target="{Binding ElementName=SoundCombo}" Padding="0,0,8,0" VerticalAlignment="Center" />
-            <ComboBox x:Name="SoundCombo" MinWidth="140" AutomationProperties.Name="Klang des Bestätigungstons" />
-            <Button Content="▶ An" Click="PreviewSoundOn_Click" MinHeight="32" MinWidth="60" Margin="8,0,0,0"
-                    AutomationProperties.Name="Ton für Aktivieren anhören" ToolTip="Ton beim Aktivieren anhören" />
-            <Button Content="▶ Aus" Click="PreviewSoundOff_Click" MinHeight="32" MinWidth="60" Margin="6,0,0,0"
-                    AutomationProperties.Name="Ton für Deaktivieren anhören" ToolTip="Ton beim Deaktivieren anhören" />
+            <Label Content="{l:T Profile_SoundLabel}" Target="{Binding ElementName=SoundCombo}" Padding="0,0,8,0" VerticalAlignment="Center" />
+            <ComboBox x:Name="SoundCombo" MinWidth="140" AutomationProperties.Name="{l:T Profile_SoundA11y}" />
+            <Button Content="{l:T Profile_SoundOn}" Click="PreviewSoundOn_Click" MinHeight="32" MinWidth="60" Margin="8,0,0,0"
+                    AutomationProperties.Name="{l:T Profile_SoundOnTip}" ToolTip="{l:T Profile_SoundOnTip}" />
+            <Button Content="{l:T Profile_SoundOff}" Click="PreviewSoundOff_Click" MinHeight="32" MinWidth="60" Margin="6,0,0,0"
+                    AutomationProperties.Name="{l:T Profile_SoundOffTip}" ToolTip="{l:T Profile_SoundOffTip}" />
         </StackPanel>
 
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
-            <Button x:Name="SaveButton" Content="_Speichern" IsDefault="True" Click="Save_Click" MinWidth="100" MinHeight="32" Margin="0,0,8,0" />
-            <Button Content="Abbrechen" IsCancel="True" MinWidth="100" MinHeight="32" />
+            <Button x:Name="SaveButton" Content="{l:T Common_Save}" IsDefault="True" Click="Save_Click" MinWidth="100" MinHeight="32" Margin="0,0,8,0" />
+            <Button Content="{l:T Common_Cancel}" IsCancel="True" MinWidth="100" MinHeight="32" />
         </StackPanel>
     </StackPanel>
 </Window>

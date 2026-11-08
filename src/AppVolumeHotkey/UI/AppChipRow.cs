@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using AppVolumeHotkey.Core.Localization;
 
 namespace AppVolumeHotkey.UI;
 
@@ -22,9 +23,11 @@ public sealed class AppChipRow(string exe) : INotifyPropertyChanged
         }
     }
 
-    public string VolumeText => _volumePercent < 0 ? "läuft nicht" : $"{_volumePercent} %";
+    public string VolumeText => _volumePercent < 0 ? L.T("Chip_NotRunning") : L.F("Volume_Percent", _volumePercent);
 
     public string AccessibleName => $"{Exe}, {VolumeText}";
+
+    public string RemoveName => L.F("Chip_Remove", Exe);
 
     public event PropertyChangedEventHandler? PropertyChanged;
 }

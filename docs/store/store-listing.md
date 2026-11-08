@@ -51,6 +51,7 @@ Mit AppVolumeHotkey drehst du die Lautstärke einzelner Apps per Tastendruck her
 • Sanfter Übergang, optionales Overlay und Bestätigungston
 • Live-Anzeige der Lautstärken aus dem Windows-Mixer
 • Läuft unauffällig im Infobereich, startet auf Wunsch mit Windows
+• Deutsch und Englisch
 • Keine Datensammlung, keine Internetverbindung, Open Source (MIT)
 
 **Suchbegriffe:** volume, hotkey, discord, mixer, gaming, audio, teamspeak
@@ -72,6 +73,7 @@ AppVolumeHotkey lets you turn individual apps down and back up with a single key
 • Smooth transitions, optional overlay and confirmation sound
 • Live view of app volumes from the Windows mixer
 • Runs quietly in the system tray, optional start with Windows
+• English and German
 • No data collection, no internet connection, open source (MIT)
 
 **Search terms:** volume, hotkey, discord, mixer, gaming, audio, teamspeak

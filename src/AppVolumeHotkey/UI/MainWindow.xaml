@@ -1,6 +1,7 @@
 <Window x:Class="AppVolumeHotkey.UI.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:l="clr-namespace:AppVolumeHotkey.Localization"
         Title="AppVolumeHotkey"
         Width="1320" Height="760" MinWidth="960" MinHeight="520"
         WindowStartupLocation="CenterScreen"
@@ -38,16 +39,16 @@
             <TextBlock DockPanel.Dock="Left" Text="AppVolumeHotkey" FontSize="22" FontWeight="SemiBold" VerticalAlignment="Center" />
             <TextBlock DockPanel.Dock="Left" x:Name="VersionLabel" Margin="10,6,0,0" VerticalAlignment="Center" Opacity="0.7" />
             <TextBlock x:Name="PausedHint" DockPanel.Dock="Left" Margin="16,0,0,0" VerticalAlignment="Center"
-                       Text="⏸ Hotkeys pausiert" FontWeight="SemiBold" Visibility="Collapsed" />
-            <Button DockPanel.Dock="Right" x:Name="SettingsButton" Content="⚙ _Einstellungen" Click="Settings_Click" MinHeight="32" Padding="12,4" />
-            <Button DockPanel.Dock="Right" Content="ⓘ Ü_ber" Click="About_Click" MinHeight="32" Padding="12,4" Margin="0,0,8,0" />
+                       Text="{l:T Main_HotkeysPaused}" FontWeight="SemiBold" Visibility="Collapsed" />
+            <Button DockPanel.Dock="Right" x:Name="SettingsButton" Content="{l:T Main_Settings}" Click="Settings_Click" MinHeight="32" Padding="12,4" />
+            <Button DockPanel.Dock="Right" Content="{l:T Main_About}" Click="About_Click" MinHeight="32" Padding="12,4" Margin="0,0,8,0" />
         </DockPanel>
 
         <!-- Spalte 1: Gruppen -->
         <GridSplitter Grid.Row="1" Grid.Column="1" Width="12" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
                       ResizeBehavior="PreviousAndNext" ResizeDirection="Columns" Background="Transparent" Cursor="SizeWE"
                       DragCompleted="Splitter_DragCompleted" KeyboardIncrement="20" Focusable="True" IsTabStop="True"
-                      AutomationProperties.Name="Trenner zwischen Gruppen und Gruppendetails" ToolTip="Ziehen oder mit Pfeiltasten die Breite ändern">
+                      AutomationProperties.Name="{l:T Main_SplitterLeft}" ToolTip="{l:T Main_SplitterTip}">
             <GridSplitter.Template>
                 <ControlTemplate TargetType="GridSplitter">
                     <Border Background="Transparent">
@@ -71,7 +72,7 @@
         <GridSplitter Grid.Row="1" Grid.Column="3" Width="12" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
                       ResizeBehavior="PreviousAndNext" ResizeDirection="Columns" Background="Transparent" Cursor="SizeWE"
                       DragCompleted="Splitter_DragCompleted" KeyboardIncrement="20" Focusable="True" IsTabStop="True"
-                      AutomationProperties.Name="Trenner zwischen Gruppendetails und laufenden Apps" ToolTip="Ziehen oder mit Pfeiltasten die Breite ändern">
+                      AutomationProperties.Name="{l:T Main_SplitterRight}" ToolTip="{l:T Main_SplitterTip}">
             <GridSplitter.Template>
                 <ControlTemplate TargetType="GridSplitter">
                     <Border Background="Transparent">
@@ -95,33 +96,33 @@
         <Border Grid.Row="1" Grid.Column="0" Style="{StaticResource Panel}">
             <DockPanel>
                 <Label DockPanel.Dock="Top" Target="{Binding ElementName=GroupList}" Padding="0" Margin="0,0,0,8">
-                    <AccessText Text="_Gruppen" FontSize="16" FontWeight="SemiBold" />
+                    <AccessText Text="{l:T Main_Groups}" FontSize="16" FontWeight="SemiBold" />
                 </Label>
                 <StackPanel DockPanel.Dock="Bottom" Margin="0,8,0,0">
-                    <Button Content="+ _Neue Gruppe" Click="NewGroup_Click" HorizontalAlignment="Stretch" MinHeight="32" Margin="0,0,0,6" />
+                    <Button Content="{l:T Main_NewGroup}" Click="NewGroup_Click" HorizontalAlignment="Stretch" MinHeight="32" Margin="0,0,0,6" />
                     <UniformGrid Columns="2">
-                        <Button x:Name="RenameGroupButton" Content="Umbenennen" Click="RenameGroup_Click" MinHeight="32" Margin="0,0,3,0"
-                                ToolTip="Gruppe umbenennen (F2)" />
-                        <Button x:Name="DeleteGroupButton" Content="Löschen" Click="DeleteGroup_Click" MinHeight="32" Margin="3,0,0,0"
-                                ToolTip="Gruppe löschen (Entf)" />
+                        <Button x:Name="RenameGroupButton" Content="{l:T Main_Rename}" Click="RenameGroup_Click" MinHeight="32" Margin="0,0,3,0"
+                                ToolTip="{l:T Main_RenameTip}" />
+                        <Button x:Name="DeleteGroupButton" Content="{l:T Main_Delete}" Click="DeleteGroup_Click" MinHeight="32" Margin="3,0,0,0"
+                                ToolTip="{l:T Main_DeleteGroupTip}" />
                     </UniformGrid>
                 </StackPanel>
                 <ListBox x:Name="GroupList" DisplayMemberPath="Name" SelectionChanged="GroupList_SelectionChanged"
-                         KeyDown="GroupList_KeyDown" AutomationProperties.Name="Gruppen" />
+                         KeyDown="GroupList_KeyDown" AutomationProperties.Name="{l:T Main_GroupsName}" />
             </DockPanel>
         </Border>
 
         <!-- Spalte 2: gewählte Gruppe -->
         <Border Grid.Row="1" Grid.Column="2" Style="{StaticResource Panel}">
             <Grid>
-                <TextBlock x:Name="NoGroupHint" Text="Lege links eine Gruppe an oder wähle eine aus." TextWrapping="Wrap"
+                <TextBlock x:Name="NoGroupHint" Text="{l:T Main_NoGroup}" TextWrapping="Wrap"
                            HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="14" />
                 <DockPanel x:Name="GroupPanel" Visibility="Collapsed">
                     <TextBlock x:Name="GroupTitle" DockPanel.Dock="Top" FontSize="20" FontWeight="SemiBold" Margin="0,0,0,12" />
 
                     <!-- Apps -->
                     <StackPanel DockPanel.Dock="Top">
-                        <TextBlock Text="Apps" Style="{StaticResource SectionHeading}" />
+                        <TextBlock Text="{l:T Main_Apps}" Style="{StaticResource SectionHeading}" />
                         <ItemsControl x:Name="AppChips" Focusable="False">
                             <ItemsControl.ItemsPanel>
                                 <ItemsPanelTemplate><WrapPanel /></ItemsPanelTemplate>
@@ -136,8 +137,8 @@
                                                        FontFamily="Consolas" />
                                             <Button Content="✕" Click="RemoveApp_Click" Tag="{Binding Exe}" Margin="6,0,0,0"
                                                     MinWidth="28" MinHeight="28" Padding="0"
-                                                    AutomationProperties.Name="{Binding Exe, StringFormat='{}{0} aus Gruppe entfernen'}"
-                                                    ToolTip="{Binding Exe, StringFormat='{}{0} entfernen'}" />
+                                                    AutomationProperties.Name="{Binding RemoveName}"
+                                                    ToolTip="{Binding RemoveName}" />
                                         </StackPanel>
                                     </Border>
                                 </DataTemplate>
@@ -146,21 +147,21 @@
                         <Border x:Name="DropZone" AllowDrop="True" Drop="DropZone_Drop" DragEnter="DropZone_DragEnter" DragLeave="DropZone_DragLeave"
                                 BorderThickness="2" CornerRadius="8" Padding="10" Margin="0,2,0,8"
                                 BorderBrush="{DynamicResource {x:Static SystemColors.AccentColorBrushKey}}" Background="Transparent">
-                            <TextBlock Text="⬇ App aus „Laufende Apps“ hierher ziehen" HorizontalAlignment="Center" />
+                            <TextBlock Text="{l:T Main_DropHint}" HorizontalAlignment="Center" />
                         </Border>
-                        <Button x:Name="AddExeButton" Content="App per ._exe hinzufügen …" Click="AddExe_Click" HorizontalAlignment="Left" MinHeight="32" Padding="12,4" />
+                        <Button x:Name="AddExeButton" Content="{l:T Main_AddExe}" Click="AddExe_Click" HorizontalAlignment="Left" MinHeight="32" Padding="12,4" />
                     </StackPanel>
 
                     <!-- Profile -->
                     <DockPanel Margin="0,20,0,0">
                         <DockPanel DockPanel.Dock="Top" LastChildFill="False" Margin="0,0,0,8">
                             <Label DockPanel.Dock="Left" Target="{Binding ElementName=ProfileList}" Padding="0" VerticalAlignment="Center">
-                                <AccessText Text="_Profile" FontSize="16" FontWeight="SemiBold" />
+                                <AccessText Text="{l:T Main_Profiles}" FontSize="16" FontWeight="SemiBold" />
                             </Label>
-                            <Button DockPanel.Dock="Right" Content="+ Pro_fil" Click="NewProfile_Click" MinHeight="32" Padding="12,4" />
+                            <Button DockPanel.Dock="Right" Content="{l:T Main_NewProfile}" Click="NewProfile_Click" MinHeight="32" Padding="12,4" />
                         </DockPanel>
                         <ListBox x:Name="ProfileList" HorizontalContentAlignment="Stretch" KeyDown="ProfileList_KeyDown"
-                                 MouseDoubleClick="ProfileList_MouseDoubleClick" AutomationProperties.Name="Profile">
+                                 MouseDoubleClick="ProfileList_MouseDoubleClick" AutomationProperties.Name="{l:T Main_ProfilesName}">
                             <ListBox.ItemTemplate>
                                 <DataTemplate>
                                     <Grid Margin="0,4" AutomationProperties.Name="{Binding AccessibleName}">
@@ -183,10 +184,10 @@
                                             <TextBlock Text="{Binding Warning}" Visibility="{Binding HasWarning, Converter={StaticResource BoolToVis}}" TextWrapping="Wrap" />
                                         </StackPanel>
                                         <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
-                                            <Button Content="Bearbeiten" Click="EditProfile_Click" Tag="{Binding}" MinHeight="32" Padding="10,2" Margin="0,0,6,0"
-                                                    AutomationProperties.Name="{Binding Name, StringFormat='Profil {0} bearbeiten'}" />
-                                            <Button Content="Löschen" Click="DeleteProfile_Click" Tag="{Binding}" MinHeight="32" Padding="10,2"
-                                                    AutomationProperties.Name="{Binding Name, StringFormat='Profil {0} löschen'}" />
+                                            <Button Content="{l:T Main_Edit}" Click="EditProfile_Click" Tag="{Binding}" MinHeight="32" Padding="10,2" Margin="0,0,6,0"
+                                                    AutomationProperties.Name="{Binding EditName}" />
+                                            <Button Content="{l:T Main_Delete}" Click="DeleteProfile_Click" Tag="{Binding}" MinHeight="32" Padding="10,2"
+                                                    AutomationProperties.Name="{Binding DeleteName}" />
                                         </StackPanel>
                                     </Grid>
                                 </DataTemplate>
@@ -201,12 +202,12 @@
         <Border Grid.Row="1" Grid.Column="4" Style="{StaticResource Panel}">
             <DockPanel>
                 <Label DockPanel.Dock="Top" Target="{Binding ElementName=RunningList}" Padding="0" Margin="0,0,0,8">
-                    <AccessText Text="_Laufende Apps" FontSize="16" FontWeight="SemiBold" />
+                    <AccessText Text="{l:T Main_Running}" FontSize="16" FontWeight="SemiBold" />
                 </Label>
-                <TextBlock DockPanel.Dock="Top" Text="Apps, die gerade Ton ausgeben, mit ihrer aktuellen Lautstärke im Windows-Mixer (live). In eine Gruppe ziehen." TextWrapping="Wrap" Opacity="0.8" Margin="0,0,0,8" />
-                <Button DockPanel.Dock="Bottom" x:Name="AddRunningButton" Content="→ _Zur Gruppe hinzufügen" Click="AddRunning_Click"
+                <TextBlock DockPanel.Dock="Top" Text="{l:T Main_RunningHint}" TextWrapping="Wrap" Opacity="0.8" Margin="0,0,0,8" />
+                <Button DockPanel.Dock="Bottom" x:Name="AddRunningButton" Content="{l:T Main_AddToGroup}" Click="AddRunning_Click"
                         HorizontalAlignment="Stretch" MinHeight="32" Margin="0,8,0,0" />
-                <ListBox x:Name="RunningList" AutomationProperties.Name="Laufende Apps"
+                <ListBox x:Name="RunningList" AutomationProperties.Name="{l:T Main_RunningName}"
                          HorizontalContentAlignment="Stretch" ScrollViewer.HorizontalScrollBarVisibility="Disabled" SelectionChanged="RunningList_SelectionChanged"
                          PreviewMouseLeftButtonDown="RunningList_PreviewMouseLeftButtonDown" PreviewMouseMove="RunningList_PreviewMouseMove"
                          MouseDoubleClick="RunningList_MouseDoubleClick">

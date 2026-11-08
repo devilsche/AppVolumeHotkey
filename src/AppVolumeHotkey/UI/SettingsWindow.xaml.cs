@@ -4,6 +4,7 @@ using AppVolumeHotkey.Core.Audio;
 using AppVolumeHotkey.Core.Model;
 using AppVolumeHotkey.Overlay;
 using AppVolumeHotkey.Platform;
+using AppVolumeHotkey.Core.Localization;
 
 namespace AppVolumeHotkey.UI;
 
@@ -11,23 +12,30 @@ public partial class SettingsWindow : Window
 {
     private static readonly (OverlayCorner Value, string Label)[] Corners =
     {
-        (OverlayCorner.TopLeft, "Oben links"),
-        (OverlayCorner.TopRight, "Oben rechts"),
-        (OverlayCorner.BottomLeft, "Unten links"),
-        (OverlayCorner.BottomRight, "Unten rechts"),
+        (OverlayCorner.TopLeft, "Settings_TopLeft"),
+        (OverlayCorner.TopRight, "Settings_TopRight"),
+        (OverlayCorner.BottomLeft, "Settings_BottomLeft"),
+        (OverlayCorner.BottomRight, "Settings_BottomRight"),
     };
 
     private static readonly (OverlaySize Value, string Label)[] Sizes =
     {
-        (OverlaySize.Small, "Klein"),
-        (OverlaySize.Medium, "Mittel"),
-        (OverlaySize.Large, "Groß"),
+        (OverlaySize.Small, "Settings_Small"),
+        (OverlaySize.Medium, "Settings_Medium"),
+        (OverlaySize.Large, "Settings_Large"),
     };
 
     private static readonly (OverlayStyle Value, string Label)[] Styles =
     {
-        (OverlayStyle.Compact, "Kompakt"),
-        (OverlayStyle.Normal, "Normal"),
+        (OverlayStyle.Compact, "Settings_Compact"),
+        (OverlayStyle.Normal, "Settings_Normal"),
+    };
+
+    private static readonly (string Value, string Label)[] Languages =
+    {
+        ("auto", "Settings_LangAuto"),
+        ("de", "Settings_LangDe"),
+        ("en", "Settings_LangEn"),
     };
 
     private readonly AppHost _host;
@@ -50,11 +58,13 @@ public partial class SettingsWindow : Window
         StartMinimizedBox.IsChecked = s.StartMinimized;
         RunAsAdminBox.IsChecked = s.RunAsAdmin;
         MinimizeToTrayBox.IsChecked = s.MinimizeToTray;
-        CornerBox.ItemsSource = Corners.Select(c => c.Label).ToList();
+        CornerBox.ItemsSource = Corners.Select(c => L.T(c.Label)).ToList();
         CornerBox.SelectedIndex = Array.FindIndex(Corners, c => c.Value == s.OverlayCorner);
-        SizeBox.ItemsSource = Sizes.Select(c => c.Label).ToList();
+        SizeBox.ItemsSource = Sizes.Select(c => L.T(c.Label)).ToList();
         SizeBox.SelectedIndex = Array.FindIndex(Sizes, c => c.Value == s.OverlaySize);
-        StyleBox.ItemsSource = Styles.Select(c => c.Label).ToList();
+        LanguageBox.ItemsSource = Languages.Select(c => L.T(c.Label)).ToList();
+        LanguageBox.SelectedIndex = Math.Max(0, Array.FindIndex(Languages, c => c.Value == s.Language));
+        StyleBox.ItemsSource = Styles.Select(c => L.T(c.Label)).ToList();
         StyleBox.SelectedIndex = Array.FindIndex(Styles, c => c.Value == s.OverlayStyle);
         DurationBox.Text = s.OverlayDurationMs.ToString();
         FadeBox.Text = s.FadeDurationMs.ToString();
@@ -77,13 +87,14 @@ public partial class SettingsWindow : Window
             OverlaySize = Sizes[Math.Max(0, SizeBox.SelectedIndex)].Value,
             OverlayStyle = Styles[Math.Max(0, StyleBox.SelectedIndex)].Value,
             MainWindow = _host.Config.Settings.MainWindow,
+            Language = Languages[Math.Max(0, LanguageBox.SelectedIndex)].Value,
         };
 
         ClearError();
         if (!int.TryParse(DurationBox.Text.Trim(), out var duration) || duration is < 300 or > 10000)
-            return ShowError(DurationBox, "Anzeigedauer: bitte eine Zahl von 300 bis 10000 eingeben.");
+            return ShowError(DurationBox, L.T("Settings_ErrDuration"));
         if (!int.TryParse(FadeBox.Text.Trim(), out var fade) || fade is < 0 or > 1000)
-            return ShowError(FadeBox, "Übergangsdauer: bitte eine Zahl von 0 bis 1000 eingeben.");
+            return ShowError(FadeBox, L.T("Settings_ErrFade"));
         settings.OverlayDurationMs = duration;
         settings.FadeDurationMs = fade;
         return true;
@@ -111,7 +122,7 @@ public partial class SettingsWindow : Window
         if (!TryRead(out var s))
             return;
         var group = new AppGroup { Name = "Test" };
-        var profile = new Profile { Name = "Voice leise", Mode = ValueMode.Relative, Steps = { Step.Percent(20) } };
+        var profile = new Profile { Name = L.T("Settings_SampleProfile"), Mode = ValueMode.Relative, Steps = { Step.Percent(20) } };
         _preview.Handle(new HotkeyResult(group, profile, Step.Percent(20), true, true, false), s);
     }
 
@@ -122,6 +133,9 @@ public partial class SettingsWindow : Window
         var adminNewlyOn = s.RunAsAdmin && !_host.Config.Settings.RunAsAdmin;
         _host.Config.Settings = s;
         _host.SaveConfig();
+        var lang = L.Resolve(s.Language);
+        if (lang != L.Language)
+            L.SetLanguage(lang); // alle Fenster, Tray und Overlay wechseln sofort
 
         var elevated = Elevation.IsElevated;
         try
@@ -130,7 +144,7 @@ public partial class SettingsWindow : Window
         }
         catch (Exception ex)
         {
-            MessageBox.Show(this, "Autostart konnte nicht eingerichtet werden: " + ex.Message, "Autostart",
+            MessageBox.Show(this, L.F("Settings_AutostartFailed", ex.Message), "Autostart",
                 MessageBoxButton.OK, MessageBoxImage.Warning);
         }
 
@@ -138,7 +152,7 @@ public partial class SettingsWindow : Window
 
         if (adminNewlyOn && !elevated)
         {
-            var answer = MessageBox.Show(Owner, "Jetzt mit Administratorrechten neu starten?", "Administratorrechte",
+            var answer = MessageBox.Show(Owner, L.T("Settings_RestartAdmin"), L.T("Settings_AdminTitle"),
                 MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.Yes);
             if (answer == MessageBoxResult.Yes)
                 _host.RestartElevated();

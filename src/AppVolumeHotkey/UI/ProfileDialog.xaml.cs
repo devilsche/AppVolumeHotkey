@@ -6,6 +6,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using AppVolumeHotkey.Core.Model;
 using AppVolumeHotkey.Input;
+using AppVolumeHotkey.Core.Localization;
 
 namespace AppVolumeHotkey.UI;
 
@@ -24,8 +25,8 @@ public partial class ProfileDialog : Window
         _profile = profile;
         InitializeComponent();
 
-        Title = isNew ? "Neues Profil" : "Profil bearbeiten";
-        Heading.Text = isNew ? $"Neues Profil in „{group.Name}“" : $"Profil „{profile.Name}“ in „{group.Name}“";
+        Title = isNew ? L.T("Profile_TitleNew") : L.T("Profile_TitleEdit");
+        Heading.Text = isNew ? L.F("Profile_HeadingNew", group.Name) : L.F("Profile_HeadingEdit", profile.Name, group.Name);
         NameBox.Text = profile.Name;
         HotkeyInput.Hotkey = profile.Hotkey;
         foreach (var s in profile.Steps)
@@ -34,7 +35,7 @@ public partial class ProfileDialog : Window
         OverlayOnBox.IsChecked = profile.OverlayOnActivate;
         OverlayOffBox.IsChecked = profile.OverlayOnDeactivate;
         SoundBox.IsChecked = profile.Sound;
-        SoundCombo.ItemsSource = Overlay.SoundBank.Variants.Select(v => v.Label).ToList();
+        SoundCombo.ItemsSource = Overlay.SoundBank.Variants.Select(v => L.T(v.LabelKey)).ToList();
         SoundCombo.SelectedIndex = Math.Max(0, Overlay.SoundBank.Variants.ToList().FindIndex(v => v.Variant == profile.SoundVariant));
         PassThroughBox.IsChecked = profile.PassThrough;
         (profile.Mode == ValueMode.Relative ? RelativeRadio : AbsoluteRadio).IsChecked = true;
@@ -74,8 +75,8 @@ public partial class ProfileDialog : Window
         var isMouse = HotkeyInput.Hotkey?.IsMouse == true;
         PassThroughBox.IsEnabled = isMouse;
         PassThroughHint.Text = isMouse
-            ? "Aus: Nur dieses Tool bekommt den Klick. An: Der Klick wirkt zusätzlich im Spiel (z. B. wenn Maus 4 dort belegt ist)."
-            : "Nur für Maustasten. Tastatur-Hotkeys werden immer nur von diesem Tool verarbeitet.";
+            ? L.T("Profile_PassThroughOn")
+            : L.T("Profile_PassThroughKeyboard");
     }
 
     private StepItem Track(StepItem item)
@@ -145,16 +146,16 @@ public partial class ProfileDialog : Window
         }
         if (steps.Count == 0)
         {
-            PreviewText.Text = "Keine Stufen.";
+            PreviewText.Text = L.T("Profile_PreviewNoSteps");
             return;
         }
         var probe = new Profile { Mode = SelectedMode, Steps = steps };
-        var lines = steps.Select((s, i) => $"{i + 1}. Druck: " + (s.Kind == StepKind.Baseline
-            ? "zurück auf die Lautstärke von vorher (Profil aus)"
-            : probe.StepLabel(s) + (probe.Mode == ValueMode.Relative ? $" (z. B. 80 % → {Math.Round(80 * s.Value / 100.0)} %)" : "")));
+        var lines = steps.Select((s, i) => L.F("Profile_PreviewPress", i + 1, s.Kind == StepKind.Baseline
+            ? L.T("Profile_PreviewBack")
+            : probe.StepLabel(s) + (probe.Mode == ValueMode.Relative ? L.F("Profile_PreviewExample", Math.Round(80 * s.Value / 100.0)) : "")));
         var tail = steps.Any(s => s.Kind == StepKind.Baseline)
-            ? "Danach beginnt es wieder bei Druck 1."
-            : "Danach wieder Druck 1 – das Profil bleibt aktiv, bis du über das Tray-Menü zurücksetzt.";
+            ? L.T("Profile_PreviewAgain")
+            : L.T("Profile_PreviewStays");
         PreviewText.Text = string.Join("\n", lines) + "\n" + tail;
     }
 
@@ -163,24 +164,24 @@ public partial class ProfileDialog : Window
         UpdatePreview();
         var ok = true;
 
-        ok &= SetError(NameBox, NameError, string.IsNullOrWhiteSpace(NameBox.Text) ? "Bitte einen Namen eingeben." : null);
+        ok &= SetError(NameBox, NameError, string.IsNullOrWhiteSpace(NameBox.Text) ? L.T("Profile_ErrName") : null);
 
         string? hotkeyError = null;
         if (HotkeyInput.Hotkey is { } hk)
         {
             var other = _host.Config.AllProfiles().FirstOrDefault(x => x.Profile.Id != _profile.Id && x.Profile.Hotkey == hk);
             if (other.Profile is not null)
-                hotkeyError = $"{KeyNames.Format(hk)} wird bereits von „{other.Profile.Name}“ (Gruppe „{other.Group.Name}“) verwendet.";
+                hotkeyError = L.F("Profile_ErrHotkeyUsed", KeyNames.Format(hk), other.Profile.Name, other.Group.Name);
             else if (!_host.Hotkeys.IsAvailable(hk))
-                hotkeyError = $"{KeyNames.Format(hk)} ist von Windows oder einem anderen Programm belegt. Bitte eine andere Kombination wählen.";
+                hotkeyError = L.F("Profile_ErrHotkeyTaken", KeyNames.Format(hk));
         }
         ok &= SetError(HotkeyInput, HotkeyError, hotkeyError);
 
         string? stepsError = null;
         if (_steps.Count == 0)
-            stepsError = "Die Abfolge braucht mindestens eine Stufe.";
+            stepsError = L.T("Profile_ErrNoSteps");
         else if (_steps.FirstOrDefault(s => !s.TryGetStep(out _)) is { } bad)
-            stepsError = $"Stufe {bad.Number}: Bitte eine ganze Zahl von 0 bis 100 eingeben.";
+            stepsError = L.F("Profile_ErrStep", bad.Number);
         ok &= SetError(StepList, StepsError, stepsError);
 
         SaveButton.IsEnabled = ok;

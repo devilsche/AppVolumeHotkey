@@ -7,6 +7,7 @@ using System.Windows.Media;
 using AppVolumeHotkey.Audio;
 using AppVolumeHotkey.Core.Model;
 using Microsoft.Win32;
+using AppVolumeHotkey.Core.Localization;
 
 namespace AppVolumeHotkey.UI;
 
@@ -45,6 +46,7 @@ public partial class MainWindow : Window
 
         Refresh();
         RefreshRunning();
+        L.Changed += OnLanguageChanged;
         if (_host.Config.Groups.Count > 0)
             GroupList.SelectedIndex = 0;
     }
@@ -146,6 +148,7 @@ public partial class MainWindow : Window
         _host.Audio.SessionsChanged -= RefreshRunning;
         _host.Audio.Polled -= UpdateRunningVolumes;
         _liveTimer.Stop();
+        L.Changed -= OnLanguageChanged;
         base.OnClosed(e);
     }
 
@@ -173,7 +176,7 @@ public partial class MainWindow : Window
         UpdateInGroupMarks();
         if (g is null)
             return;
-        GroupTitle.Text = $"Gruppe „{g.Name}“";
+        GroupTitle.Text = L.F("Main_GroupTitle", g.Name);
         _chips = g.Apps.Select(a => new AppChipRow(a)).ToList();
         AppChips.ItemsSource = _chips;
         UpdateRunningVolumes();
@@ -237,18 +240,27 @@ public partial class MainWindow : Window
             chip.VolumePercent = _host.Audio.GetCurrentVolume(chip.Exe) is { } v ? (int)Math.Round(v * 100) : -1;
     }
 
+    /// <summary>Texte, die im Code zusammengesetzt werden, neu aufbauen (XAML-Texte wechseln automatisch).</summary>
+    private void OnLanguageChanged()
+    {
+        ProfileList.ItemsSource = null;
+        _running.Clear();
+        Refresh();
+        RefreshRunning();
+    }
+
     private void UpdateInGroupMarks()
     {
         var g = SelectedGroup;
         foreach (var row in _running)
         {
             row.IsInGroup = g?.ContainsApp(row.Exe) == true;
-            var others = _host.Config.Groups.Where(x => x != g && x.ContainsApp(row.Exe)).Select(x => $"„{x.Name}“").ToList();
+            var others = _host.Config.Groups.Where(x => x != g && x.ContainsApp(row.Exe)).Select(x => L.F("Quote", x.Name)).ToList();
             var parts = new List<string>();
             if (row.IsInGroup)
-                parts.Add($"✓ in „{g!.Name}“");
+                parts.Add(L.F("Running_InSelected", g!.Name));
             if (others.Count > 0)
-                parts.Add((row.IsInGroup ? "auch in " : "in ") + string.Join(", ", others));
+                parts.Add(L.F(row.IsInGroup ? "Running_AlsoIn" : "Running_In", string.Join(", ", others)));
             row.InGroupSuffix = parts.Count == 0 ? "" : " · " + string.Join(", ", parts);
         }
         UpdateAddRunningButton();
@@ -271,7 +283,7 @@ public partial class MainWindow : Window
 
     private void NewGroup_Click(object sender, RoutedEventArgs e)
     {
-        var name = InputDialog.Ask(this, "Neue Gruppe", "Name der Gruppe", "Voice");
+        var name = InputDialog.Ask(this, L.T("Main_NewGroupTitle"), L.T("Main_GroupNameLabel"), "Voice");
         if (name is null)
             return;
         var g = new AppGroup { Name = name };
@@ -287,7 +299,7 @@ public partial class MainWindow : Window
     {
         if (SelectedGroup is not { } g)
             return;
-        var name = InputDialog.Ask(this, "Gruppe umbenennen", "Name der Gruppe", g.Name);
+        var name = InputDialog.Ask(this, L.T("Main_RenameGroupTitle"), L.T("Main_GroupNameLabel"), g.Name);
         if (name is null)
             return;
         g.Name = name;
@@ -300,7 +312,7 @@ public partial class MainWindow : Window
     {
         if (SelectedGroup is not { } g)
             return;
-        var answer = MessageBox.Show(this, $"Gruppe „{g.Name}“ mit allen Profilen löschen?", "Gruppe löschen",
+        var answer = MessageBox.Show(this, L.F("Main_DeleteGroupQuestion", g.Name), L.T("Main_DeleteGroupTitle"),
             MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.No);
         if (answer != MessageBoxResult.Yes)
             return;
@@ -343,8 +355,8 @@ public partial class MainWindow : Window
     {
         var dlg = new OpenFileDialog
         {
-            Title = "App auswählen",
-            Filter = "Programme (*.exe)|*.exe",
+            Title = L.T("Main_PickAppTitle"),
+            Filter = L.T("Main_ExeFilter"),
             CheckFileExists = true,
         };
         if (dlg.ShowDialog(this) == true)
@@ -415,7 +427,7 @@ public partial class MainWindow : Window
     {
         if (SelectedGroup is not { } g)
             return;
-        var p = new Profile { Name = "Leise", Mode = ValueMode.Relative, Steps = { Step.Percent(20), Step.Baseline } };
+        var p = new Profile { Name = L.T("Main_DefaultProfileName"), Mode = ValueMode.Relative, Steps = { Step.Percent(20), Step.Baseline } };
         if (ProfileDialog.Edit(this, _host, g, p, isNew: true) is { } result)
         {
             g.Profiles.Add(result);
@@ -466,7 +478,7 @@ public partial class MainWindow : Window
     {
         if (SelectedGroup is not { } g)
             return;
-        var answer = MessageBox.Show(this, $"Profil „{profile.Name}“ löschen?", "Profil löschen",
+        var answer = MessageBox.Show(this, L.F("Main_DeleteProfileQuestion", profile.Name), L.T("Main_DeleteProfileTitle"),
             MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.No);
         if (answer != MessageBoxResult.Yes)
             return;

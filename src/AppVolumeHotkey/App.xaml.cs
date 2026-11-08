@@ -1,6 +1,7 @@
 using System.Windows;
 using AppVolumeHotkey.Core.Persistence;
 using AppVolumeHotkey.Platform;
+using AppVolumeHotkey.Core.Localization;
 
 namespace AppVolumeHotkey;
 
@@ -13,14 +14,14 @@ public partial class App : Application
     {
         base.OnStartup(e);
         ThemeMode = ThemeMode.System;
+        L.SetLanguage(L.Resolve("auto"));
 
         DispatcherUnhandledException += (_, args) =>
         {
             ErrorLog.Write(args.Exception);
             args.Handled = true; // Tray-App weiterlaufen lassen
             _host?.EmergencyReset();
-            MessageBox.Show("Ein unerwarteter Fehler ist aufgetreten. Die Lautstärken wurden zurückgesetzt.\n\n" + args.Exception.Message
-                + "\n\nDetails: " + ErrorLog.Path, "AppVolumeHotkey", MessageBoxButton.OK, MessageBoxImage.Error);
+            MessageBox.Show(L.F("Msg_Error", args.Exception.Message, ErrorLog.Path), "AppVolumeHotkey", MessageBoxButton.OK, MessageBoxImage.Error);
         };
         AppDomain.CurrentDomain.UnhandledException += (_, args) =>
         {
@@ -33,7 +34,7 @@ public partial class App : Application
         if (!_instance.IsFirst)
         {
             if (_instance.OtherInstanceIsElevated)
-                MessageBox.Show("AppVolumeHotkey läuft bereits mit Administratorrechten. Öffne es über das Symbol im Infobereich.",
+                MessageBox.Show(L.T("Msg_AlreadyElevated"),
                     "AppVolumeHotkey", MessageBoxButton.OK, MessageBoxImage.Information);
             else
                 _instance.SignalFirstInstance();
@@ -43,6 +44,7 @@ public partial class App : Application
 
         var isAutostart = e.Args.Contains(Autostart.AutostartArg, StringComparer.OrdinalIgnoreCase) || Packaging.LaunchedByStartupTask();
         var settings = ConfigStore.Load(AppPaths.ConfigFile).Settings;
+        L.SetLanguage(L.Resolve(settings.Language));
         var elevated = Elevation.IsElevated;
         var elevationDeclined = false;
 
@@ -73,8 +75,7 @@ public partial class App : Application
         _instance.ListenForShowRequests(() => Dispatcher.BeginInvoke(() => _host?.ShowMainWindow()));
 
         if (elevationDeclined)
-            _host.Tray.ShowNotification("Ohne Adminrechte gestartet",
-                "Hotkeys kommen nicht an, solange eine Anwendung mit Administratorrechten im Vordergrund ist.");
+            _host.Tray.ShowNotification(L.T("Msg_NoAdminTitle"), L.T("Msg_NoAdmin"));
 
         if (!(isAutostart && settings.StartMinimized))
             _host.ShowMainWindow();

@@ -14,5 +14,5 @@ public sealed record Step(StepKind Kind, int Value = 0)
     public static Step Baseline { get; } = new(StepKind.Baseline);
 
     [System.Text.Json.Serialization.JsonIgnore]
-    public string Label => Kind == StepKind.Baseline ? "Ausgangswert" : $"{Value} %";
+    public string Label => Kind == StepKind.Baseline ? Localization.L.T("Step_Baseline") : Localization.L.F("Volume_Percent", Value);
 }

@@ -4,6 +4,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using AppVolumeHotkey.Core.Model;
 using AppVolumeHotkey.Input;
+using AppVolumeHotkey.Core.Localization;
 
 namespace AppVolumeHotkey.UI;
 
@@ -13,7 +14,7 @@ namespace AppVolumeHotkey.UI;
 /// </summary>
 public sealed class HotkeyBox : TextBox
 {
-    private const string Prompt = "Taste drücken …";
+    private static string Prompt => L.T("HotkeyBox_Prompt");
     private Hotkey? _hotkey;
 
     public event Action? HotkeyChanged;
@@ -23,7 +24,8 @@ public sealed class HotkeyBox : TextBox
         IsReadOnly = true;
         IsReadOnlyCaretVisible = false;
         IsUndoEnabled = false;
-        AutomationProperties.SetHelpText(this, "Fokussieren und gewünschte Tastenkombination oder Maustaste (Mittelklick, Maus 4, Maus 5) drücken. Entf löscht den Hotkey.");
+        AutomationProperties.SetHelpText(this, L.T("HotkeyBox_Help"));
+        L.Changed += () => { AutomationProperties.SetHelpText(this, L.T("HotkeyBox_Help")); if (!IsKeyboardFocusWithin) UpdateText(); };
         UpdateText();
     }
 
@@ -141,5 +143,5 @@ public sealed class HotkeyBox : TextBox
     private static bool IsModifierKey(Key k) => k is Key.LeftShift or Key.RightShift or Key.LeftCtrl or Key.RightCtrl
         or Key.LeftAlt or Key.RightAlt or Key.LWin or Key.RWin;
 
-    private void UpdateText() => Text = _hotkey is null ? "kein Hotkey" : KeyNames.Format(_hotkey);
+    private void UpdateText() => Text = KeyNames.Format(_hotkey);
 }

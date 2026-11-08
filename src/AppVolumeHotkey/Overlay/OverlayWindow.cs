@@ -8,6 +8,7 @@ using System.Windows.Threading;
 using AppVolumeHotkey.Core.Audio;
 using AppVolumeHotkey.Core.Model;
 using AppVolumeHotkey.Interop;
+using AppVolumeHotkey.Core.Localization;
 
 namespace AppVolumeHotkey.Overlay;
 
@@ -113,15 +114,15 @@ public sealed class OverlayWindow : Window
         if (r.IsActive)
         {
             _detail.Text = r.Profile.StepLabel(r.Step);
-            _badgeText.Text = "AKTIV";
+            _badgeText.Text = L.T("Overlay_Active");
             _badgeText.Foreground = new SolidColorBrush(Color.FromRgb(0x1C, 0x16, 0x06));
             _badge.Background = new SolidColorBrush(Gold);
             _badge.BorderThickness = new Thickness(0);
         }
         else
         {
-            _detail.Text = "zurück auf Ausgangswert";
-            _badgeText.Text = "AUS";
+            _detail.Text = L.T("Overlay_Back");
+            _badgeText.Text = L.T("Overlay_Off");
             _badgeText.Foreground = new SolidColorBrush(Color.FromArgb(0xD0, 0xFF, 0xFF, 0xFF));
             _badge.Background = Brushes.Transparent;
             _badge.BorderBrush = new SolidColorBrush(Color.FromArgb(0x70, 0xFF, 0xFF, 0xFF));

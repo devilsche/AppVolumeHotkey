@@ -9,13 +9,13 @@ public static class SoundBank
 {
     private static readonly Dictionary<string, SoundPlayer> Cache = new();
 
-    public static IReadOnlyList<(SoundVariant Variant, string Label)> Variants { get; } = new[]
+    public static IReadOnlyList<(SoundVariant Variant, string LabelKey)> Variants { get; } = new[]
     {
-        (SoundVariant.TwoTones, "Zwei Töne"),
-        (SoundVariant.Click, "Klick"),
-        (SoundVariant.Bell, "Glocke"),
-        (SoundVariant.Blip, "Blip"),
-        (SoundVariant.Soft, "Sanft"),
+        (SoundVariant.TwoTones, "Sound_TwoTones"),
+        (SoundVariant.Click, "Sound_Click"),
+        (SoundVariant.Bell, "Sound_Bell"),
+        (SoundVariant.Blip, "Sound_Blip"),
+        (SoundVariant.Soft, "Sound_Soft"),
     };
 
     public static void Play(SoundVariant variant, bool active)

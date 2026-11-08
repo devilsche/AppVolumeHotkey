@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using System.Windows.Media;
 using AppVolumeHotkey.Audio;
+using AppVolumeHotkey.Core.Localization;
 
 namespace AppVolumeHotkey.UI;
 
@@ -60,9 +61,9 @@ public sealed class RunningAppRow(RunningApp app) : INotifyPropertyChanged
         }
     }
 
-    public string VolumeText => _volumePercent < 0 ? "–" : $"{_volumePercent} %";
+    public string VolumeText => _volumePercent < 0 ? "–" : L.F("Volume_Percent", _volumePercent);
 
-    public string AccessibleName => $"{DisplayName}, Lautstärke {VolumeText}{InGroupSuffix}";
+    public string AccessibleName => L.F("Running_Accessible", DisplayName, VolumeText) + InGroupSuffix;
 
     public event PropertyChangedEventHandler? PropertyChanged;
 }

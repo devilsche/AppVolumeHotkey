@@ -9,6 +9,7 @@ using AppVolumeHotkey.Overlay;
 using AppVolumeHotkey.Platform;
 using AppVolumeHotkey.Tray;
 using AppVolumeHotkey.UI;
+using AppVolumeHotkey.Core.Localization;
 
 namespace AppVolumeHotkey;
 
@@ -112,8 +113,8 @@ public sealed class AppHost : IDisposable
         }
         catch (Exception e) when (e is IOException or UnauthorizedAccessException)
         {
-            MessageBox.Show($"Die Einstellungen konnten nicht gespeichert werden:\n{e.Message}\n\nDie Änderungen gelten bis zum Beenden.",
-                "Speichern fehlgeschlagen", MessageBoxButton.OK, MessageBoxImage.Warning);
+            MessageBox.Show(L.F("Msg_SaveFailed", e.Message),
+                L.T("Msg_SaveFailedTitle"), MessageBoxButton.OK, MessageBoxImage.Warning);
         }
         Audio.FadeDurationMs = Config.Settings.FadeDurationMs;
         Volume.SetConfig(Config);
@@ -130,7 +131,7 @@ public sealed class AppHost : IDisposable
             var p = g.Profiles.FirstOrDefault(x => x.Id == a.ProfileId);
             if (p is null)
                 continue;
-            yield return $"{g.Name}: {p.Name} · {p.StepLabel(p.Steps[a.StepIndex])}";
+            yield return L.F("Tray_ActiveLine", g.Name, p.Name, p.StepLabel(p.Steps[a.StepIndex]));
         }
     }
 
@@ -196,7 +197,7 @@ public sealed class AppHost : IDisposable
             }
         }
         if (newFailures.Count > 0)
-            Tray.ShowNotification("Hotkey belegt", "Von einem anderen Programm belegt: " + string.Join(", ", newFailures));
+            Tray.ShowNotification(L.T("Msg_HotkeyTakenTitle"), L.F("Msg_HotkeyTaken", string.Join(", ", newFailures)));
     }
 
     private void OnHotkeyPressed(int id)

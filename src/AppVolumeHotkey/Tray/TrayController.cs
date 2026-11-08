@@ -1,5 +1,6 @@
 using System.Windows;
 using System.Windows.Controls;
+using AppVolumeHotkey.Core.Localization;
 
 namespace AppVolumeHotkey.Tray;
 
@@ -16,6 +17,7 @@ public sealed class TrayController : IDisposable
         _icon.LeftClick += () => _host.ShowMainWindow();
         _icon.ContextMenu.Opened += (_, _) => Platform.DebugLog.Write("Tray: Menü geöffnet");
         Rebuild();
+        L.Changed += Rebuild;
     }
 
     public void ShowNotification(string title, string message) => _icon.ShowBalloon(title, message);
@@ -29,7 +31,7 @@ public sealed class TrayController : IDisposable
         var active = _host.ActiveProfileDescriptions().ToList();
         if (active.Count == 0)
         {
-            menu.Items.Add(new MenuItem { Header = "Kein Profil aktiv", IsEnabled = false });
+            menu.Items.Add(new MenuItem { Header = L.T("Tray_NoneActive"), IsEnabled = false });
         }
         else
         {
@@ -38,24 +40,24 @@ public sealed class TrayController : IDisposable
         }
         menu.Items.Add(new Separator());
 
-        var reset = new MenuItem { Header = "Alle _zurücksetzen", IsEnabled = active.Count > 0 };
+        var reset = new MenuItem { Header = L.T("Tray_ResetAll"), IsEnabled = active.Count > 0 };
         reset.Click += (_, _) => _host.Volume.ResetAll();
         menu.Items.Add(reset);
 
-        var pause = new MenuItem { Header = "Hotkeys _pausieren", IsCheckable = true, IsChecked = _host.HotkeysPaused };
+        var pause = new MenuItem { Header = L.T("Tray_Pause"), IsCheckable = true, IsChecked = _host.HotkeysPaused };
         pause.Click += (_, _) => _host.HotkeysPaused = pause.IsChecked;
         menu.Items.Add(pause);
 
         menu.Items.Add(new Separator());
-        var open = new MenuItem { Header = "_Öffnen", FontWeight = FontWeights.SemiBold };
+        var open = new MenuItem { Header = L.T("Tray_Open"), FontWeight = FontWeights.SemiBold };
         open.Click += (_, _) => _host.ShowMainWindow();
         menu.Items.Add(open);
 
-        var about = new MenuItem { Header = "Ü_ber" };
+        var about = new MenuItem { Header = L.T("Tray_About") };
         about.Click += (_, _) => UI.AboutWindow.Show(null);
         menu.Items.Add(about);
 
-        var exit = new MenuItem { Header = "_Beenden" };
+        var exit = new MenuItem { Header = L.T("Tray_Exit") };
         exit.Click += (_, _) => _host.Exit();
         menu.Items.Add(exit);
 

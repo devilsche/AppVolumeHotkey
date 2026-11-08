@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using AppVolumeHotkey.Core.Model;
+using AppVolumeHotkey.Core.Localization;
 
 namespace AppVolumeHotkey.UI;
 
@@ -22,7 +23,7 @@ public sealed class StepItem : INotifyPropertyChanged
     public int Number
     {
         get => _number;
-        set { _number = value; OnChanged(); OnChanged(nameof(AccessibleName)); }
+        set { _number = value; OnChanged(); OnChanged(nameof(AccessibleName)); OnChanged(nameof(PercentName)); OnChanged(nameof(UpName)); OnChanged(nameof(DownName)); OnChanged(nameof(RemoveName)); }
     }
 
     public string PercentText
@@ -47,7 +48,12 @@ public sealed class StepItem : INotifyPropertyChanged
         return false;
     }
 
-    public string AccessibleName => IsBaseline ? $"Stufe {Number}: Ausgangswert" : $"Stufe {Number}: {PercentText} Prozent";
+    public string AccessibleName => IsBaseline ? L.F("Profile_StepAccBaseline", Number) : L.F("Profile_StepAccPercent", Number, PercentText);
+
+    public string PercentName => L.F("Profile_StepPercentA11y", Number);
+    public string UpName => L.F("Profile_StepUpA11y", Number);
+    public string DownName => L.F("Profile_StepDownA11y", Number);
+    public string RemoveName => L.F("Profile_StepRemoveA11y", Number);
 
     public event PropertyChangedEventHandler? PropertyChanged;
 

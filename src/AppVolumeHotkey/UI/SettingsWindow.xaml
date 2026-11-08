@@ -1,22 +1,32 @@
 <Window x:Class="AppVolumeHotkey.UI.SettingsWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Einstellungen"
+        xmlns:l="clr-namespace:AppVolumeHotkey.Localization"
+        Title="{l:T Settings_Title}"
         Width="520" SizeToContent="Height"
         ResizeMode="NoResize" WindowStartupLocation="CenterOwner" ShowInTaskbar="False">
     <StackPanel Margin="20">
-        <TextBlock Text="Einstellungen" FontSize="20" FontWeight="SemiBold" Margin="0,0,0,16" />
+        <TextBlock Text="{l:T Settings_Title}" FontSize="20" FontWeight="SemiBold" Margin="0,0,0,16" />
 
-        <TextBlock Text="Start" FontWeight="SemiBold" Margin="0,0,0,6" />
-        <CheckBox x:Name="StartWithWindowsBox" Content="Mit _Windows starten" Margin="0,0,0,6" />
-        <CheckBox x:Name="StartMinimizedBox" Content="Beim Windows-Start _minimiert im Infobereich starten" Margin="0,0,0,6" />
-        <CheckBox x:Name="MinimizeToTrayBox" Content="Beim M_inimieren in den Infobereich verschieben (nicht in der Taskleiste anzeigen)" Margin="0,0,0,6" />
-        <CheckBox x:Name="RunAsAdminBox" Content="Mit _Administratorrechten ausführen" />
-        <TextBlock x:Name="RunAsAdminHint" Text="Nötig, damit Hotkeys auch ankommen, während eine Anwendung mit Administratorrechten im Vordergrund ist (z. B. manche Spiele, Launcher oder Tools)."
+        <Grid Margin="0,0,0,12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="170" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Label Content="{l:T Settings_Language}" Target="{Binding ElementName=LanguageBox}" VerticalAlignment="Center" />
+            <ComboBox Grid.Column="1" x:Name="LanguageBox" AutomationProperties.Name="{l:T Settings_LanguageA11y}" />
+        </Grid>
+
+        <TextBlock Text="{l:T Settings_Start}" FontWeight="SemiBold" Margin="0,0,0,6" />
+        <CheckBox x:Name="StartWithWindowsBox" Content="{l:T Settings_StartWithWindows}" Margin="0,0,0,6" />
+        <CheckBox x:Name="StartMinimizedBox" Content="{l:T Settings_StartMinimized}" Margin="0,0,0,6" />
+        <CheckBox x:Name="MinimizeToTrayBox" Content="{l:T Settings_MinimizeToTray}" Margin="0,0,0,6" />
+        <CheckBox x:Name="RunAsAdminBox" Content="{l:T Settings_RunAsAdmin}" />
+        <TextBlock x:Name="RunAsAdminHint" Text="{l:T Settings_RunAsAdminHint}"
                    Opacity="0.75" FontSize="12" TextWrapping="Wrap" Margin="26,2,0,0" />
 
-        <TextBlock Text="Overlay" FontWeight="SemiBold" Margin="0,18,0,2" />
-        <TextBlock Text="Erscheint über normalen Fenstern und Spielen im Modus „Rahmenloses Fenster“. Bei exklusivem Vollbild ist kein Overlay möglich – dafür gibt es den Bestätigungston im Profil."
+        <TextBlock Text="{l:T Settings_Overlay}" FontWeight="SemiBold" Margin="0,18,0,2" />
+        <TextBlock Text="{l:T Settings_OverlayHint}"
                    Opacity="0.75" FontSize="12" TextWrapping="Wrap" Margin="0,0,0,8" />
         <Grid>
             <Grid.ColumnDefinitions>
@@ -29,33 +39,33 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
-            <Label Grid.Row="3" Content="Dar_stellung" Target="{Binding ElementName=StyleBox}" VerticalAlignment="Center" />
-            <ComboBox Grid.Row="3" Grid.Column="1" x:Name="StyleBox" Margin="0,6,0,0" AutomationProperties.Name="Overlay-Darstellung" />
-            <Label Grid.Row="0" Content="_Position" Target="{Binding ElementName=CornerBox}" VerticalAlignment="Center" />
-            <ComboBox Grid.Row="0" Grid.Column="1" x:Name="CornerBox" Margin="0,0,0,6" AutomationProperties.Name="Overlay-Position" />
-            <Label Grid.Row="1" Content="_Größe" Target="{Binding ElementName=SizeBox}" VerticalAlignment="Center" />
-            <ComboBox Grid.Row="1" Grid.Column="1" x:Name="SizeBox" Margin="0,0,0,6" AutomationProperties.Name="Overlay-Größe" />
-            <Label Grid.Row="2" Content="Anzeige_dauer (ms)" Target="{Binding ElementName=DurationBox}" VerticalAlignment="Center" />
-            <TextBox Grid.Row="2" Grid.Column="1" x:Name="DurationBox" AutomationProperties.Name="Overlay-Anzeigedauer in Millisekunden" />
+            <Label Grid.Row="3" Content="{l:T Settings_Style}" Target="{Binding ElementName=StyleBox}" VerticalAlignment="Center" />
+            <ComboBox Grid.Row="3" Grid.Column="1" x:Name="StyleBox" Margin="0,6,0,0" AutomationProperties.Name="{l:T Settings_StyleA11y}" />
+            <Label Grid.Row="0" Content="{l:T Settings_Position}" Target="{Binding ElementName=CornerBox}" VerticalAlignment="Center" />
+            <ComboBox Grid.Row="0" Grid.Column="1" x:Name="CornerBox" Margin="0,0,0,6" AutomationProperties.Name="{l:T Settings_PositionA11y}" />
+            <Label Grid.Row="1" Content="{l:T Settings_Size}" Target="{Binding ElementName=SizeBox}" VerticalAlignment="Center" />
+            <ComboBox Grid.Row="1" Grid.Column="1" x:Name="SizeBox" Margin="0,0,0,6" AutomationProperties.Name="{l:T Settings_SizeA11y}" />
+            <Label Grid.Row="2" Content="{l:T Settings_Duration}" Target="{Binding ElementName=DurationBox}" VerticalAlignment="Center" />
+            <TextBox Grid.Row="2" Grid.Column="1" x:Name="DurationBox" AutomationProperties.Name="{l:T Settings_DurationA11y}" />
         </Grid>
-        <Button Content="Overlay _testen" Click="TestOverlay_Click" HorizontalAlignment="Left" MinHeight="32" Padding="12,4" Margin="0,8,0,0" />
+        <Button Content="{l:T Settings_TestOverlay}" Click="TestOverlay_Click" HorizontalAlignment="Left" MinHeight="32" Padding="12,4" Margin="0,8,0,0" />
 
-        <TextBlock Text="Übergang" FontWeight="SemiBold" Margin="0,18,0,6" />
+        <TextBlock Text="{l:T Settings_Transition}" FontWeight="SemiBold" Margin="0,18,0,6" />
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="170" />
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
-            <Label Content="Ü_bergangsdauer (ms)" Target="{Binding ElementName=FadeBox}" VerticalAlignment="Center" />
-            <TextBox Grid.Column="1" x:Name="FadeBox" AutomationProperties.Name="Übergangsdauer in Millisekunden, 0 bis 1000" />
+            <Label Content="{l:T Settings_Fade}" Target="{Binding ElementName=FadeBox}" VerticalAlignment="Center" />
+            <TextBox Grid.Column="1" x:Name="FadeBox" AutomationProperties.Name="{l:T Settings_FadeA11y}" />
         </Grid>
 
         <TextBlock x:Name="ErrorText" Margin="0,10,0,0" TextWrapping="Wrap" FontWeight="SemiBold" Visibility="Collapsed"
                    Foreground="{DynamicResource SystemFillColorCriticalBrush}" />
 
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
-            <Button Content="_Speichern" IsDefault="True" Click="Save_Click" MinWidth="100" MinHeight="32" Margin="0,0,8,0" />
-            <Button Content="Abbrechen" IsCancel="True" MinWidth="100" MinHeight="32" />
+            <Button Content="{l:T Common_Save}" IsDefault="True" Click="Save_Click" MinWidth="100" MinHeight="32" Margin="0,0,8,0" />
+            <Button Content="{l:T Common_Cancel}" IsCancel="True" MinWidth="100" MinHeight="32" />
         </StackPanel>
     </StackPanel>
 </Window>

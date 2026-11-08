@@ -33,6 +33,9 @@ public sealed record WindowPlacement(double Left, double Top, double Width, doub
 
 public sealed class AppSettings
 {
+    /// <summary>„auto“ (wie Windows), „de“ oder „en“.</summary>
+    public string Language { get; set; } = "auto";
+
     public bool StartWithWindows { get; set; }
     public bool StartMinimized { get; set; } = true;
     public bool RunAsAdmin { get; set; }

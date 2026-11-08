@@ -1,6 +1,7 @@
 using System.Windows;
 using System.Windows.Automation;
 using System.Windows.Controls;
+using AppVolumeHotkey.Core.Localization;
 
 namespace AppVolumeHotkey.UI;
 
@@ -29,7 +30,7 @@ public sealed class InputDialog : Window
             if (!string.IsNullOrWhiteSpace(_box.Text))
                 DialogResult = true;
         };
-        var cancel = new Button { Content = "Abbrechen", IsCancel = true, MinWidth = 90 };
+        var cancel = new Button { Content = L.T("Common_Cancel"), IsCancel = true, MinWidth = 90 };
 
         var buttons = new StackPanel { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Right, Margin = new Thickness(0, 16, 0, 0) };
         buttons.Children.Add(ok);

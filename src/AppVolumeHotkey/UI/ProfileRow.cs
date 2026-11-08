@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using AppVolumeHotkey.Core.Model;
 using AppVolumeHotkey.Input;
+using AppVolumeHotkey.Core.Localization;
 
 namespace AppVolumeHotkey.UI;
 
@@ -24,13 +25,16 @@ public sealed class ProfileRow : INotifyPropertyChanged
 
     public bool IsActive => _active?.ProfileId == Profile.Id;
 
-    public string StatusText => IsActive ? $"● AKTIV · {Profile.StepLabel(Profile.Steps[_active!.Value.StepIndex])}" : "";
+    public string StatusText => IsActive ? L.F("Row_Active", Profile.StepLabel(Profile.Steps[_active!.Value.StepIndex])) : "";
 
     public bool HasWarning => _hotkeyFailed;
-    public string Warning => _hotkeyFailed ? "⚠ Hotkey ist von einem anderen Programm belegt und funktioniert gerade nicht." : "";
+    public string Warning => _hotkeyFailed ? L.T("Row_HotkeyTaken") : "";
 
     public string AccessibleName =>
-        $"{Name}, Hotkey {HotkeyText}, Abfolge {Summary}" + (IsActive ? ", aktiv" : "") + (_hotkeyFailed ? ", Hotkey belegt" : "");
+        L.F("Row_Accessible", Name, HotkeyText, Summary) + (IsActive ? L.T("Row_AccActive") : "") + (_hotkeyFailed ? L.T("Row_AccTaken") : "");
+
+    public string EditName => L.F("Row_EditName", Name);
+    public string DeleteName => L.F("Row_DeleteName", Name);
 
     public void Update((Guid ProfileId, int StepIndex)? active, bool hotkeyFailed)
     {

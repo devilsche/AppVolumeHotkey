@@ -39,11 +39,11 @@ public sealed class Profile
     public bool PassThrough { get; set; }
 
     [System.Text.Json.Serialization.JsonIgnore]
-    public string StepsSummary => Steps.Count == 0 ? "(keine Stufen)" : string.Join(" → ", Steps.Select(StepLabel));
+    public string StepsSummary => Steps.Count == 0 ? Localization.L.T("Steps_None") : string.Join(" → ", Steps.Select(StepLabel));
 
     /// <summary>Beschriftung einer Stufe dieses Profils, z. B. „20 % vom Ausgangswert“.</summary>
     public string StepLabel(Step step) =>
-        step.Kind == StepKind.Percent && Mode == ValueMode.Relative ? $"{step.Value} % vom Ausgangswert" : step.Label;
+        step.Kind == StepKind.Percent && Mode == ValueMode.Relative ? Localization.L.F("Step_OfBaseline", step.Value) : step.Label;
 
     public Profile Clone() => new()
     {
