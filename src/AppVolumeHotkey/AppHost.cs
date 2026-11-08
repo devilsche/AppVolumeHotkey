@@ -97,6 +97,13 @@ public sealed class AppHost : IDisposable
             RegisterAllHotkeys();
     }
 
+    /// <summary>Nur speichern (z. B. Fenstergröße) – ohne Hotkeys neu zu registrieren oder Zustände zurückzusetzen.</summary>
+    public void SaveSettingsOnly()
+    {
+        try { ConfigStore.Save(AppPaths.ConfigFile, Config); }
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException) { }
+    }
+
     public void SaveConfig()
     {
         try
@@ -145,6 +152,7 @@ public sealed class AppHost : IDisposable
             return;
         _exiting = true;
         EmergencyReset();
+        _main?.SavePlacementPublic();
         _main?.ForceClose();
         Dispose();
         Application.Current.Shutdown();

@@ -25,6 +25,7 @@ public partial class MainWindow : Window
         _host = host;
         InitializeComponent();
         Title = $"AppVolumeHotkey {Platform.AppInfo.Version}";
+        RestorePlacement();
         VersionLabel.Text = "v" + Platform.AppInfo.Version;
 
         _host.ConfigChanged += Refresh;
@@ -56,8 +57,79 @@ public partial class MainWindow : Window
         Close();
     }
 
+    /// <summary>Gespeicherte Größe/Position übernehmen, sofern sie noch auf einen Bildschirm passt; sonst Standard (an Arbeitsfläche angepasst).</summary>
+    private void RestorePlacement()
+    {
+        var area = SystemParameters.WorkArea;
+        var virt = new Rect(SystemParameters.VirtualScreenLeft, SystemParameters.VirtualScreenTop,
+            SystemParameters.VirtualScreenWidth, SystemParameters.VirtualScreenHeight);
+        if (_host.Config.Settings.MainWindow is { } p
+            && p.Width >= MinWidth && p.Height >= MinHeight
+            && virt.IntersectsWith(new Rect(p.Left, p.Top, p.Width, p.Height))
+            && virt.Contains(new Point(p.Left + 40, p.Top + 20))) // Titelleiste erreichbar
+        {
+            if (p.GroupsWidth is >= 170 and <= 800)
+                GroupsColumn.Width = new GridLength(p.GroupsWidth.Value);
+            if (p.RunningWidth is >= 200 and <= 900)
+                RunningColumn.Width = new GridLength(p.RunningWidth.Value);
+            WindowStartupLocation = WindowStartupLocation.Manual;
+            Left = p.Left;
+            Top = p.Top;
+            Width = p.Width;
+            Height = p.Height;
+            if (p.Maximized)
+                Loaded += (_, _) => WindowState = WindowState.Maximized;
+            return;
+        }
+        Width = Math.Min(Width, area.Width - 40);
+        Height = Math.Min(Height, area.Height - 40);
+    }
+
+    internal void SavePlacementPublic()
+    {
+        if (IsVisible)
+            SavePlacement();
+    }
+
+    private void SavePlacement()
+    {
+        var r = WindowState == WindowState.Normal ? new Rect(Left, Top, ActualWidth, ActualHeight) : RestoreBounds;
+        if (r.IsEmpty || r.Width < 100)
+            return;
+        var p = new WindowPlacement(r.Left, r.Top, r.Width, r.Height, WindowState == WindowState.Maximized)
+        {
+            GroupsWidth = GroupsColumn.ActualWidth,
+            RunningWidth = RunningColumn.ActualWidth,
+        };
+        if (p == _host.Config.Settings.MainWindow)
+            return;
+        _host.Config.Settings.MainWindow = p;
+        _host.SaveSettingsOnly();
+    }
+
+    private WindowState _lastNonMinimized = WindowState.Normal;
+
+    protected override void OnStateChanged(EventArgs e)
+    {
+        base.OnStateChanged(e);
+        if (WindowState != WindowState.Minimized)
+        {
+            _lastNonMinimized = WindowState;
+            return;
+        }
+        if (_host.Config.Settings.MinimizeToTray)
+        {
+            SavePlacement();
+            Hide();                           // nur noch im Infobereich
+            WindowState = _lastNonMinimized;  // beim nächsten Öffnen wie vorher (normal/maximiert)
+        }
+    }
+
+    private void Splitter_DragCompleted(object sender, System.Windows.Controls.Primitives.DragCompletedEventArgs e) => SavePlacement();
+
     protected override void OnClosing(CancelEventArgs e)
     {
+        SavePlacement();
         // Schließen = in den Infobereich minimieren; Beenden nur über das Tray-Menü
         if (!_forceClose)
         {

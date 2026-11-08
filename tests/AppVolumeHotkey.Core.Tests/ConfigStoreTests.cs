@@ -35,6 +35,8 @@ public sealed class ConfigStoreTests : IDisposable
         var cfg = new AppConfig { Groups = { group } };
         cfg.Settings.OverlayCorner = OverlayCorner.BottomLeft;
         cfg.Settings.OverlayStyle = OverlayStyle.Normal;
+        cfg.Settings.MinimizeToTray = false;
+        cfg.Settings.MainWindow = new WindowPlacement(100, 50, 1300, 800, true) { GroupsWidth = 260, RunningWidth = 340 };
 
         ConfigStore.Save(ConfigPath, cfg);
         var loaded = ConfigStore.Load(ConfigPath);
@@ -50,6 +52,10 @@ public sealed class ConfigStoreTests : IDisposable
         Assert.Equal(OverlayCorner.BottomLeft, loaded.Settings.OverlayCorner);
         Assert.Equal(OverlayStyle.Normal, loaded.Settings.OverlayStyle);
         Assert.Equal(OverlayStyle.Compact, new AppSettings().OverlayStyle);
+        Assert.Equal(new WindowPlacement(100, 50, 1300, 800, true) { GroupsWidth = 260, RunningWidth = 340 }, loaded.Settings.MainWindow);
+        Assert.Null(new AppSettings().MainWindow);
+        Assert.True(new AppSettings().MinimizeToTray);
+        Assert.False(loaded.Settings.MinimizeToTray);
     }
 
     [Fact]

@@ -43,6 +43,7 @@ public partial class SettingsWindow : Window
         StartWithWindowsBox.IsChecked = s.StartWithWindows;
         StartMinimizedBox.IsChecked = s.StartMinimized;
         RunAsAdminBox.IsChecked = s.RunAsAdmin;
+        MinimizeToTrayBox.IsChecked = s.MinimizeToTray;
         CornerBox.ItemsSource = Corners.Select(c => c.Label).ToList();
         CornerBox.SelectedIndex = Array.FindIndex(Corners, c => c.Value == s.OverlayCorner);
         SizeBox.ItemsSource = Sizes.Select(c => c.Label).ToList();
@@ -65,9 +66,11 @@ public partial class SettingsWindow : Window
             StartWithWindows = StartWithWindowsBox.IsChecked == true,
             StartMinimized = StartMinimizedBox.IsChecked == true,
             RunAsAdmin = RunAsAdminBox.IsChecked == true,
+            MinimizeToTray = MinimizeToTrayBox.IsChecked == true,
             OverlayCorner = Corners[Math.Max(0, CornerBox.SelectedIndex)].Value,
             OverlaySize = Sizes[Math.Max(0, SizeBox.SelectedIndex)].Value,
             OverlayStyle = Styles[Math.Max(0, StyleBox.SelectedIndex)].Value,
+            MainWindow = _host.Config.Settings.MainWindow,
         };
 
         ClearError();
