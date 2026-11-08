@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/AppVolumeHotkey.Core/AppVolumeHotkey.Core.csproj" />
+    <Project Path="src/AppVolumeHotkey/AppVolumeHotkey.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/AppVolumeHotkey.Core.Tests/AppVolumeHotkey.Core.Tests.csproj" />
+  </Folder>
+</Solution>
