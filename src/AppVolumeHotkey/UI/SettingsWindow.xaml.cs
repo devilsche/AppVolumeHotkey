@@ -40,7 +40,13 @@ public partial class SettingsWindow : Window
         InitializeComponent();
 
         var s = host.Config.Settings;
-        StartWithWindowsBox.IsChecked = s.StartWithWindows;
+        StartWithWindowsBox.IsChecked = Autostart.PackagedState() ?? s.StartWithWindows;
+        if (Packaging.IsPackaged)
+        {
+            // In der Store-Version gibt es keinen Admin-Modus
+            RunAsAdminBox.Visibility = Visibility.Collapsed;
+            RunAsAdminHint.Visibility = Visibility.Collapsed;
+        }
         StartMinimizedBox.IsChecked = s.StartMinimized;
         RunAsAdminBox.IsChecked = s.RunAsAdmin;
         MinimizeToTrayBox.IsChecked = s.MinimizeToTray;
@@ -65,7 +71,7 @@ public partial class SettingsWindow : Window
         {
             StartWithWindows = StartWithWindowsBox.IsChecked == true,
             StartMinimized = StartMinimizedBox.IsChecked == true,
-            RunAsAdmin = RunAsAdminBox.IsChecked == true,
+            RunAsAdmin = !Packaging.IsPackaged && RunAsAdminBox.IsChecked == true,
             MinimizeToTray = MinimizeToTrayBox.IsChecked == true,
             OverlayCorner = Corners[Math.Max(0, CornerBox.SelectedIndex)].Value,
             OverlaySize = Sizes[Math.Max(0, SizeBox.SelectedIndex)].Value,

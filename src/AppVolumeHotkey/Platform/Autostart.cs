@@ -18,6 +18,12 @@ public static class Autostart
 
     public static void Apply(AppSettings settings, bool elevated)
     {
+        if (Packaging.IsPackaged)
+        {
+            ApplyPackaged(settings.StartWithWindows);
+            return;
+        }
+
         var command = $"\"{AppPaths.ExePath}\" {AutostartArg}";
 
         if (!settings.StartWithWindows)
@@ -40,6 +46,39 @@ public static class Autostart
             SetRunValue(command);
             if (elevated)
                 RunSchtasks("/Delete", "/TN", Name, "/F");
+        }
+    }
+
+    /// <summary>Store-Version: Autostart über die im Paket deklarierte StartupTask (Windows verwaltet sie unter „Autostart-Apps“).</summary>
+    private static void ApplyPackaged(bool enable)
+    {
+        try
+        {
+            var task = global::Windows.ApplicationModel.StartupTask.GetAsync(Packaging.StartupTaskId).AsTask().GetAwaiter().GetResult();
+            if (enable && task.State == global::Windows.ApplicationModel.StartupTaskState.Disabled)
+                task.RequestEnableAsync().AsTask().GetAwaiter().GetResult();
+            else if (!enable && task.State == global::Windows.ApplicationModel.StartupTaskState.Enabled)
+                task.Disable();
+        }
+        catch (Exception e)
+        {
+            DebugLog.Write("Autostart (Store) fehlgeschlagen: " + e.Message);
+        }
+    }
+
+    /// <summary>Store-Version: aktueller Zustand (der Nutzer kann ihn auch in den Windows-Einstellungen ändern).</summary>
+    public static bool? PackagedState()
+    {
+        if (!Packaging.IsPackaged)
+            return null;
+        try
+        {
+            var task = global::Windows.ApplicationModel.StartupTask.GetAsync(Packaging.StartupTaskId).AsTask().GetAwaiter().GetResult();
+            return task.State is global::Windows.ApplicationModel.StartupTaskState.Enabled or global::Windows.ApplicationModel.StartupTaskState.EnabledByPolicy;
+        }
+        catch (Exception)
+        {
+            return null;
         }
     }
 

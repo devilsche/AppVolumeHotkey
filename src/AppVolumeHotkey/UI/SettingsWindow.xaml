@@ -12,7 +12,7 @@
         <CheckBox x:Name="StartMinimizedBox" Content="Beim Windows-Start _minimiert im Infobereich starten" Margin="0,0,0,6" />
         <CheckBox x:Name="MinimizeToTrayBox" Content="Beim M_inimieren in den Infobereich verschieben (nicht in der Taskleiste anzeigen)" Margin="0,0,0,6" />
         <CheckBox x:Name="RunAsAdminBox" Content="Mit _Administratorrechten ausführen" />
-        <TextBlock Text="Nötig, damit Hotkeys auch ankommen, während eine Anwendung mit Administratorrechten im Vordergrund ist (z. B. manche Spiele, Launcher oder Tools)."
+        <TextBlock x:Name="RunAsAdminHint" Text="Nötig, damit Hotkeys auch ankommen, während eine Anwendung mit Administratorrechten im Vordergrund ist (z. B. manche Spiele, Launcher oder Tools)."
                    Opacity="0.75" FontSize="12" TextWrapping="Wrap" Margin="26,2,0,0" />
 
         <TextBlock Text="Overlay" FontWeight="SemiBold" Margin="0,18,0,2" />

@@ -53,9 +53,49 @@ jobs:
           name: AppVolumeHotkey-v${{ env.VERSION }}
           path: out/${{ env.EXE_NAME }}
 
+      # ---------- Microsoft-Store-Paket (MSIX, unsigniert – Microsoft signiert beim Einreichen) ----------
+      - name: MSIX bauen
+        shell: pwsh
+        run: |
+          # Store verlangt Major.Minor.Build.0
+          $core = ($env:VERSION -split '-')[0]
+          $parts = $core.Split('.')
+          while ($parts.Count -lt 3) { $parts += '0' }
+          $msixVersion = "$($parts[0]).$($parts[1]).$($parts[2]).0"
+          if ("${{ github.ref_type }}" -ne "tag") { $msixVersion = "$($parts[0]).$($parts[1]).${{ github.run_number }}.0" }
+
+          dotnet publish src/AppVolumeHotkey/AppVolumeHotkey.csproj -c Release -r win-x64 `
+            --self-contained true -p:PublishSingleFile=false -p:DebugType=none `
+            -p:Version=$env:VERSION -o msix-layout
+
+          Copy-Item packaging/Assets msix-layout/Assets -Recurse
+          (Get-Content packaging/AppxManifest.xml -Raw).Replace('__VERSION__', $msixVersion) |
+            Set-Content msix-layout/AppxManifest.xml -Encoding utf8
+
+          $kit = Get-ChildItem "${env:ProgramFiles(x86)}\Windows Kits\10\bin\*\x64\makeappx.exe" |
+            Sort-Object FullName | Select-Object -Last 1
+          $bin = $kit.DirectoryName
+          Write-Host "Windows SDK: $bin"
+
+          & "$bin\makepri.exe" createconfig /cf priconfig.xml /dq de-DE /o
+          & "$bin\makepri.exe" new /pr msix-layout /cf priconfig.xml /of msix-layout\resources.pri /o
+          if ($LASTEXITCODE -ne 0) { throw "makepri fehlgeschlagen" }
+
+          $name = "AppVolumeHotkey-v$env:VERSION.msix"
+          & "$bin\makeappx.exe" pack /d msix-layout /p "out\$name" /o
+          if ($LASTEXITCODE -ne 0) { throw "makeappx fehlgeschlagen" }
+          "MSIX_NAME=$name" | Out-File -FilePath $env:GITHUB_ENV -Append
+
+      - uses: actions/upload-artifact@v5
+        with:
+          name: AppVolumeHotkey-v${{ env.VERSION }}-msix
+          path: out/${{ env.MSIX_NAME }}
+
       - name: Release
         if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
         with:
-          files: out/${{ env.EXE_NAME }}
+          files: |
+            out/${{ env.EXE_NAME }}
+            out/${{ env.MSIX_NAME }}
           generate_release_notes: true

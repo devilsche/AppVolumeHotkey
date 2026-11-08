@@ -41,12 +41,13 @@ public partial class App : Application
             return;
         }
 
-        var isAutostart = e.Args.Contains(Autostart.AutostartArg, StringComparer.OrdinalIgnoreCase);
+        var isAutostart = e.Args.Contains(Autostart.AutostartArg, StringComparer.OrdinalIgnoreCase) || Packaging.LaunchedByStartupTask();
         var settings = ConfigStore.Load(AppPaths.ConfigFile).Settings;
         var elevated = Elevation.IsElevated;
         var elevationDeclined = false;
 
-        if (settings.RunAsAdmin && !elevated)
+        // Store-Version: Admin-Neustart wird nicht angeboten (Paket-Apps laufen ohne Erhöhung)
+        if (settings.RunAsAdmin && !elevated && !Packaging.IsPackaged)
         {
             _instance.Release();
             if (Elevation.TryRelaunchElevated(e.Args))
@@ -59,8 +60,12 @@ public partial class App : Application
             _instance = new SingleInstance();
         }
 
-        try { Autostart.Apply(settings, elevated); }
-        catch (Exception) { /* Autostart ist nicht kritisch */ }
+        // Store-Version: Zustand nicht beim Start erzwingen – der Nutzer kann ihn in Windows ändern
+        if (!Packaging.IsPackaged)
+        {
+            try { Autostart.Apply(settings, elevated); }
+            catch (Exception) { /* Autostart ist nicht kritisch */ }
+        }
 
         DebugLog.Write($"Start (elevated={elevated}, autostart={isAutostart})");
         DebugLog.StartUiWatchdog(Dispatcher);
