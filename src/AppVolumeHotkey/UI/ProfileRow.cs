@@ -21,7 +21,9 @@ public sealed class ProfileRow : INotifyPropertyChanged
     public Profile Profile { get; }
     public string Name => Profile.Name;
     public string HotkeyText => KeyNames.Format(Profile.Hotkey);
-    public string Summary => Profile.StepsSummary;
+    public string Summary => Profile.Trigger == TriggerMode.Hold && Profile.Steps.FirstOrDefault(s => s.Kind == StepKind.Percent) is { } first
+        ? L.F("Row_HoldSummary", Profile.StepLabel(first))
+        : Profile.StepsSummary;
 
     public bool IsActive => _active?.ProfileId == Profile.Id;
 

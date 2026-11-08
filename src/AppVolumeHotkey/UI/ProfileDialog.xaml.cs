@@ -39,6 +39,7 @@ public partial class ProfileDialog : Window
         SoundCombo.SelectedIndex = Math.Max(0, Overlay.SoundBank.Variants.ToList().FindIndex(v => v.Variant == profile.SoundVariant));
         PassThroughBox.IsChecked = profile.PassThrough;
         (profile.Mode == ValueMode.Relative ? RelativeRadio : AbsoluteRadio).IsChecked = true;
+        (profile.Trigger == TriggerMode.Hold ? HoldRadio : ToggleRadio).IsChecked = true;
         UpdatePassThrough();
 
         HotkeyInput.HotkeyChanged += () => { UpdatePassThrough(); if (_loaded) Validate(); };
@@ -107,6 +108,8 @@ public partial class ProfileDialog : Window
 
     private void PreviewSoundOff_Click(object sender, RoutedEventArgs e) => Overlay.SoundBank.Play(SelectedSound, active: false);
 
+    private TriggerMode SelectedTrigger => HoldRadio.IsChecked == true ? TriggerMode.Hold : TriggerMode.Toggle;
+
     private ValueMode SelectedMode => RelativeRadio.IsChecked == true ? ValueMode.Relative : ValueMode.Absolute;
 
     private void Mode_Changed(object sender, RoutedEventArgs e)
@@ -150,6 +153,14 @@ public partial class ProfileDialog : Window
             return;
         }
         var probe = new Profile { Mode = SelectedMode, Steps = steps };
+        if (SelectedTrigger == TriggerMode.Hold)
+        {
+            var first = steps.FirstOrDefault(s => s.Kind == StepKind.Percent);
+            PreviewText.Text = first is null
+                ? L.T("Profile_ErrHoldNeedsPercent")
+                : L.F("Profile_PreviewHoldDown", probe.StepLabel(first)) + "\n" + L.T("Profile_PreviewHoldUp");
+            return;
+        }
         var lines = steps.Select((s, i) => L.F("Profile_PreviewPress", i + 1, s.Kind == StepKind.Baseline
             ? L.T("Profile_PreviewBack")
             : probe.StepLabel(s) + (probe.Mode == ValueMode.Relative ? L.F("Profile_PreviewExample", Math.Round(80 * s.Value / 100.0)) : "")));
@@ -182,6 +193,8 @@ public partial class ProfileDialog : Window
             stepsError = L.T("Profile_ErrNoSteps");
         else if (_steps.FirstOrDefault(s => !s.TryGetStep(out _)) is { } bad)
             stepsError = L.F("Profile_ErrStep", bad.Number);
+        else if (HoldRadio is not null && HoldRadio.IsChecked == true && _steps.All(s => s.IsBaseline))
+            stepsError = L.T("Profile_ErrHoldNeedsPercent");
         ok &= SetError(StepList, StepsError, stepsError);
 
         SaveButton.IsEnabled = ok;
@@ -310,6 +323,7 @@ public partial class ProfileDialog : Window
         _profile.Sound = SoundBox.IsChecked == true;
         _profile.SoundVariant = SelectedSound;
         _profile.Mode = SelectedMode;
+        _profile.Trigger = SelectedTrigger;
         _profile.PassThrough = HotkeyInput.Hotkey?.IsMouse == true && PassThroughBox.IsChecked == true;
         DialogResult = true;
     }

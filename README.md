@@ -21,6 +21,7 @@ Unter **Releases** liegt `AppVolumeHotkey-vX.Y.Z.exe`. Die laufende Version steh
    - **Ausgangswert** ist die Lautstärke, die die Apps vor dem ersten Druck hatten.
    - **Bezug:** *relativ* (Standard bei neuen Profilen): 20 % heißt 20 % vom Ausgangswert jeder App. Steht Discord im Mixer auf 80 % und TS3 auf 100 %, landen sie bei 16 % und 20 %. *Feste Werte*: alle Apps genau auf 20 %.
    - Die Vorschau im Dialog zeigt in Klartext, was jeder Druck bewirkt.
+   - **Auslösen:** *Umschalten* (jeder Druck eine Stufe weiter) oder *Halten* (nur solange die Taste gedrückt ist gilt die erste Prozent-Stufe; beim Loslassen zurück zum vorherigen Zustand – z. B. Discord kurz stumm, während du sprichst).
 4. Pro Gruppe ist immer höchstens ein Profil aktiv. Drückst du den Hotkey eines anderen Profils derselben Gruppe, wechselt die Gruppe direkt dorthin.
 
 Das Fenster schließen minimiert die App in den Infobereich. Mit einem Rechtsklick auf das Symbol siehst du die aktiven Profile, kannst alle zurücksetzen, die Hotkeys pausieren oder die App beenden. Beim Beenden werden alle Lautstärken zurückgesetzt. Stürzt die App ab, holt sie die Ausgangswerte beim nächsten Start nach.

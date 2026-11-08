@@ -66,11 +66,14 @@ public sealed class MouseHook : IDisposable
     private readonly object _lock = new();
     private readonly Dictionary<int, (Hotkey Hotkey, bool PassThrough)> _hotkeys = new();
     private readonly HashSet<uint> _swallowedDown = new(); // Taste, deren „Down“ verschluckt wurde → „Up“ auch verschlucken
+    private readonly Dictionary<uint, int> _pressedIdByButton = new(); // für „Loslassen“-Meldung
     private HookProc? _proc; // Referenz halten, sonst sammelt der GC den Delegate ein
     private Thread? _thread;
     private uint _threadId;
 
     public event Action<int>? Pressed;
+
+    public event Action<int>? Released;
 
     public MouseHook(Dispatcher dispatcher) => _dispatcher = dispatcher;
 
@@ -87,6 +90,7 @@ public sealed class MouseHook : IDisposable
         {
             _hotkeys.Clear();
             _swallowedDown.Clear();
+            _pressedIdByButton.Clear();
         }
         Stop();
     }
@@ -156,6 +160,7 @@ public sealed class MouseHook : IDisposable
             passThrough = _hotkeys[id.Value].PassThrough;
             if (!passThrough)
                 _swallowedDown.Add(vk);
+            _pressedIdByButton[vk] = id.Value;
         }
         var hit = id.Value;
         _dispatcher.BeginInvoke(() => Pressed?.Invoke(hit));
@@ -164,8 +169,17 @@ public sealed class MouseHook : IDisposable
 
     private bool HandleUp(uint vk)
     {
+        int? releasedId = null;
+        bool swallow;
         lock (_lock)
-            return _swallowedDown.Remove(vk);
+        {
+            swallow = _swallowedDown.Remove(vk);
+            if (_pressedIdByButton.Remove(vk, out var id))
+                releasedId = id;
+        }
+        if (releasedId is { } r)
+            _dispatcher.BeginInvoke(() => Released?.Invoke(r));
+        return swallow;
     }
 
     private static uint? ButtonOf(int msg, uint mouseData) => msg switch

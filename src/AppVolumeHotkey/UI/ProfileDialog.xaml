@@ -35,6 +35,12 @@
                   Content="{l:T Profile_PassThrough}" />
         <TextBlock x:Name="PassThroughHint" Opacity="0.75" FontSize="12" Margin="26,2,0,0" TextWrapping="Wrap" /> 
 
+        <!-- Auslösen -->
+        <TextBlock Text="{l:T Profile_TriggerHeading}" FontWeight="SemiBold" Margin="0,16,0,6" />
+        <RadioButton x:Name="ToggleRadio" GroupName="Trigger" Checked="Mode_Changed" Margin="0,0,0,4" Content="{l:T Profile_TriggerToggle}" />
+        <RadioButton x:Name="HoldRadio" GroupName="Trigger" Checked="Mode_Changed" Margin="0,0,0,4" Content="{l:T Profile_TriggerHold}" />
+        <TextBlock Text="{l:T Profile_TriggerHoldHint}" Opacity="0.75" FontSize="12" Margin="26,0,0,0" TextWrapping="Wrap" />
+
         <!-- Bezug -->
         <TextBlock Text="{l:T Profile_ModeHeading}" FontWeight="SemiBold" Margin="0,16,0,6" />
         <RadioButton x:Name="RelativeRadio" GroupName="Mode" Checked="Mode_Changed" Margin="0,0,0,4"

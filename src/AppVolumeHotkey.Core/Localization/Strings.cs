@@ -239,6 +239,14 @@ public static class Strings
         ["Settings_ErrOpacity"] = "Deckkraft: bitte eine Zahl von 30 bis 100 eingeben.",
         ["Settings_TrayBadge"] = "Grünen _Punkt am Tray-Symbol zeigen, solange ein Profil aktiv ist",
         ["Status_Item"] = "{0} {1}",
+        ["Profile_TriggerHeading"] = "Auslösen",
+        ["Profile_TriggerToggle"] = "U_mschalten – jeder Druck geht eine Stufe weiter",
+        ["Profile_TriggerHold"] = "Hal_ten – nur solange die Taste gedrückt ist",
+        ["Profile_TriggerHoldHint"] = "Es gilt die erste Prozent-Stufe der Abfolge. Beim Loslassen geht es zurück zum vorherigen Zustand – auch zu einem anderen aktiven Profil der Gruppe.",
+        ["Profile_PreviewHoldDown"] = "Taste halten: {0}",
+        ["Profile_PreviewHoldUp"] = "Loslassen: zurück zum vorherigen Zustand",
+        ["Profile_ErrHoldNeedsPercent"] = "Für „Halten“ braucht die Abfolge mindestens eine Prozent-Stufe.",
+        ["Row_HoldSummary"] = "Halten: {0}",
     };
 
     public static readonly IReadOnlyDictionary<string, string> En = new Dictionary<string, string>
@@ -475,5 +483,13 @@ public static class Strings
         ["Settings_ErrOpacity"] = "Opacity: please enter a number from 30 to 100.",
         ["Settings_TrayBadge"] = "Show a green _dot on the tray icon while a profile is active",
         ["Status_Item"] = "{0} {1}",
+        ["Profile_TriggerHeading"] = "Trigger",
+        ["Profile_TriggerToggle"] = "Togg_le – each press moves to the next step",
+        ["Profile_TriggerHold"] = "Hol_d – only while the key is held down",
+        ["Profile_TriggerHoldHint"] = "The first percent step of the sequence applies. On release it returns to the previous state – including another active profile of the group.",
+        ["Profile_PreviewHoldDown"] = "Hold the key: {0}",
+        ["Profile_PreviewHoldUp"] = "Release: back to the previous state",
+        ["Profile_ErrHoldNeedsPercent"] = "“Hold” needs at least one percent step in the sequence.",
+        ["Row_HoldSummary"] = "Hold: {0}",
     };
 }

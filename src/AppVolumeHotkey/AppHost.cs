@@ -48,6 +48,7 @@ public sealed class AppHost : IDisposable
 
         Hotkeys = new HotkeyManager();
         Hotkeys.Pressed += OnHotkeyPressed;
+        Hotkeys.Released += OnHotkeyReleased;
 
         Tray = new TrayController(this);
         Volume.StateChanged += Tray.Rebuild;
@@ -240,6 +241,14 @@ public sealed class AppHost : IDisposable
         if (!_profileByHotkeyId.TryGetValue(id, out var profileId))
             return;
         if (Volume.OnHotkey(profileId) is { } result)
+            _overlay.Handle(result, Config.Settings);
+    }
+
+    private void OnHotkeyReleased(int id)
+    {
+        if (!_profileByHotkeyId.TryGetValue(id, out var profileId))
+            return;
+        if (Volume.OnHotkeyReleased(profileId) is { } result)
             _overlay.Handle(result, Config.Settings);
     }
 

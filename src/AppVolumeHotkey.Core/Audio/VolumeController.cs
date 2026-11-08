@@ -10,7 +10,9 @@ namespace AppVolumeHotkey.Core.Audio;
 /// </summary>
 public sealed class VolumeController(IAudioBackend audio, IBaselineStore store)
 {
-    private sealed record ActiveState(Guid ProfileId, int StepIndex, IReadOnlyList<Step> Steps, ValueMode Mode, HashSet<string> Apps);
+    /// <param name="Previous">Bei Halten-Profilen: Zustand vor dem Drücken, zu dem beim Loslassen zurückgekehrt wird.</param>
+    private sealed record ActiveState(Guid ProfileId, int StepIndex, IReadOnlyList<Step> Steps, ValueMode Mode, TriggerMode Trigger,
+        HashSet<string> Apps, ActiveState? Previous = null);
 
     private AppConfig _config = new();
     private readonly Dictionary<Guid, ActiveState> _active = new();
@@ -34,6 +36,7 @@ public sealed class VolumeController(IAudioBackend audio, IBaselineStore store)
                 && profile is not null
                 && profile.Steps.SequenceEqual(state.Steps)
                 && profile.Mode == state.Mode
+                && profile.Trigger == state.Trigger
                 && state.Apps.SetEquals(group.Apps);
             if (!stillValid)
             {
@@ -51,6 +54,8 @@ public sealed class VolumeController(IAudioBackend audio, IBaselineStore store)
         var (group, profile) = _config.AllProfiles().FirstOrDefault(x => x.Profile.Id == profileId);
         if (group is null || profile is null || profile.Steps.Count == 0)
             return null;
+        if (profile.Trigger == TriggerMode.Hold)
+            return OnHoldPressed(group, profile);
 
         int index;
         if (_active.TryGetValue(group.Id, out var state))
@@ -72,7 +77,7 @@ public sealed class VolumeController(IAudioBackend audio, IBaselineStore store)
         }
         else
         {
-            var state2 = new ActiveState(profile.Id, index, profile.Steps.ToList(), profile.Mode,
+            var state2 = new ActiveState(profile.Id, index, profile.Steps.ToList(), profile.Mode, profile.Trigger,
                 new HashSet<string>(group.Apps, StringComparer.OrdinalIgnoreCase));
             _active[group.Id] = state2;
             foreach (var exe in group.Apps)
@@ -85,6 +90,58 @@ public sealed class VolumeController(IAudioBackend audio, IBaselineStore store)
         return new HotkeyResult(group, profile, step, isActive,
             ShowOverlay: isActive ? profile.OverlayOnActivate : profile.OverlayOnDeactivate,
             PlaySound: profile.Sound);
+    }
+
+    private HotkeyResult? OnHoldPressed(AppGroup group, Profile profile)
+    {
+        var index = profile.Steps.FindIndex(s => s.Kind == StepKind.Percent);
+        if (index < 0)
+            return null;
+
+        _active.TryGetValue(group.Id, out var previous);
+        if (previous?.ProfileId == profile.Id)
+            return null; // Taste wird noch gehalten – nichts tun
+        if (previous is null)
+            CaptureBaselines(group);
+
+        var state = new ActiveState(profile.Id, index, profile.Steps.ToList(), profile.Mode, profile.Trigger,
+            new HashSet<string>(group.Apps, StringComparer.OrdinalIgnoreCase), previous);
+        _active[group.Id] = state;
+        foreach (var exe in group.Apps)
+            Apply(group.Id, state, exe);
+
+        Persist();
+        StateChanged?.Invoke();
+        return new HotkeyResult(group, profile, profile.Steps[index], true, profile.OverlayOnActivate, profile.Sound);
+    }
+
+    /// <summary>Taste eines Halten-Profils losgelassen: zurück zum vorherigen Zustand (anderes Profil oder Ausgangswert).</summary>
+    public HotkeyResult? OnHotkeyReleased(Guid profileId)
+    {
+        var (group, profile) = _config.AllProfiles().FirstOrDefault(x => x.Profile.Id == profileId);
+        if (group is null || profile is null || profile.Trigger != TriggerMode.Hold)
+            return null;
+        if (!_active.TryGetValue(group.Id, out var state) || state.ProfileId != profile.Id)
+            return null;
+
+        HotkeyResult result;
+        var previousProfile = state.Previous is { } prev ? group.Profiles.FirstOrDefault(p => p.Id == prev.ProfileId) : null;
+        if (state.Previous is { } before && previousProfile is not null)
+        {
+            _active[group.Id] = before;
+            foreach (var exe in group.Apps)
+                Apply(group.Id, before, exe);
+            result = new HotkeyResult(group, previousProfile, before.Steps[before.StepIndex], true, profile.OverlayOnDeactivate, profile.Sound);
+        }
+        else
+        {
+            ResetGroupCore(group.Id);
+            result = new HotkeyResult(group, profile, Step.Baseline, false, profile.OverlayOnDeactivate, profile.Sound);
+        }
+
+        Persist();
+        StateChanged?.Invoke();
+        return result;
     }
 
     public void OnSessionAdded(string exe)

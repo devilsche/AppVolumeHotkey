@@ -10,6 +10,16 @@ public enum ValueMode
     Relative,
 }
 
+/// <summary>Wie der Hotkey auslöst.</summary>
+public enum TriggerMode
+{
+    /// <summary>Jeder Druck schaltet zur nächsten Stufe.</summary>
+    Toggle,
+
+    /// <summary>Solange gedrückt: erste Prozent-Stufe; Loslassen: zurück zum vorherigen Zustand.</summary>
+    Hold,
+}
+
 /// <summary>Eigene Bestätigungstöne (je ein Ton für „aktiv“ und „aus“).</summary>
 public enum SoundVariant
 {
@@ -35,6 +45,8 @@ public sealed class Profile
     /// <summary>Fehlt in alten Konfigurationen → absolut (bisheriges Verhalten).</summary>
     public ValueMode Mode { get; set; } = ValueMode.Absolute;
 
+    public TriggerMode Trigger { get; set; } = TriggerMode.Toggle;
+
     /// <summary>Nur für Maus-Hotkeys: Klick zusätzlich an Spiel/andere Programme weitergeben.</summary>
     public bool PassThrough { get; set; }
 
@@ -57,5 +69,6 @@ public sealed class Profile
         SoundVariant = SoundVariant,
         PassThrough = PassThrough,
         Mode = Mode,
+        Trigger = Trigger,
     };
 }
