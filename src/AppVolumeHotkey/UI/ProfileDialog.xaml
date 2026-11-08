@@ -7,6 +7,16 @@
         Width="560" SizeToContent="Height" MinHeight="420"
         ResizeMode="NoResize" WindowStartupLocation="CenterOwner" ShowInTaskbar="False">
     <Window.Resources>
+        <!-- Lange Beschriftungen umbrechen statt abschneiden (Fluent-Stil bleibt erhalten) -->
+        <DataTemplate x:Key="WrapContent">
+            <AccessText Text="{Binding}" TextWrapping="Wrap" />
+        </DataTemplate>
+        <Style TargetType="CheckBox" BasedOn="{StaticResource {x:Type CheckBox}}">
+            <Setter Property="ContentTemplate" Value="{StaticResource WrapContent}" />
+        </Style>
+        <Style TargetType="RadioButton" BasedOn="{StaticResource {x:Type RadioButton}}">
+            <Setter Property="ContentTemplate" Value="{StaticResource WrapContent}" />
+        </Style>
         <BooleanToVisibilityConverter x:Key="BoolToVis" />
         <Style x:Key="Error" TargetType="TextBlock">
             <Setter Property="Margin" Value="0,4,0,0" />
