@@ -101,7 +101,7 @@ Modales Fenster mit:
 ### 6.3 Einstellungen
 - Mit Windows starten ☐
 - Minimiert (im Infobereich) starten ☐
-- Mit Administratorrechten ausführen ☐ (nötig, damit Hotkeys ankommen, wenn ein als Admin laufendes Spiel im Vordergrund ist)
+- Mit Administratorrechten ausführen ☐ (nötig, damit Hotkeys ankommen, wenn eine als Admin laufende Anwendung im Vordergrund ist)
 - Overlay: Position (Ecke oben links/rechts, unten links/rechts, ggf. Monitor), Größe (klein/mittel/groß), Anzeigedauer (Standard 1,5 s)
 - Übergangsdauer (Standard 200 ms)
 

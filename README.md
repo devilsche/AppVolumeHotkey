@@ -26,7 +26,7 @@ Das Fenster schließen minimiert die App in den Infobereich. Mit einem Rechtskli
 ## Einstellungen
 
 - Mit Windows starten, beim Autostart minimiert im Infobereich
-- Mit Administratorrechten ausführen: nötig, wenn ein Spiel als Admin läuft, sonst kommen die Hotkeys nicht an. Der Autostart läuft dann über die Aufgabenplanung.
+- Mit Administratorrechten ausführen: nötig, wenn eine Anwendung mit Adminrechten im Vordergrund ist (z. B. manche Spiele oder Tools), sonst kommen die Hotkeys nicht an. Der Autostart läuft dann über die Aufgabenplanung.
 - Overlay: Position, Größe, Anzeigedauer; Übergangsdauer (Standard 200 ms)
 
 ## Bekannte Grenzen

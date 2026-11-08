@@ -20,6 +20,7 @@ public sealed class RunningAppRow(RunningApp app) : INotifyPropertyChanged
                 return;
             _isInGroup = value;
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsInGroup)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(InGroupSuffix)));
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(AccessibleName)));
         }
     }
@@ -41,6 +42,8 @@ public sealed class RunningAppRow(RunningApp app) : INotifyPropertyChanged
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(AccessibleName)));
         }
     }
+
+    public string InGroupSuffix => IsInGroup ? " · ✓ in Gruppe" : "";
 
     public string VolumeText => _volumePercent < 0 ? "–" : $"{_volumePercent} %";
 

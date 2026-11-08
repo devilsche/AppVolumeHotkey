@@ -105,8 +105,19 @@ public partial class MainWindow : Window
             ProfileList.ItemsSource = null;
             return;
         }
-        var selectedId = (ProfileList.SelectedItem as ProfileRow)?.Profile.Id;
         var active = _host.Volume.GetActive(g.Id);
+
+        // Gleiche Profile (gleiche Objekte, gleiche Reihenfolge)? Dann nur den Status aktualisieren – kein Flackern.
+        if (ProfileList.ItemsSource is List<ProfileRow> current
+            && current.Count == g.Profiles.Count
+            && current.Select(r => r.Profile).SequenceEqual(g.Profiles))
+        {
+            foreach (var row in current)
+                row.Update(active, _host.FailedHotkeys.Contains(row.Profile.Id));
+            return;
+        }
+
+        var selectedId = (ProfileList.SelectedItem as ProfileRow)?.Profile.Id;
         var rows = g.Profiles.Select(p => new ProfileRow(p, active, _host.FailedHotkeys.Contains(p.Id))).ToList();
         ProfileList.ItemsSource = rows;
         if (selectedId is not null)

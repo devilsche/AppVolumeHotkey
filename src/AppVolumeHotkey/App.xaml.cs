@@ -67,7 +67,7 @@ public partial class App : Application
 
         if (elevationDeclined)
             _host.Tray.ShowNotification("Ohne Adminrechte gestartet",
-                "Hotkeys kommen nicht an, solange ein als Administrator laufendes Spiel im Vordergrund ist.");
+                "Hotkeys kommen nicht an, solange eine Anwendung mit Administratorrechten im Vordergrund ist.");
 
         if (!(isAutostart && settings.StartMinimized))
             _host.ShowMainWindow();

@@ -156,28 +156,34 @@
                 <TextBlock DockPanel.Dock="Top" Text="Apps, die gerade Ton ausgeben, mit ihrer aktuellen Lautstärke im Windows-Mixer (live). In eine Gruppe ziehen." TextWrapping="Wrap" Opacity="0.8" Margin="0,0,0,8" />
                 <Button DockPanel.Dock="Bottom" x:Name="AddRunningButton" Content="→ _Zur Gruppe hinzufügen" Click="AddRunning_Click"
                         HorizontalAlignment="Stretch" MinHeight="32" Margin="0,8,0,0" />
-                <ListBox x:Name="RunningList" AutomationProperties.Name="Laufende Apps" SelectionChanged="RunningList_SelectionChanged"
+                <ListBox x:Name="RunningList" AutomationProperties.Name="Laufende Apps"
+                         HorizontalContentAlignment="Stretch" ScrollViewer.HorizontalScrollBarVisibility="Disabled" SelectionChanged="RunningList_SelectionChanged"
                          PreviewMouseLeftButtonDown="RunningList_PreviewMouseLeftButtonDown" PreviewMouseMove="RunningList_PreviewMouseMove"
                          MouseDoubleClick="RunningList_MouseDoubleClick">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
-                            <Grid x:Name="Root" Margin="0,2" AutomationProperties.Name="{Binding AccessibleName}">
+                            <Grid x:Name="Root" Margin="0,3" AutomationProperties.Name="{Binding AccessibleName}">
                                 <Grid.ColumnDefinitions>
                                     <ColumnDefinition Width="Auto" />
                                     <ColumnDefinition Width="*" />
                                     <ColumnDefinition Width="Auto" />
                                 </Grid.ColumnDefinitions>
-                                <Image Source="{Binding Icon}" Width="20" Height="20" Margin="0,0,8,0" VerticalAlignment="Center" />
-                                <StackPanel Grid.Column="1">
-                                    <TextBlock Text="{Binding DisplayName}" TextTrimming="CharacterEllipsis" />
-                                    <TextBlock Text="{Binding Exe}" FontSize="11" Opacity="0.7" TextTrimming="CharacterEllipsis" />
-                                    <TextBlock Text="✓ bereits in der Gruppe" FontSize="11" FontWeight="SemiBold"
-                                               Visibility="{Binding IsInGroup, Converter={StaticResource BoolToVis}}" />
-                                    <ProgressBar Value="{Binding VolumePercent, Mode=OneWay}" Maximum="100" Height="4" Margin="0,3,0,0"
-                                                 IsTabStop="False" AutomationProperties.Name="{Binding VolumeText}" />
-                                </StackPanel>
-                                <TextBlock Grid.Column="2" Text="{Binding VolumeText}" FontFamily="Consolas" Margin="8,0,0,0"
-                                           VerticalAlignment="Center" MinWidth="40" TextAlignment="Right" />
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <Image Grid.RowSpan="2" Source="{Binding Icon}" Width="20" Height="20" Margin="0,0,8,0" VerticalAlignment="Center" />
+                                <TextBlock Grid.Column="1" Text="{Binding DisplayName}" TextTrimming="CharacterEllipsis" />
+                                <TextBlock Grid.Column="2" Text="{Binding VolumeText}" FontSize="11" Opacity="0.7" Margin="8,0,0,0"
+                                           VerticalAlignment="Center" />
+                                <TextBlock Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" FontSize="11" Opacity="0.7" TextTrimming="CharacterEllipsis">
+                                    <Run Text="{Binding Exe, Mode=OneWay}" /><Run Text="{Binding InGroupSuffix, Mode=OneWay}" FontWeight="SemiBold" />
+                                </TextBlock>
+                                <!-- Balken immer volle Spaltenbreite, Füllung = Prozentwert -->
+                                <ProgressBar Grid.Row="2" Grid.ColumnSpan="3" Value="{Binding VolumePercent, Mode=OneWay}" Minimum="0" Maximum="100"
+                                             Height="4" MinHeight="4" Margin="0,4,0,0" HorizontalAlignment="Stretch"
+                                             IsTabStop="False" Focusable="False" AutomationProperties.Name="{Binding VolumeText}" />
                             </Grid>
                             <DataTemplate.Triggers>
                                 <DataTrigger Binding="{Binding IsInGroup}" Value="True">
