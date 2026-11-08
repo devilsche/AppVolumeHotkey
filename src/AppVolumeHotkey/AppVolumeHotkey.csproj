@@ -11,7 +11,11 @@
     <RootNamespace>AppVolumeHotkey</RootNamespace>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <ApplicationIcon>Assets\app.ico</ApplicationIcon>
-    <Version>0.4.1</Version>
+    <Version>0.4.2</Version>
+    <Product>AppVolumeHotkey</Product>
+    <Authors>Dominic Ruschinski</Authors>
+    <Copyright>© 2026 Dominic Ruschinski</Copyright>
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
     <!-- WPF0001: ThemeMode ist (noch) experimentell -->
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <NoWarn>$(NoWarn);WPF0001</NoWarn>
@@ -24,6 +28,7 @@
 
   <ItemGroup>
     <Resource Include="Assets\app.ico" />
+    <EmbeddedResource Include="..\..\THIRD-PARTY-NOTICES.txt" LogicalName="THIRD-PARTY-NOTICES.txt" />
   </ItemGroup>
 
   <ItemGroup>

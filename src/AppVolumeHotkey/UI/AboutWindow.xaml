@@ -1,0 +1,44 @@
+<Window x:Class="AppVolumeHotkey.UI.AboutWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Über AppVolumeHotkey"
+        Width="560" Height="620" MinHeight="420"
+        WindowStartupLocation="CenterOwner" ShowInTaskbar="False">
+    <DockPanel Margin="20">
+        <StackPanel DockPanel.Dock="Top">
+            <StackPanel Orientation="Horizontal">
+                <Image Source="/Assets/app.ico" Width="56" Height="56" Margin="0,0,14,0" AutomationProperties.Name="" />
+                <StackPanel VerticalAlignment="Center">
+                    <TextBlock Text="AppVolumeHotkey" FontSize="22" FontWeight="SemiBold" />
+                    <TextBlock x:Name="VersionText" Opacity="0.8" />
+                </StackPanel>
+            </StackPanel>
+            <TextBlock Margin="0,14,0,0" TextWrapping="Wrap"
+                       Text="Lautstärke von App-Gruppen per globalem Hotkey umschalten – z. B. Discord beim Zocken leiser und wieder lauter." />
+            <TextBlock x:Name="CopyrightText" Margin="0,10,0,0" />
+            <TextBlock Margin="0,4,0,0">
+                <Hyperlink x:Name="RepoLink" RequestNavigate="Link_RequestNavigate">
+                    <Run x:Name="RepoLinkText" />
+                </Hyperlink>
+            </TextBlock>
+
+            <TextBlock Text="Datenschutz" FontWeight="SemiBold" Margin="0,16,0,4" />
+            <TextBlock TextWrapping="Wrap"
+                       Text="Die App sammelt keine Daten und sendet nichts ins Internet. Einstellungen werden nur lokal in %APPDATA%\AppVolumeHotkey gespeichert. Tastatur und Maus werden nur auf die eingestellten Hotkeys geprüft; Eingaben werden weder gespeichert noch weitergegeben." />
+
+            <TextBlock Text="Haftung" FontWeight="SemiBold" Margin="0,16,0,4" />
+            <TextBlock TextWrapping="Wrap"
+                       Text="Die Software wird ohne Gewähr bereitgestellt. Sie greift nur über die offizielle Windows-Audio-Schnittstelle auf Lautstärken zu und verändert keine anderen Programme." />
+
+            <TextBlock Text="Komponenten Dritter" FontWeight="SemiBold" Margin="0,16,0,4" />
+        </StackPanel>
+
+        <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,14,0,0">
+            <Button Content="_Datenordner öffnen" Click="OpenDataDir_Click" MinHeight="32" Padding="12,4" Margin="0,0,8,0" />
+            <Button Content="_Schließen" IsCancel="True" IsDefault="True" MinWidth="100" MinHeight="32" />
+        </StackPanel>
+
+        <TextBox x:Name="NoticesBox" IsReadOnly="True" TextWrapping="Wrap" VerticalScrollBarVisibility="Auto"
+                 FontFamily="Consolas" FontSize="11" AutomationProperties.Name="Lizenzen der Komponenten Dritter" />
+    </DockPanel>
+</Window>

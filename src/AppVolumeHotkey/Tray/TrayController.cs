@@ -15,7 +15,7 @@ public sealed class TrayController : IDisposable
         _host = host;
         _icon = new TaskbarIcon
         {
-            ToolTipText = "AppVolumeHotkey",
+            ToolTipText = "AppVolumeHotkey " + Platform.AppInfo.Version,
             IconSource = new BitmapImage(new Uri("pack://application:,,,/Assets/app.ico")),
             NoLeftClickDelay = true,
             ContextMenu = new ContextMenu(),
@@ -58,11 +58,16 @@ public sealed class TrayController : IDisposable
         open.Click += (_, _) => _host.ShowMainWindow();
         menu.Items.Add(open);
 
+        var about = new MenuItem { Header = "Ü_ber" };
+        about.Click += (_, _) => UI.AboutWindow.Show(null);
+        menu.Items.Add(about);
+
         var exit = new MenuItem { Header = "_Beenden" };
         exit.Click += (_, _) => _host.Exit();
         menu.Items.Add(exit);
 
-        _icon.ToolTipText = active.Count == 0 ? "AppVolumeHotkey" : "AppVolumeHotkey – " + string.Join(", ", active);
+        var tip = active.Count == 0 ? $"AppVolumeHotkey {Platform.AppInfo.Version}" : "AppVolumeHotkey – " + string.Join(", ", active);
+        _icon.ToolTipText = tip.Length > 120 ? tip[..117] + "…" : tip;
     }
 
     public void Dispose() => _icon.Dispose();

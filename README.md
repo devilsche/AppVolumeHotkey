@@ -4,7 +4,7 @@ Mit einem globalen Hotkey die Lautstärke einer oder mehrerer Apps umschalten. G
 
 ## Download
 
-Unter **Releases** liegt `AppVolumeHotkey.exe`. Einfach herunterladen und starten; eine Installation ist nicht nötig. Jeder Push baut die exe außerdem als Artefakt im Reiter **Actions**.
+Unter **Releases** liegt `AppVolumeHotkey-vX.Y.Z.exe`. Die laufende Version steht im Fenstertitel und unter „Über“. Einfach herunterladen und starten; eine Installation ist nicht nötig. Jeder Push baut die exe außerdem als Artefakt im Reiter **Actions**.
 
 > Windows SmartScreen kann beim ersten Start warnen, weil die exe nicht signiert ist: „Weitere Informationen“ → „Trotzdem ausführen“.
 

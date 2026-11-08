@@ -23,6 +23,8 @@ public partial class MainWindow : Window
     {
         _host = host;
         InitializeComponent();
+        Title = $"AppVolumeHotkey {Platform.AppInfo.Version}";
+        VersionLabel.Text = "v" + Platform.AppInfo.Version;
 
         _host.ConfigChanged += Refresh;
         _host.Volume.StateChanged += RefreshProfiles;
@@ -372,4 +374,6 @@ public partial class MainWindow : Window
     // ---------- Einstellungen ----------
 
     private void Settings_Click(object sender, RoutedEventArgs e) => SettingsWindow.Open(this, _host);
+
+    private void About_Click(object sender, RoutedEventArgs e) => AboutWindow.Show(this);
 }
