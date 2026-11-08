@@ -16,6 +16,7 @@
             <TextBlock Margin="0,14,0,0" TextWrapping="Wrap"
                        Text="Lautstärke von App-Gruppen per globalem Hotkey umschalten – z. B. Discord beim Zocken leiser und wieder lauter." />
             <TextBlock x:Name="CopyrightText" Margin="0,10,0,0" />
+            <TextBlock Text="Lizenz: MIT – freie Nutzung, Änderung und Weitergabe, ohne Gewähr." Margin="0,4,0,0" TextWrapping="Wrap" />
             <TextBlock Margin="0,4,0,0">
                 <Hyperlink x:Name="RepoLink" RequestNavigate="Link_RequestNavigate">
                     <Run x:Name="RepoLinkText" />

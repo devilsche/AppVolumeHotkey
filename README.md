@@ -43,3 +43,7 @@ dotnet publish src/AppVolumeHotkey -c Release -r win-x64 --self-contained -p:Pub
 ```
 
 Die Kernlogik (`src/AppVolumeHotkey.Core`) ist plattformunabhängig und getestet. Die WPF-App (`src/AppVolumeHotkey`) lässt sich unter Linux bauen (`EnableWindowsTargeting`), aber nur unter Windows ausführen.
+
+## Lizenz
+
+MIT, siehe [LICENSE](LICENSE). Lizenzen der verwendeten Bibliotheken: [THIRD-PARTY-NOTICES.txt](THIRD-PARTY-NOTICES.txt).
