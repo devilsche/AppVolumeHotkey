@@ -48,4 +48,23 @@ public sealed class HotkeyTests
             Directory.Delete(dir, true);
         }
     }
+
+    [Fact]
+    public void SoundVariant_RoundTripsAndClones()
+    {
+        var dir = Path.Combine(Path.GetTempPath(), "avh-" + Guid.NewGuid());
+        var path = Path.Combine(dir, "config.json");
+        try
+        {
+            var p = new Profile { Sound = true, SoundVariant = SoundVariant.Bell, Steps = { Step.Baseline } };
+            Assert.Equal(SoundVariant.Bell, p.Clone().SoundVariant);
+            ConfigStore.Save(path, new AppConfig { Groups = { new AppGroup { Profiles = { p } } } });
+            Assert.Equal(SoundVariant.Bell, ConfigStore.Load(path).Groups[0].Profiles[0].SoundVariant);
+            Assert.Equal(SoundVariant.TwoTones, new Profile().SoundVariant);
+        }
+        finally
+        {
+            Directory.Delete(dir, true);
+        }
+    }
 }

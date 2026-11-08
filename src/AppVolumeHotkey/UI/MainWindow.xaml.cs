@@ -169,7 +169,16 @@ public partial class MainWindow : Window
     {
         var g = SelectedGroup;
         foreach (var row in _running)
+        {
             row.IsInGroup = g?.ContainsApp(row.Exe) == true;
+            var others = _host.Config.Groups.Where(x => x != g && x.ContainsApp(row.Exe)).Select(x => $"„{x.Name}“").ToList();
+            var parts = new List<string>();
+            if (row.IsInGroup)
+                parts.Add($"✓ in „{g!.Name}“");
+            if (others.Count > 0)
+                parts.Add((row.IsInGroup ? "auch in " : "in ") + string.Join(", ", others));
+            row.InGroupSuffix = parts.Count == 0 ? "" : " · " + string.Join(", ", parts);
+        }
         UpdateAddRunningButton();
     }
 

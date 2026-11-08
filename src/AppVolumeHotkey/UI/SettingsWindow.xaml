@@ -14,7 +14,9 @@
         <TextBlock Text="Nötig, damit Hotkeys auch ankommen, während eine Anwendung mit Administratorrechten im Vordergrund ist (z. B. manche Spiele, Launcher oder Tools)."
                    Opacity="0.75" FontSize="12" TextWrapping="Wrap" Margin="26,2,0,0" />
 
-        <TextBlock Text="Overlay" FontWeight="SemiBold" Margin="0,18,0,6" />
+        <TextBlock Text="Overlay" FontWeight="SemiBold" Margin="0,18,0,2" />
+        <TextBlock Text="Erscheint über normalen Fenstern und Spielen im Modus „Rahmenloses Fenster“. Bei exklusivem Vollbild ist kein Overlay möglich – dafür gibt es den Bestätigungston im Profil."
+                   Opacity="0.75" FontSize="12" TextWrapping="Wrap" Margin="0,0,0,8" />
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="170" />
@@ -33,8 +35,6 @@
             <TextBox Grid.Row="2" Grid.Column="1" x:Name="DurationBox" AutomationProperties.Name="Overlay-Anzeigedauer in Millisekunden" />
         </Grid>
         <Button Content="Overlay _testen" Click="TestOverlay_Click" HorizontalAlignment="Left" MinHeight="32" Padding="12,4" Margin="0,8,0,0" />
-        <TextBlock Text="Hinweis: In Spielen mit exklusivem Vollbild kann kein Overlay erscheinen – dort hilft der Bestätigungston im Profil."
-                   Opacity="0.75" FontSize="12" TextWrapping="Wrap" Margin="0,6,0,0" />
 
         <TextBlock Text="Übergang" FontWeight="SemiBold" Margin="0,18,0,6" />
         <Grid>

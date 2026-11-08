@@ -34,6 +34,8 @@ public partial class ProfileDialog : Window
         OverlayOnBox.IsChecked = profile.OverlayOnActivate;
         OverlayOffBox.IsChecked = profile.OverlayOnDeactivate;
         SoundBox.IsChecked = profile.Sound;
+        SoundCombo.ItemsSource = Overlay.SoundBank.Variants.Select(v => v.Label).ToList();
+        SoundCombo.SelectedIndex = Math.Max(0, Overlay.SoundBank.Variants.ToList().FindIndex(v => v.Variant == profile.SoundVariant));
         PassThroughBox.IsChecked = profile.PassThrough;
         (profile.Mode == ValueMode.Relative ? RelativeRadio : AbsoluteRadio).IsChecked = true;
         UpdatePassThrough();
@@ -97,6 +99,12 @@ public partial class ProfileDialog : Window
         if (_loaded)
             Validate();
     }
+
+    private SoundVariant SelectedSound => Overlay.SoundBank.Variants[Math.Max(0, SoundCombo.SelectedIndex)].Variant;
+
+    private void PreviewSoundOn_Click(object sender, RoutedEventArgs e) => Overlay.SoundBank.Play(SelectedSound, active: true);
+
+    private void PreviewSoundOff_Click(object sender, RoutedEventArgs e) => Overlay.SoundBank.Play(SelectedSound, active: false);
 
     private ValueMode SelectedMode => RelativeRadio.IsChecked == true ? ValueMode.Relative : ValueMode.Absolute;
 
@@ -299,6 +307,7 @@ public partial class ProfileDialog : Window
         _profile.OverlayOnActivate = OverlayOnBox.IsChecked == true;
         _profile.OverlayOnDeactivate = OverlayOffBox.IsChecked == true;
         _profile.Sound = SoundBox.IsChecked == true;
+        _profile.SoundVariant = SelectedSound;
         _profile.Mode = SelectedMode;
         _profile.PassThrough = HotkeyInput.Hotkey?.IsMouse == true && PassThroughBox.IsChecked == true;
         DialogResult = true;

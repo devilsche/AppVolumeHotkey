@@ -10,6 +10,16 @@ public enum ValueMode
     Relative,
 }
 
+/// <summary>Eigene Bestätigungstöne (je ein Ton für „aktiv“ und „aus“).</summary>
+public enum SoundVariant
+{
+    TwoTones,
+    Click,
+    Bell,
+    Blip,
+    Soft,
+}
+
 public sealed class Profile
 {
     public Guid Id { get; set; } = Guid.NewGuid();
@@ -19,6 +29,8 @@ public sealed class Profile
     public bool OverlayOnActivate { get; set; } = true;
     public bool OverlayOnDeactivate { get; set; } = true;
     public bool Sound { get; set; }
+
+    public SoundVariant SoundVariant { get; set; } = SoundVariant.TwoTones;
 
     /// <summary>Fehlt in alten Konfigurationen → absolut (bisheriges Verhalten).</summary>
     public ValueMode Mode { get; set; } = ValueMode.Absolute;
@@ -42,6 +54,7 @@ public sealed class Profile
         OverlayOnActivate = OverlayOnActivate,
         OverlayOnDeactivate = OverlayOnDeactivate,
         Sound = Sound,
+        SoundVariant = SoundVariant,
         PassThrough = PassThrough,
         Mode = Mode,
     };

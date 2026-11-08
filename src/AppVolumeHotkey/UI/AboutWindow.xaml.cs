@@ -39,6 +39,8 @@ public partial class AboutWindow : Window
         _open.Show();
     }
 
+    private void Close_Click(object sender, RoutedEventArgs e) => Close();
+
     private void Link_RequestNavigate(object sender, RequestNavigateEventArgs e)
     {
         Process.Start(new ProcessStartInfo(e.Uri.AbsoluteUri) { UseShellExecute = true });

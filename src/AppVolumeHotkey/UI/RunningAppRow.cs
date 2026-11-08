@@ -20,7 +20,6 @@ public sealed class RunningAppRow(RunningApp app) : INotifyPropertyChanged
                 return;
             _isInGroup = value;
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsInGroup)));
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(InGroupSuffix)));
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(AccessibleName)));
         }
     }
@@ -46,11 +45,24 @@ public sealed class RunningAppRow(RunningApp app) : INotifyPropertyChanged
 
     public double VolumeFraction => _volumePercent < 0 ? 0 : _volumePercent / 100.0;
 
-    public string InGroupSuffix => IsInGroup ? " · ✓ in Gruppe" : "";
+    private string _groupInfo = "";
+
+    /// <summary>z. B. „ · ✓ in „Voice“, auch in „Musik““.</summary>
+    public string InGroupSuffix
+    {
+        get => _groupInfo;
+        set
+        {
+            if (_groupInfo == value)
+                return;
+            _groupInfo = value;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(AccessibleName)));
+        }
+    }
 
     public string VolumeText => _volumePercent < 0 ? "–" : $"{_volumePercent} %";
 
-    public string AccessibleName => $"{DisplayName}, Lautstärke {VolumeText}" + (IsInGroup ? ", bereits in der Gruppe" : "");
+    public string AccessibleName => $"{DisplayName}, Lautstärke {VolumeText}{InGroupSuffix}";
 
     public event PropertyChangedEventHandler? PropertyChanged;
 }

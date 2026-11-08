@@ -1,4 +1,3 @@
-using System.Media;
 using AppVolumeHotkey.Core.Audio;
 using AppVolumeHotkey.Core.Model;
 
@@ -20,12 +19,7 @@ public sealed class OverlayService
             _window.ShowMessage(FormatMessage(r), settings);
         }
         if (r.PlaySound)
-        {
-            if (r.IsActive)
-                SystemSounds.Asterisk.Play();
-            else
-                SystemSounds.Beep.Play();
-        }
+            SoundBank.Play(r.Profile.SoundVariant, r.IsActive);
     }
 
     public void Close() => _window?.Close();

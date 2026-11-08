@@ -112,6 +112,14 @@
         <CheckBox x:Name="OverlayOnBox" Content="Overlay beim A_ktivieren anzeigen" Margin="0,0,0,6" />
         <CheckBox x:Name="OverlayOffBox" Content="Overlay beim _Deaktivieren anzeigen" Margin="0,0,0,6" />
         <CheckBox x:Name="SoundBox" Content="Bestätigungs_ton abspielen (hilfreich bei exklusivem Vollbild)" />
+        <StackPanel Orientation="Horizontal" Margin="26,6,0,0">
+            <Label Content="_Klang" Target="{Binding ElementName=SoundCombo}" Padding="0,0,8,0" VerticalAlignment="Center" />
+            <ComboBox x:Name="SoundCombo" MinWidth="140" AutomationProperties.Name="Klang des Bestätigungstons" />
+            <Button Content="▶ An" Click="PreviewSoundOn_Click" MinHeight="32" MinWidth="60" Margin="8,0,0,0"
+                    AutomationProperties.Name="Ton für Aktivieren anhören" ToolTip="Ton beim Aktivieren anhören" />
+            <Button Content="▶ Aus" Click="PreviewSoundOff_Click" MinHeight="32" MinWidth="60" Margin="6,0,0,0"
+                    AutomationProperties.Name="Ton für Deaktivieren anhören" ToolTip="Ton beim Deaktivieren anhören" />
+        </StackPanel>
 
         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
             <Button x:Name="SaveButton" Content="_Speichern" IsDefault="True" Click="Save_Click" MinWidth="100" MinHeight="32" Margin="0,0,8,0" />
