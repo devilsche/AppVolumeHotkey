@@ -1,0 +1,138 @@
+# Changelog
+
+Jede Version auf Deutsch und Englisch. Der Abschnitt einer Version wird automatisch als Beschreibung des GitHub-Releases verwendet.
+Every version in German and English. A version's section is used automatically as the GitHub release description.
+
+## [0.12.2] – 2026-11-08
+
+### Deutsch
+- Beendete Apps verschwinden sofort aus „Laufende Apps“, auch wenn Windows ihre Audio-Sitzung noch eine Weile behält.
+
+### English
+- Closed apps disappear from “Running apps” right away, even if Windows keeps their audio session around for a while.
+
+## [0.12.1] – 2026-11-08
+
+### Deutsch
+- Lange Beschriftungen von Häkchen und Optionsfeldern werden umgebrochen statt abgeschnitten.
+
+### English
+- Long checkbox and radio button labels now wrap instead of being cut off.
+
+## [0.12.0] – 2026-11-08
+
+### Deutsch
+- Neu: Auslösen pro Profil – **Umschalten** (jeder Druck eine Stufe weiter) oder **Halten** (nur solange die Taste gedrückt ist; beim Loslassen zurück zum vorherigen Zustand, auch zu einem anderen aktiven Profil).
+- Halten funktioniert auch mit Maustasten.
+
+### English
+- New: trigger mode per profile – **Toggle** (each press moves to the next step) or **Hold** (only while the key is held; on release it returns to the previous state, including another active profile).
+- Hold also works with mouse buttons.
+
+## [0.11.0] – 2026-11-08
+
+### Deutsch
+- Neue Apps werden sofort erkannt: Startet eine App, während ihre Gruppe aktiv ist, wird sie direkt leiser geschaltet – meist bevor der erste Ton zu hören ist.
+
+### English
+- New apps are detected instantly: if an app starts while its group is active, it is turned down right away – usually before the first sound.
+
+## [0.10.0] – 2026-11-08
+
+### Deutsch
+- Neu: dauerhafte Statusanzeige, solange ein Profil aktiv ist – als Minitext (wie eine FPS-Anzeige), Symbol + Text oder nur Symbol; Ecke und Deckkraft einstellbar.
+- Neu: grüner Punkt am Tray-Symbol, solange ein Profil aktiv ist.
+- Beides in den Einstellungen abschaltbar.
+
+### English
+- New: permanent status indicator while a profile is active – as mini text (like an FPS counter), icon + text or icon only; corner and opacity adjustable.
+- New: green dot on the tray icon while a profile is active.
+- Both can be turned off in the settings.
+
+## [0.9.0] – 2026-11-08
+
+### Deutsch
+- Neu: Sprachumschalter Deutsch/English (Standard: wie Windows), Wechsel ohne Neustart.
+
+### English
+- New: language switch German/English (default: same as Windows), changes without restart.
+
+## [0.8.0] – 2026-11-08
+
+### Deutsch
+- Microsoft-Store-Paket (MSIX). In der Store-Version läuft der Autostart über Windows; der Admin-Modus entfällt dort.
+
+### English
+- Microsoft Store package (MSIX). In the Store version, autostart is managed by Windows; admin mode is not available there.
+
+## [0.7.0] – 2026-11-08
+
+### Deutsch
+- Breiteres Standardfenster; Größe, Position und Spaltenbreiten werden gespeichert.
+- Bereiche per Trenner in der Breite veränderbar.
+- Neu: beim Minimieren in den Infobereich verschieben (abschaltbar).
+
+### English
+- Wider default window; size, position and column widths are remembered.
+- Panels can be resized with splitters.
+- New: minimize to the system tray (can be turned off).
+
+## [0.6.0] – 2026-11-08
+
+### Deutsch
+- Keine Bibliotheken Dritter mehr: Audio-Zugriff und Tray-Symbol direkt gegen Windows programmiert.
+- 0.6.1: Tray-Menü schloss sich sofort wieder – behoben.
+
+### English
+- No more third-party libraries: audio access and tray icon programmed directly against Windows.
+- 0.6.1: tray menu closed immediately – fixed.
+
+## [0.5.0] – 2026-11-08
+
+### Deutsch
+- Neues Overlay: Karte mit Icon, Status und goldenem Pegelbalken, kompakt oder normal; Balken läuft synchron zum Übergang.
+- Eigene Bestätigungstöne in 5 Varianten.
+- Über-Fenster mit Version, Datenschutz und Lizenzen; MIT-Lizenz.
+
+### English
+- New overlay: card with icon, status and gold level bar, compact or normal; the bar moves in sync with the transition.
+- Custom confirmation sounds in 5 variants.
+- About window with version, privacy and licenses; MIT license.
+
+## [0.4.0] – 2026-11-08
+
+### Deutsch
+- Relativer Modus: Prozentwerte beziehen sich auf die Lautstärke jeder App (80 % → bei 20 % = 16 %).
+- Vorlagen und Klartext-Vorschau im Profil-Dialog.
+- Live-Lautstärke bei laufenden Apps und in der Gruppe; Apps in der Gruppe werden ausgegraut.
+- 0.4.2–0.4.5: Version im Titel und Dateinamen, Diagnose-Log, flüssigere Balken, kein Flackern.
+
+### English
+- Relative mode: percentages refer to each app's own volume (80 % → at 20 % = 16 %).
+- Templates and plain-language preview in the profile dialog.
+- Live volume for running apps and in the group; apps already in the group are greyed out.
+- 0.4.2–0.4.5: version in title and file name, diagnostic log, smoother bars, no flicker.
+
+## [0.3.0] – 2026-11-08
+
+### Deutsch
+- Neues Icon in Gold.
+
+### English
+- New gold icon.
+
+## [0.2.0] – 2026-11-08
+
+### Deutsch
+- Maustasten als Hotkey (Mittelklick, Maus 4/5, auch mit Shift/Strg/Alt/Win), optional an andere Programme weitergeben.
+
+### English
+- Mouse buttons as hotkeys (middle click, mouse 4/5, also with Shift/Ctrl/Alt/Win), optionally passed on to other programs.
+
+## [0.1.0] – 2026-11-08
+
+### Deutsch
+- Erste Version: Gruppen, Profile mit Abfolgen, globale Hotkeys, sanfter Übergang, Overlay, Tray, Autostart.
+
+### English
+- First version: groups, profiles with step sequences, global hotkeys, smooth transitions, overlay, tray, autostart.

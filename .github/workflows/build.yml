@@ -91,6 +91,16 @@ jobs:
           name: AppVolumeHotkey-v${{ env.VERSION }}-msix
           path: out/${{ env.MSIX_NAME }}
 
+      - name: Patch Notes aus CHANGELOG.md
+        if: startsWith(github.ref, 'refs/tags/v')
+        shell: pwsh
+        run: |
+          $v = [regex]::Escape($env:VERSION)
+          $text = Get-Content CHANGELOG.md -Raw
+          $m = [regex]::Match($text, "(?ms)^## \[$v\][^\n]*\n(.*?)(?=^## \[|\z)")
+          $notes = if ($m.Success) { $m.Groups[1].Value.Trim() } else { "Siehe / see CHANGELOG.md" }
+          Set-Content release-notes.md $notes -Encoding utf8
+
       - name: Release
         if: startsWith(github.ref, 'refs/tags/v')
         uses: softprops/action-gh-release@v2
@@ -98,4 +108,4 @@ jobs:
           files: |
             out/${{ env.EXE_NAME }}
             out/${{ env.MSIX_NAME }}
-          generate_release_notes: true
+          body_path: release-notes.md
