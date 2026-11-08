@@ -81,12 +81,6 @@ internal sealed class NotifyIcon : IDisposable
         _window.AddHook(WndProc);
         _icon = LoadSmallIcon(icoStream);
         ContextMenu.Placement = PlacementMode.MousePoint;
-        ContextMenu.Opened += (_, _) =>
-        {
-            // Popup in den Vordergrund holen, damit ein Klick daneben das Menü schließt
-            if (PresentationSource.FromVisual(ContextMenu) is HwndSource src)
-                SetForegroundWindow(src.Handle);
-        };
         Add();
     }
 
@@ -155,9 +149,14 @@ internal sealed class NotifyIcon : IDisposable
     private void ShowMenu()
     {
         Platform.DebugLog.Write("Tray: Rechtsklick empfangen");
-        SetForegroundWindow(_window.Handle);
-        ContextMenu.IsOpen = false;
         ContextMenu.IsOpen = true;
+        // Direkt danach das Popup-Fenster des Menüs in den Vordergrund holen (nicht vorher ein anderes Fenster –
+        // ein Fokuswechsel nach dem Öffnen schließt WPF-Popups sofort wieder). So schließt ein Klick daneben das Menü.
+        if (PresentationSource.FromVisual(ContextMenu) is HwndSource src)
+        {
+            var ok = SetForegroundWindow(src.Handle);
+            Platform.DebugLog.Write($"Tray: Menü-Fenster in Vordergrund: {ok}");
+        }
     }
 
     /// <summary>Wählt aus der .ico-Datei den passenden Eintrag für die kleine Symbolgröße (DPI-abhängig).</summary>
