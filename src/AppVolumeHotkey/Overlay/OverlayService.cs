@@ -9,7 +9,7 @@ public sealed class OverlayService
     private OverlayWindow? _window;
 
     public static string FormatMessage(HotkeyResult r) => r.IsActive
-        ? $"🔉 {r.Profile.Name} · {r.Step.Label} · AKTIV"
+        ? $"🔉 {r.Profile.Name} · {r.Profile.StepLabel(r.Step)} · AKTIV"
         : $"🔊 {r.Profile.Name} · Ausgangswert · AUS";
 
     public void Handle(HotkeyResult r, AppSettings settings)

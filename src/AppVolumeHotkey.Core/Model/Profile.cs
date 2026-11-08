@@ -1,5 +1,15 @@
 namespace AppVolumeHotkey.Core.Model;
 
+/// <summary>Worauf sich die Prozentwerte der Stufen beziehen.</summary>
+public enum ValueMode
+{
+    /// <summary>20 % = 20 % im Windows-Mixer.</summary>
+    Absolute,
+
+    /// <summary>20 % = 20 % des Ausgangswerts der jeweiligen App (80 % → 16 %).</summary>
+    Relative,
+}
+
 public sealed class Profile
 {
     public Guid Id { get; set; } = Guid.NewGuid();
@@ -10,11 +20,18 @@ public sealed class Profile
     public bool OverlayOnDeactivate { get; set; } = true;
     public bool Sound { get; set; }
 
+    /// <summary>Fehlt in alten Konfigurationen → absolut (bisheriges Verhalten).</summary>
+    public ValueMode Mode { get; set; } = ValueMode.Absolute;
+
     /// <summary>Nur für Maus-Hotkeys: Klick zusätzlich an Spiel/andere Programme weitergeben.</summary>
     public bool PassThrough { get; set; }
 
     [System.Text.Json.Serialization.JsonIgnore]
-    public string StepsSummary => Steps.Count == 0 ? "(keine Stufen)" : string.Join(" → ", Steps.Select(s => s.Label));
+    public string StepsSummary => Steps.Count == 0 ? "(keine Stufen)" : string.Join(" → ", Steps.Select(StepLabel));
+
+    /// <summary>Beschriftung einer Stufe dieses Profils, z. B. „20 % vom Ausgangswert“.</summary>
+    public string StepLabel(Step step) =>
+        step.Kind == StepKind.Percent && Mode == ValueMode.Relative ? $"{step.Value} % vom Ausgangswert" : step.Label;
 
     public Profile Clone() => new()
     {
@@ -26,5 +43,6 @@ public sealed class Profile
         OverlayOnDeactivate = OverlayOnDeactivate,
         Sound = Sound,
         PassThrough = PassThrough,
+        Mode = Mode,
     };
 }

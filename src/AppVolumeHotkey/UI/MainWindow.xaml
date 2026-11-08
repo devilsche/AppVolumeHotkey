@@ -78,12 +78,14 @@
                                 <DataTemplate>
                                     <Border BorderThickness="1" CornerRadius="14" Padding="10,2,2,2" Margin="0,0,6,6"
                                             BorderBrush="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}">
-                                        <StackPanel Orientation="Horizontal">
-                                            <TextBlock Text="{Binding}" VerticalAlignment="Center" />
-                                            <Button Content="✕" Click="RemoveApp_Click" Tag="{Binding}" Margin="6,0,0,0"
+                                        <StackPanel Orientation="Horizontal" AutomationProperties.Name="{Binding AccessibleName}">
+                                            <TextBlock Text="{Binding Exe}" VerticalAlignment="Center" />
+                                            <TextBlock Text="{Binding VolumeText}" VerticalAlignment="Center" Margin="8,0,0,0" Opacity="0.75"
+                                                       FontFamily="Consolas" />
+                                            <Button Content="✕" Click="RemoveApp_Click" Tag="{Binding Exe}" Margin="6,0,0,0"
                                                     MinWidth="28" MinHeight="28" Padding="0"
-                                                    AutomationProperties.Name="{Binding StringFormat='{}{0} aus Gruppe entfernen'}"
-                                                    ToolTip="{Binding StringFormat='{}{0} entfernen'}" />
+                                                    AutomationProperties.Name="{Binding Exe, StringFormat='{}{0} aus Gruppe entfernen'}"
+                                                    ToolTip="{Binding Exe, StringFormat='{}{0} entfernen'}" />
                                         </StackPanel>
                                     </Border>
                                 </DataTemplate>

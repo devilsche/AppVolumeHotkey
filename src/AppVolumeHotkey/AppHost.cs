@@ -123,7 +123,7 @@ public sealed class AppHost : IDisposable
             var p = g.Profiles.FirstOrDefault(x => x.Id == a.ProfileId);
             if (p is null)
                 continue;
-            yield return $"{g.Name}: {p.Name} · {p.Steps[a.StepIndex].Label}";
+            yield return $"{g.Name}: {p.Name} · {p.StepLabel(p.Steps[a.StepIndex])}";
         }
     }
 

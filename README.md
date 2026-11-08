@@ -11,11 +11,14 @@ Unter **Releases** liegt `AppVolumeHotkey.exe`. Einfach herunterladen und starte
 ## Bedienung
 
 1. **Gruppe anlegen** (links), z. B. „Voice“.
-2. **Apps hinzufügen:** aus „Laufende Apps“ (rechts) in die Gruppe ziehen, per Doppelklick oder über „Zur Gruppe hinzufügen“. Apps, die gerade nicht laufen, gehen über „App per .exe hinzufügen …“. Erkannt werden die Apps am Namen der .exe, also auch nach einem Neustart der App.
+2. **Apps hinzufügen** (in der Gruppe und rechts siehst du jeweils live die aktuelle Lautstärke im Windows-Mixer): aus „Laufende Apps“ (rechts) in die Gruppe ziehen, per Doppelklick oder über „Zur Gruppe hinzufügen“. Apps, die gerade nicht laufen, gehen über „App per .exe hinzufügen …“. Erkannt werden die Apps am Namen der .exe, also auch nach einem Neustart der App.
 3. **Profil anlegen:** Name, Hotkey (ins Feld klicken und die Kombination drücken, z. B. `Shift+F9`, `Strg+Shift+A`, `F23`, oder eine Maustaste: `Maus 4`, `Shift+Maus 5`, `Mittelklick`) und die **Abfolge**:
    - `20 % → Ausgangswert`: Toggle wie in TS3
+   - `20 % → 50 %`: zwischen zwei Werten hin- und herschalten
    - `20 % → 50 % → Ausgangswert`: drei Stufen
    - **Ausgangswert** ist die Lautstärke, die die Apps vor dem ersten Druck hatten.
+   - **Bezug:** *relativ* (Standard bei neuen Profilen): 20 % heißt 20 % vom Ausgangswert jeder App. Steht Discord im Mixer auf 80 % und TS3 auf 100 %, landen sie bei 16 % und 20 %. *Feste Werte*: alle Apps genau auf 20 %.
+   - Die Vorschau im Dialog zeigt in Klartext, was jeder Druck bewirkt.
 4. Pro Gruppe ist immer höchstens ein Profil aktiv. Drückst du den Hotkey eines anderen Profils derselben Gruppe, wechselt die Gruppe direkt dorthin.
 
 Das Fenster schließen minimiert die App in den Infobereich. Mit einem Rechtsklick auf das Symbol siehst du die aktiven Profile, kannst alle zurücksetzen, die Hotkeys pausieren oder die App beenden. Beim Beenden werden alle Lautstärken zurückgesetzt. Stürzt die App ab, holt sie die Ausgangswerte beim nächsten Start nach.

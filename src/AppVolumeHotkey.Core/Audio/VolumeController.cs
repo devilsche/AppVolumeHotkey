@@ -10,7 +10,7 @@ namespace AppVolumeHotkey.Core.Audio;
 /// </summary>
 public sealed class VolumeController(IAudioBackend audio, IBaselineStore store)
 {
-    private sealed record ActiveState(Guid ProfileId, int StepIndex, IReadOnlyList<Step> Steps, HashSet<string> Apps);
+    private sealed record ActiveState(Guid ProfileId, int StepIndex, IReadOnlyList<Step> Steps, ValueMode Mode, HashSet<string> Apps);
 
     private AppConfig _config = new();
     private readonly Dictionary<Guid, ActiveState> _active = new();
@@ -33,6 +33,7 @@ public sealed class VolumeController(IAudioBackend audio, IBaselineStore store)
             var stillValid = group is not null
                 && profile is not null
                 && profile.Steps.SequenceEqual(state.Steps)
+                && profile.Mode == state.Mode
                 && state.Apps.SetEquals(group.Apps);
             if (!stillValid)
             {
@@ -71,10 +72,11 @@ public sealed class VolumeController(IAudioBackend audio, IBaselineStore store)
         }
         else
         {
-            _active[group.Id] = new ActiveState(profile.Id, index, profile.Steps.ToList(),
+            var state2 = new ActiveState(profile.Id, index, profile.Steps.ToList(), profile.Mode,
                 new HashSet<string>(group.Apps, StringComparer.OrdinalIgnoreCase));
+            _active[group.Id] = state2;
             foreach (var exe in group.Apps)
-                audio.SetVolume(exe, step.Value / 100f);
+                Apply(group.Id, state2, exe);
             isActive = true;
         }
 
@@ -110,8 +112,7 @@ public sealed class VolumeController(IAudioBackend audio, IBaselineStore store)
                 baselines[exe] = current;
                 changed = true;
             }
-            var step = state.Steps[state.StepIndex];
-            audio.SetVolume(exe, step.Value / 100f);
+            Apply(groupId, state, exe);
         }
 
         if (changed)
@@ -148,6 +149,21 @@ public sealed class VolumeController(IAudioBackend audio, IBaselineStore store)
             }
         }
         Persist();
+    }
+
+    /// <summary>Setzt die App auf den Wert der aktuellen Stufe (absolut oder relativ zu ihrem Ausgangswert).</summary>
+    private void Apply(Guid groupId, ActiveState state, string exe)
+    {
+        var fraction = state.Steps[state.StepIndex].Value / 100f;
+        if (state.Mode == ValueMode.Absolute)
+        {
+            audio.SetVolume(exe, fraction);
+        }
+        else if (_baselines.TryGetValue(groupId, out var b) && b.TryGetValue(exe, out var baseline))
+        {
+            audio.SetVolume(exe, baseline * fraction);
+        }
+        // relativ ohne Ausgangswert (App läuft nicht): nichts tun, OnSessionAdded holt es nach
     }
 
     private Dictionary<string, float> Pending(Guid groupId)

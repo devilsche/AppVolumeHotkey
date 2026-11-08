@@ -34,10 +34,28 @@
                   Content="Maustaste zusätzlich an Spiel und andere Programme _weitergeben" />
         <TextBlock x:Name="PassThroughHint" Opacity="0.75" FontSize="12" Margin="26,2,0,0" TextWrapping="Wrap" /> 
 
+        <!-- Bezug -->
+        <TextBlock Text="Prozentwerte beziehen sich auf" FontWeight="SemiBold" Margin="0,16,0,6" />
+        <RadioButton x:Name="RelativeRadio" GroupName="Mode" Checked="Mode_Changed" Margin="0,0,0,4"
+                     Content="den _Ausgangswert jeder App (relativ)" />
+        <TextBlock Text="Beispiel: Discord steht im Mixer auf 80 %, TS3 auf 100 %. Bei 20 % → Discord 16 %, TS3 20 %."
+                   Opacity="0.75" FontSize="12" Margin="26,0,0,6" TextWrapping="Wrap" />
+        <RadioButton x:Name="AbsoluteRadio" GroupName="Mode" Checked="Mode_Changed" Margin="0,0,0,4"
+                     Content="die Lautstärke im _Windows-Mixer (feste Werte)" />
+        <TextBlock Text="Bei 20 % → alle Apps der Gruppe auf genau 20 %."
+                   Opacity="0.75" FontSize="12" Margin="26,0,0,0" TextWrapping="Wrap" />
+
         <!-- Abfolge -->
-        <Label Content="_Abfolge" Target="{Binding ElementName=StepList}" Padding="0,14,0,4" />
-        <TextBlock Text="Jeder Druck auf den Hotkey schaltet zur nächsten Stufe, nach der letzten wieder zur ersten. „Ausgangswert“ = die Lautstärke von vor dem Aktivieren."
-                   Opacity="0.75" FontSize="12" Margin="0,0,0,6" TextWrapping="Wrap" />
+        <Label Content="Ab_folge" Target="{Binding ElementName=StepList}" Padding="0,16,0,4" FontWeight="SemiBold" />
+        <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
+            <TextBlock Text="Vorlage:" VerticalAlignment="Center" Margin="0,0,8,0" />
+            <Button Content="Leise ↔ zurück" Click="PresetToggle_Click" MinHeight="32" Padding="10,2" Margin="0,0,6,0"
+                    ToolTip="20 % → Ausgangswert" />
+            <Button Content="Zwischen 20 % und 50 %" Click="PresetTwoValues_Click" MinHeight="32" Padding="10,2" Margin="0,0,6,0"
+                    ToolTip="20 % → 50 %" />
+            <Button Content="Drei Stufen" Click="PresetThree_Click" MinHeight="32" Padding="10,2"
+                    ToolTip="20 % → 50 % → Ausgangswert" />
+        </StackPanel>
         <ListBox x:Name="StepList" MaxHeight="260" HorizontalContentAlignment="Stretch" AllowDrop="True"
                  KeyDown="StepList_KeyDown" Drop="StepList_Drop" DragOver="StepList_DragOver"
                  AutomationProperties.Name="Abfolge der Stufen">
@@ -81,6 +99,13 @@
             <Button Content="+ A_usgangswert" Click="AddBaseline_Click" MinHeight="32" Padding="12,4" />
         </StackPanel>
         <TextBlock x:Name="StepsError" Style="{StaticResource Error}" />
+        <Border BorderThickness="1" CornerRadius="6" Padding="10,8" Margin="0,10,0,0"
+                BorderBrush="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}">
+            <StackPanel>
+                <TextBlock Text="So verhält sich der Hotkey:" FontWeight="SemiBold" />
+                <TextBlock x:Name="PreviewText" TextWrapping="Wrap" Margin="0,4,0,0" AutomationProperties.LiveSetting="Polite" />
+            </StackPanel>
+        </Border>
 
         <!-- Rückmeldung -->
         <TextBlock Text="Rückmeldung" FontWeight="SemiBold" Margin="0,16,0,6" />

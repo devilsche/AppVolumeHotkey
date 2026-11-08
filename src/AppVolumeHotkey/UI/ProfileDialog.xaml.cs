@@ -35,10 +35,12 @@ public partial class ProfileDialog : Window
         OverlayOffBox.IsChecked = profile.OverlayOnDeactivate;
         SoundBox.IsChecked = profile.Sound;
         PassThroughBox.IsChecked = profile.PassThrough;
+        (profile.Mode == ValueMode.Relative ? RelativeRadio : AbsoluteRadio).IsChecked = true;
         UpdatePassThrough();
 
         HotkeyInput.HotkeyChanged += () => { UpdatePassThrough(); if (_loaded) Validate(); };
         _steps.CollectionChanged += (_, _) => { Renumber(); if (_loaded) Validate(); };
+        UpdatePreview();
         Renumber();
 
         Loaded += (_, _) =>
@@ -96,8 +98,61 @@ public partial class ProfileDialog : Window
             Validate();
     }
 
+    private ValueMode SelectedMode => RelativeRadio.IsChecked == true ? ValueMode.Relative : ValueMode.Absolute;
+
+    private void Mode_Changed(object sender, RoutedEventArgs e)
+    {
+        if (_loaded)
+            Validate();
+    }
+
+    private void SetSteps(params Step[] steps)
+    {
+        _steps.Clear();
+        foreach (var s in steps)
+            _steps.Add(Track(new StepItem(s)));
+        StepList.SelectedIndex = 0;
+    }
+
+    private void PresetToggle_Click(object sender, RoutedEventArgs e) => SetSteps(Step.Percent(20), Step.Baseline);
+
+    private void PresetTwoValues_Click(object sender, RoutedEventArgs e) => SetSteps(Step.Percent(20), Step.Percent(50));
+
+    private void PresetThree_Click(object sender, RoutedEventArgs e) => SetSteps(Step.Percent(20), Step.Percent(50), Step.Baseline);
+
+    /// <summary>Klartext-Vorschau: was passiert bei Druck 1, 2, …</summary>
+    private void UpdatePreview()
+    {
+        if (PreviewText is null)
+            return;
+        var steps = new List<Step>();
+        foreach (var item in _steps)
+        {
+            if (!item.TryGetStep(out var s))
+            {
+                PreviewText.Text = "–";
+                return;
+            }
+            steps.Add(s);
+        }
+        if (steps.Count == 0)
+        {
+            PreviewText.Text = "Keine Stufen.";
+            return;
+        }
+        var probe = new Profile { Mode = SelectedMode, Steps = steps };
+        var lines = steps.Select((s, i) => $"{i + 1}. Druck: " + (s.Kind == StepKind.Baseline
+            ? "zurück auf die Lautstärke von vorher (Profil aus)"
+            : probe.StepLabel(s) + (probe.Mode == ValueMode.Relative ? $" (z. B. 80 % → {Math.Round(80 * s.Value / 100.0)} %)" : "")));
+        var tail = steps.Any(s => s.Kind == StepKind.Baseline)
+            ? "Danach beginnt es wieder bei Druck 1."
+            : "Danach wieder Druck 1 – das Profil bleibt aktiv, bis du über das Tray-Menü zurücksetzt.";
+        PreviewText.Text = string.Join("\n", lines) + "\n" + tail;
+    }
+
     private bool Validate()
     {
+        UpdatePreview();
         var ok = true;
 
         ok &= SetError(NameBox, NameError, string.IsNullOrWhiteSpace(NameBox.Text) ? "Bitte einen Namen eingeben." : null);
@@ -244,6 +299,7 @@ public partial class ProfileDialog : Window
         _profile.OverlayOnActivate = OverlayOnBox.IsChecked == true;
         _profile.OverlayOnDeactivate = OverlayOffBox.IsChecked == true;
         _profile.Sound = SoundBox.IsChecked == true;
+        _profile.Mode = SelectedMode;
         _profile.PassThrough = HotkeyInput.Hotkey?.IsMouse == true && PassThroughBox.IsChecked == true;
         DialogResult = true;
     }

@@ -12,7 +12,7 @@ public sealed class ProfileRow(Profile profile, (Guid ProfileId, int StepIndex)?
 
     public bool IsActive => active?.ProfileId == Profile.Id;
 
-    public string StatusText => IsActive ? $"● AKTIV · {Profile.Steps[active!.Value.StepIndex].Label}" : "";
+    public string StatusText => IsActive ? $"● AKTIV · {Profile.StepLabel(Profile.Steps[active!.Value.StepIndex])}" : "";
 
     public bool HasWarning => hotkeyFailed;
     public string Warning => hotkeyFailed ? "⚠ Hotkey ist von einem anderen Programm belegt und funktioniert gerade nicht." : "";

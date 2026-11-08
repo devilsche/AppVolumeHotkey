@@ -15,6 +15,7 @@ public partial class MainWindow : Window
     private const string DragFormat = "AppVolumeHotkey.Exe";
     private readonly AppHost _host;
     private readonly System.Collections.ObjectModel.ObservableCollection<RunningAppRow> _running = new();
+    private List<AppChipRow> _chips = new();
     private Point _dragStart;
     private bool _forceClose;
 
@@ -88,8 +89,9 @@ public partial class MainWindow : Window
         if (g is null)
             return;
         GroupTitle.Text = $"Gruppe „{g.Name}“";
-        AppChips.ItemsSource = null;
-        AppChips.ItemsSource = g.Apps;
+        _chips = g.Apps.Select(a => new AppChipRow(a)).ToList();
+        AppChips.ItemsSource = _chips;
+        UpdateRunningVolumes();
         RefreshProfiles();
     }
 
@@ -134,6 +136,8 @@ public partial class MainWindow : Window
             return;
         foreach (var row in _running)
             row.VolumePercent = _host.Audio.GetCurrentVolume(row.Exe) is { } v ? (int)Math.Round(v * 100) : -1;
+        foreach (var chip in _chips)
+            chip.VolumePercent = _host.Audio.GetCurrentVolume(chip.Exe) is { } v ? (int)Math.Round(v * 100) : -1;
     }
 
     protected override void OnActivated(EventArgs e)
@@ -295,7 +299,7 @@ public partial class MainWindow : Window
     {
         if (SelectedGroup is not { } g)
             return;
-        var p = new Profile { Name = "Leise", Steps = { Step.Percent(20), Step.Baseline } };
+        var p = new Profile { Name = "Leise", Mode = ValueMode.Relative, Steps = { Step.Percent(20), Step.Baseline } };
         if (ProfileDialog.Edit(this, _host, g, p, isNew: true) is { } result)
         {
             g.Profiles.Add(result);
