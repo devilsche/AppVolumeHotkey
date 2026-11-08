@@ -8,6 +8,21 @@ namespace AppVolumeHotkey.UI;
 public sealed class RunningAppRow(RunningApp app) : INotifyPropertyChanged
 {
     private int _volumePercent = -1;
+    private bool _isInGroup;
+
+    /// <summary>App ist bereits in der gerade gewählten Gruppe.</summary>
+    public bool IsInGroup
+    {
+        get => _isInGroup;
+        set
+        {
+            if (_isInGroup == value)
+                return;
+            _isInGroup = value;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsInGroup)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(AccessibleName)));
+        }
+    }
 
     public string Exe => app.Exe;
     public string DisplayName => app.DisplayName;
@@ -29,7 +44,7 @@ public sealed class RunningAppRow(RunningApp app) : INotifyPropertyChanged
 
     public string VolumeText => _volumePercent < 0 ? "–" : $"{_volumePercent} %";
 
-    public string AccessibleName => $"{DisplayName}, Lautstärke {VolumeText}";
+    public string AccessibleName => $"{DisplayName}, Lautstärke {VolumeText}" + (IsInGroup ? ", bereits in der Gruppe" : "");
 
     public event PropertyChangedEventHandler? PropertyChanged;
 }

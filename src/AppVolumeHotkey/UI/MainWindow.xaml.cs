@@ -85,7 +85,7 @@ public partial class MainWindow : Window
         NoGroupHint.Visibility = hasGroup ? Visibility.Collapsed : Visibility.Visible;
         RenameGroupButton.IsEnabled = hasGroup;
         DeleteGroupButton.IsEnabled = hasGroup;
-        AddRunningButton.IsEnabled = hasGroup;
+        UpdateInGroupMarks();
         if (g is null)
             return;
         GroupTitle.Text = $"Gruppe „{g.Name}“";
@@ -136,9 +136,23 @@ public partial class MainWindow : Window
             return;
         foreach (var row in _running)
             row.VolumePercent = _host.Audio.GetCurrentVolume(row.Exe) is { } v ? (int)Math.Round(v * 100) : -1;
+        UpdateInGroupMarks();
         foreach (var chip in _chips)
             chip.VolumePercent = _host.Audio.GetCurrentVolume(chip.Exe) is { } v ? (int)Math.Round(v * 100) : -1;
     }
+
+    private void UpdateInGroupMarks()
+    {
+        var g = SelectedGroup;
+        foreach (var row in _running)
+            row.IsInGroup = g?.ContainsApp(row.Exe) == true;
+        UpdateAddRunningButton();
+    }
+
+    private void UpdateAddRunningButton() =>
+        AddRunningButton.IsEnabled = SelectedGroup is not null && RunningList.SelectedItem is RunningAppRow { IsInGroup: false };
+
+    private void RunningList_SelectionChanged(object sender, SelectionChangedEventArgs e) => UpdateAddRunningButton();
 
     protected override void OnActivated(EventArgs e)
     {
@@ -234,16 +248,13 @@ public partial class MainWindow : Window
 
     private void AddRunning_Click(object sender, RoutedEventArgs e)
     {
-        if (RunningList.SelectedItem is RunningAppRow app)
+        if (RunningList.SelectedItem is RunningAppRow { IsInGroup: false } app)
             AddAppToGroup(app.Exe);
-        else
-            MessageBox.Show(this, "Bitte zuerst rechts eine laufende App auswählen.", "Keine App ausgewählt",
-                MessageBoxButton.OK, MessageBoxImage.Information);
     }
 
     private void RunningList_MouseDoubleClick(object sender, MouseButtonEventArgs e)
     {
-        if (RunningList.SelectedItem is RunningAppRow app)
+        if (RunningList.SelectedItem is RunningAppRow { IsInGroup: false } app)
             AddAppToGroup(app.Exe);
     }
 
@@ -257,7 +268,7 @@ public partial class MainWindow : Window
         if (Math.Abs(diff.X) < SystemParameters.MinimumHorizontalDragDistance &&
             Math.Abs(diff.Y) < SystemParameters.MinimumVerticalDragDistance)
             return;
-        if (FindAncestor<ListBoxItem>(e.OriginalSource as DependencyObject)?.DataContext is not RunningAppRow app)
+        if (FindAncestor<ListBoxItem>(e.OriginalSource as DependencyObject)?.DataContext is not RunningAppRow app || app.IsInGroup)
             return;
         DragDrop.DoDragDrop(RunningList, new DataObject(DragFormat, app.Exe), DragDropEffects.Copy);
     }
