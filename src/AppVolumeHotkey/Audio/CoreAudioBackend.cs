@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.IO;
+using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Media;
@@ -37,6 +38,12 @@ public sealed class CoreAudioBackend : IAudioBackend, IDisposable
     private readonly Dictionary<uint, string?> _exeByPid = new();
     private readonly Dictionary<string, RunningApp> _appInfoCache = new(StringComparer.OrdinalIgnoreCase);
     private List<Device> _devices = new();
+
+    // Sofort-Erkennung: Windows meldet neue Sessions → kurz danach gezielt neu abfragen (Polling bleibt als Absicherung)
+    private readonly SessionCreatedNotifier _notifier;
+    private readonly Dictionary<string, (IAudioSessionManager2 Manager, IntPtr Callback)> _registered = new();
+    private readonly DispatcherTimer _quickRefresh;
+    private readonly Dispatcher _dispatcher = Dispatcher.CurrentDispatcher;
     private Dictionary<string, SessionEntry> _sessions = new();
 
     public int FadeDurationMs { get; set; } = 200;
@@ -55,6 +62,18 @@ public sealed class CoreAudioBackend : IAudioBackend, IDisposable
         _pollTimer = new DispatcherTimer(TimeSpan.FromSeconds(1), DispatcherPriority.Background, (_, _) => Refresh(), Dispatcher.CurrentDispatcher);
         _fadeTimer = new DispatcherTimer(TimeSpan.FromMilliseconds(15), DispatcherPriority.Render, (_, _) => FadeTick(), Dispatcher.CurrentDispatcher);
         _fadeTimer.Stop();
+        _quickRefresh = new DispatcherTimer(TimeSpan.FromMilliseconds(30), DispatcherPriority.Normal, (_, _) =>
+        {
+            _quickRefresh!.Stop();
+            Refresh();
+        }, Dispatcher.CurrentDispatcher);
+        _quickRefresh.Stop();
+        _notifier = new SessionCreatedNotifier(() => _dispatcher.BeginInvoke(() =>
+        {
+            Platform.DebugLog.Write("Audio: neue Session gemeldet");
+            _quickRefresh.Stop(); // kurz entprellen, falls mehrere Sessions gleichzeitig entstehen
+            _quickRefresh.Start();
+        }));
         Refresh(raiseEvents: false);
         _pollTimer.Start();
     }
@@ -165,6 +184,7 @@ public sealed class CoreAudioBackend : IAudioBackend, IDisposable
             {
                 _devices = EnumerateDevices();
                 _sinceDeviceScan.Restart();
+                SyncNotifications();
             }
             catch (Exception)
             {
@@ -239,6 +259,50 @@ public sealed class CoreAudioBackend : IAudioBackend, IDisposable
         if (added.Count > 0 || removedAny)
             SessionsChanged?.Invoke();
         Polled?.Invoke();
+    }
+
+    /// <summary>Für jedes aktive Gerät genau einmal Benachrichtigungen anmelden, verschwundene Geräte abmelden.</summary>
+    private void SyncNotifications()
+    {
+        var ids = _devices.Select(d => d.Id).ToHashSet();
+        foreach (var (id, reg) in _registered.Where(r => !ids.Contains(r.Key)).ToList())
+        {
+            try { reg.Manager.UnregisterSessionNotification(reg.Callback); } catch (Exception) { }
+            Marshal.Release(reg.Callback);
+            _registered.Remove(id);
+        }
+        foreach (var device in _devices.Where(d => !_registered.ContainsKey(d.Id)))
+        {
+            var ptr = IntPtr.Zero;
+            try
+            {
+                ptr = Marshal.GetComInterfaceForObject<SessionCreatedNotifier, IAudioSessionNotification>(_notifier);
+                if (device.Manager.RegisterSessionNotification(ptr) == CoreAudio.S_OK)
+                {
+                    _registered[device.Id] = (device.Manager, ptr);
+                    ptr = IntPtr.Zero;
+                }
+            }
+            catch (Exception e)
+            {
+                Platform.DebugLog.Write("Audio: Benachrichtigung nicht angemeldet: " + e.Message);
+            }
+            finally
+            {
+                if (ptr != IntPtr.Zero)
+                    Marshal.Release(ptr);
+            }
+        }
+    }
+
+    private void UnregisterNotifications()
+    {
+        foreach (var (_, reg) in _registered)
+        {
+            try { reg.Manager.UnregisterSessionNotification(reg.Callback); } catch (Exception) { }
+            Marshal.Release(reg.Callback);
+        }
+        _registered.Clear();
     }
 
     private List<Device> EnumerateDevices()
@@ -345,6 +409,8 @@ public sealed class CoreAudioBackend : IAudioBackend, IDisposable
     public void Dispose()
     {
         _pollTimer.Stop();
+        _quickRefresh.Stop();
+        UnregisterNotifications();
         CompleteFades();
         _sessions = new();
         _devices = new();

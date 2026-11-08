@@ -108,3 +108,25 @@ internal interface ISimpleAudioVolume
     [PreserveSig] int SetMute([MarshalAs(UnmanagedType.Bool)] bool mute, ref Guid eventContext);
     [PreserveSig] int GetMute([MarshalAs(UnmanagedType.Bool)] out bool mute);
 }
+
+/// <summary>Rückruf-Schnittstelle: Windows meldet neue Audio-Sessions (audiopolicy.h).</summary>
+[ComImport, Guid("641DD20B-4D41-49CC-ABA3-174B9477BB08"), InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
+internal interface IAudioSessionNotification
+{
+    [PreserveSig] int OnSessionCreated([MarshalAs(UnmanagedType.IUnknown)] object newSession);
+}
+
+/// <summary>
+/// Unsere Implementierung des Rückrufs. Wird auf einem Audio-Thread von Windows aufgerufen –
+/// darf nichts blockieren und keine Session-Manager-Methoden aufrufen, nur weiterreichen.
+/// </summary>
+[ComVisible(true), ClassInterface(ClassInterfaceType.None)]
+internal sealed class SessionCreatedNotifier(Action onCreated) : IAudioSessionNotification
+{
+    public int OnSessionCreated(object newSession)
+    {
+        try { onCreated(); }
+        catch (Exception) { }
+        return CoreAudio.S_OK;
+    }
+}
