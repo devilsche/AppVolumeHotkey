@@ -1,0 +1,332 @@
+using System.ComponentModel;
+using System.IO;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
+using System.Windows.Media;
+using AppVolumeHotkey.Audio;
+using AppVolumeHotkey.Core.Model;
+using Microsoft.Win32;
+
+namespace AppVolumeHotkey.UI;
+
+public partial class MainWindow : Window
+{
+    private const string DragFormat = "AppVolumeHotkey.Exe";
+    private readonly AppHost _host;
+    private Point _dragStart;
+    private bool _forceClose;
+
+    public MainWindow(AppHost host)
+    {
+        _host = host;
+        InitializeComponent();
+
+        _host.ConfigChanged += Refresh;
+        _host.Volume.StateChanged += RefreshProfiles;
+        _host.Audio.SessionsChanged += RefreshRunning;
+
+        Refresh();
+        RefreshRunning();
+        if (_host.Config.Groups.Count > 0)
+            GroupList.SelectedIndex = 0;
+    }
+
+    private AppGroup? SelectedGroup => GroupList.SelectedItem as AppGroup;
+
+    public void ForceClose()
+    {
+        _forceClose = true;
+        Close();
+    }
+
+    protected override void OnClosing(CancelEventArgs e)
+    {
+        // Schließen = in den Infobereich minimieren; Beenden nur über das Tray-Menü
+        if (!_forceClose)
+        {
+            e.Cancel = true;
+            Hide();
+        }
+        base.OnClosing(e);
+    }
+
+    protected override void OnClosed(EventArgs e)
+    {
+        _host.ConfigChanged -= Refresh;
+        _host.Volume.StateChanged -= RefreshProfiles;
+        _host.Audio.SessionsChanged -= RefreshRunning;
+        base.OnClosed(e);
+    }
+
+    // ---------- Anzeige ----------
+
+    private void Refresh()
+    {
+        var selectedId = SelectedGroup?.Id;
+        GroupList.ItemsSource = null;
+        GroupList.ItemsSource = _host.Config.Groups;
+        if (selectedId is not null)
+            GroupList.SelectedItem = _host.Config.Groups.FirstOrDefault(g => g.Id == selectedId);
+        PausedHint.Visibility = _host.HotkeysPaused ? Visibility.Visible : Visibility.Collapsed;
+        RefreshGroup();
+    }
+
+    private void RefreshGroup()
+    {
+        var g = SelectedGroup;
+        var hasGroup = g is not null;
+        GroupPanel.Visibility = hasGroup ? Visibility.Visible : Visibility.Collapsed;
+        NoGroupHint.Visibility = hasGroup ? Visibility.Collapsed : Visibility.Visible;
+        RenameGroupButton.IsEnabled = hasGroup;
+        DeleteGroupButton.IsEnabled = hasGroup;
+        AddRunningButton.IsEnabled = hasGroup;
+        if (g is null)
+            return;
+        GroupTitle.Text = $"Gruppe „{g.Name}“";
+        AppChips.ItemsSource = null;
+        AppChips.ItemsSource = g.Apps;
+        RefreshProfiles();
+    }
+
+    private void RefreshProfiles()
+    {
+        var g = SelectedGroup;
+        if (g is null)
+        {
+            ProfileList.ItemsSource = null;
+            return;
+        }
+        var selectedId = (ProfileList.SelectedItem as ProfileRow)?.Profile.Id;
+        var active = _host.Volume.GetActive(g.Id);
+        var rows = g.Profiles.Select(p => new ProfileRow(p, active, _host.FailedHotkeys.Contains(p.Id))).ToList();
+        ProfileList.ItemsSource = rows;
+        if (selectedId is not null)
+            ProfileList.SelectedItem = rows.FirstOrDefault(r => r.Profile.Id == selectedId);
+    }
+
+    private void RefreshRunning()
+    {
+        var selected = (RunningList.SelectedItem as RunningApp)?.Exe;
+        var apps = _host.Audio.GetRunningApps();
+        RunningList.ItemsSource = apps;
+        if (selected is not null)
+            RunningList.SelectedItem = apps.FirstOrDefault(a => string.Equals(a.Exe, selected, StringComparison.OrdinalIgnoreCase));
+    }
+
+    // ---------- Gruppen ----------
+
+    private void GroupList_SelectionChanged(object sender, SelectionChangedEventArgs e) => RefreshGroup();
+
+    private void NewGroup_Click(object sender, RoutedEventArgs e)
+    {
+        var name = InputDialog.Ask(this, "Neue Gruppe", "Name der Gruppe", "Voice");
+        if (name is null)
+            return;
+        var g = new AppGroup { Name = name };
+        _host.Config.Groups.Add(g);
+        _host.SaveConfig();
+        GroupList.SelectedItem = g;
+        GroupList.Focus();
+    }
+
+    private void RenameGroup_Click(object sender, RoutedEventArgs e) => RenameGroup();
+
+    private void RenameGroup()
+    {
+        if (SelectedGroup is not { } g)
+            return;
+        var name = InputDialog.Ask(this, "Gruppe umbenennen", "Name der Gruppe", g.Name);
+        if (name is null)
+            return;
+        g.Name = name;
+        _host.SaveConfig();
+    }
+
+    private void DeleteGroup_Click(object sender, RoutedEventArgs e) => DeleteGroup();
+
+    private void DeleteGroup()
+    {
+        if (SelectedGroup is not { } g)
+            return;
+        var answer = MessageBox.Show(this, $"Gruppe „{g.Name}“ mit allen Profilen löschen?", "Gruppe löschen",
+            MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.No);
+        if (answer != MessageBoxResult.Yes)
+            return;
+        _host.Config.Groups.Remove(g);
+        _host.SaveConfig();
+        if (_host.Config.Groups.Count > 0)
+            GroupList.SelectedIndex = 0;
+    }
+
+    private void GroupList_KeyDown(object sender, KeyEventArgs e)
+    {
+        if (e.Key == Key.F2) { RenameGroup(); e.Handled = true; }
+        else if (e.Key == Key.Delete) { DeleteGroup(); e.Handled = true; }
+    }
+
+    // ---------- Apps ----------
+
+    private void AddAppToGroup(string exe)
+    {
+        if (SelectedGroup is not { } g || string.IsNullOrWhiteSpace(exe))
+            return;
+        if (!exe.EndsWith(".exe", StringComparison.OrdinalIgnoreCase))
+            exe += ".exe";
+        if (g.ContainsApp(exe))
+            return;
+        g.Apps.Add(exe);
+        _host.SaveConfig();
+    }
+
+    private void RemoveApp_Click(object sender, RoutedEventArgs e)
+    {
+        if (SelectedGroup is not { } g || (sender as Button)?.Tag is not string exe)
+            return;
+        g.Apps.RemoveAll(a => string.Equals(a, exe, StringComparison.OrdinalIgnoreCase));
+        _host.SaveConfig();
+        AddExeButton.Focus();
+    }
+
+    private void AddExe_Click(object sender, RoutedEventArgs e)
+    {
+        var dlg = new OpenFileDialog
+        {
+            Title = "App auswählen",
+            Filter = "Programme (*.exe)|*.exe",
+            CheckFileExists = true,
+        };
+        if (dlg.ShowDialog(this) == true)
+            AddAppToGroup(Path.GetFileName(dlg.FileName));
+    }
+
+    private void AddRunning_Click(object sender, RoutedEventArgs e)
+    {
+        if (RunningList.SelectedItem is RunningApp app)
+            AddAppToGroup(app.Exe);
+        else
+            MessageBox.Show(this, "Bitte zuerst rechts eine laufende App auswählen.", "Keine App ausgewählt",
+                MessageBoxButton.OK, MessageBoxImage.Information);
+    }
+
+    private void RunningList_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+    {
+        if (RunningList.SelectedItem is RunningApp app)
+            AddAppToGroup(app.Exe);
+    }
+
+    private void RunningList_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e) => _dragStart = e.GetPosition(null);
+
+    private void RunningList_PreviewMouseMove(object sender, MouseEventArgs e)
+    {
+        if (e.LeftButton != MouseButtonState.Pressed)
+            return;
+        var diff = _dragStart - e.GetPosition(null);
+        if (Math.Abs(diff.X) < SystemParameters.MinimumHorizontalDragDistance &&
+            Math.Abs(diff.Y) < SystemParameters.MinimumVerticalDragDistance)
+            return;
+        if (FindAncestor<ListBoxItem>(e.OriginalSource as DependencyObject)?.DataContext is not RunningApp app)
+            return;
+        DragDrop.DoDragDrop(RunningList, new DataObject(DragFormat, app.Exe), DragDropEffects.Copy);
+    }
+
+    private void DropZone_DragEnter(object sender, DragEventArgs e)
+    {
+        var ok = e.Data.GetDataPresent(DragFormat) || e.Data.GetDataPresent(DataFormats.FileDrop);
+        e.Effects = ok ? DragDropEffects.Copy : DragDropEffects.None;
+        DropZone.BorderThickness = new Thickness(ok ? 3 : 2);
+    }
+
+    private void DropZone_DragLeave(object sender, DragEventArgs e) => DropZone.BorderThickness = new Thickness(2);
+
+    private void DropZone_Drop(object sender, DragEventArgs e)
+    {
+        DropZone.BorderThickness = new Thickness(2);
+        if (e.Data.GetData(DragFormat) is string exe)
+        {
+            AddAppToGroup(exe);
+        }
+        else if (e.Data.GetData(DataFormats.FileDrop) is string[] files)
+        {
+            // .exe-Dateien oder Verknüpfungen aus dem Explorer
+            foreach (var f in files.Where(f => f.EndsWith(".exe", StringComparison.OrdinalIgnoreCase)))
+                AddAppToGroup(Path.GetFileName(f));
+        }
+    }
+
+    private static T? FindAncestor<T>(DependencyObject? d) where T : DependencyObject
+    {
+        while (d is not null and not T)
+            d = d is Visual or System.Windows.Media.Media3D.Visual3D ? VisualTreeHelper.GetParent(d) : LogicalTreeHelper.GetParent(d);
+        return d as T;
+    }
+
+    // ---------- Profile ----------
+
+    private void NewProfile_Click(object sender, RoutedEventArgs e)
+    {
+        if (SelectedGroup is not { } g)
+            return;
+        var p = new Profile { Name = "Leise", Steps = { Step.Percent(20), Step.Baseline } };
+        if (ProfileDialog.Edit(this, _host, g, p, isNew: true) is { } result)
+        {
+            g.Profiles.Add(result);
+            _host.SaveConfig();
+        }
+    }
+
+    private void EditProfile_Click(object sender, RoutedEventArgs e)
+    {
+        if ((sender as Button)?.Tag is ProfileRow row)
+            EditProfile(row.Profile);
+    }
+
+    private void ProfileList_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+    {
+        if (ProfileList.SelectedItem is ProfileRow row)
+            EditProfile(row.Profile);
+    }
+
+    private void ProfileList_KeyDown(object sender, KeyEventArgs e)
+    {
+        if (ProfileList.SelectedItem is not ProfileRow row)
+            return;
+        if (e.Key == Key.Enter) { EditProfile(row.Profile); e.Handled = true; }
+        else if (e.Key == Key.Delete) { DeleteProfile(row.Profile); e.Handled = true; }
+    }
+
+    private void EditProfile(Profile profile)
+    {
+        if (SelectedGroup is not { } g)
+            return;
+        if (ProfileDialog.Edit(this, _host, g, profile.Clone(), isNew: false) is not { } result)
+            return;
+        var index = g.Profiles.FindIndex(p => p.Id == profile.Id);
+        if (index < 0)
+            return;
+        g.Profiles[index] = result;
+        _host.SaveConfig();
+    }
+
+    private void DeleteProfile_Click(object sender, RoutedEventArgs e)
+    {
+        if ((sender as Button)?.Tag is ProfileRow row)
+            DeleteProfile(row.Profile);
+    }
+
+    private void DeleteProfile(Profile profile)
+    {
+        if (SelectedGroup is not { } g)
+            return;
+        var answer = MessageBox.Show(this, $"Profil „{profile.Name}“ löschen?", "Profil löschen",
+            MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.No);
+        if (answer != MessageBoxResult.Yes)
+            return;
+        g.Profiles.RemoveAll(p => p.Id == profile.Id);
+        _host.SaveConfig();
+    }
+
+    // ---------- Einstellungen ----------
+
+    private void Settings_Click(object sender, RoutedEventArgs e) => SettingsWindow.Open(this, _host);
+}

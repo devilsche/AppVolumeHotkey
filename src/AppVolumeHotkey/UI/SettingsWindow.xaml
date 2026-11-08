@@ -1,0 +1,57 @@
+<Window x:Class="AppVolumeHotkey.UI.SettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Einstellungen"
+        Width="520" SizeToContent="Height"
+        ResizeMode="NoResize" WindowStartupLocation="CenterOwner" ShowInTaskbar="False">
+    <StackPanel Margin="20">
+        <TextBlock Text="Einstellungen" FontSize="20" FontWeight="SemiBold" Margin="0,0,0,16" />
+
+        <TextBlock Text="Start" FontWeight="SemiBold" Margin="0,0,0,6" />
+        <CheckBox x:Name="StartWithWindowsBox" Content="Mit _Windows starten" Margin="0,0,0,6" />
+        <CheckBox x:Name="StartMinimizedBox" Content="Beim Windows-Start _minimiert im Infobereich starten" Margin="0,0,0,6" />
+        <CheckBox x:Name="RunAsAdminBox" Content="Mit _Administratorrechten ausführen" />
+        <TextBlock Text="Nötig, damit Hotkeys ankommen, wenn ein Spiel als Administrator läuft und im Vordergrund ist."
+                   Opacity="0.75" FontSize="12" TextWrapping="Wrap" Margin="26,2,0,0" />
+
+        <TextBlock Text="Overlay" FontWeight="SemiBold" Margin="0,18,0,6" />
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="170" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Label Grid.Row="0" Content="_Position" Target="{Binding ElementName=CornerBox}" VerticalAlignment="Center" />
+            <ComboBox Grid.Row="0" Grid.Column="1" x:Name="CornerBox" Margin="0,0,0,6" AutomationProperties.Name="Overlay-Position" />
+            <Label Grid.Row="1" Content="_Größe" Target="{Binding ElementName=SizeBox}" VerticalAlignment="Center" />
+            <ComboBox Grid.Row="1" Grid.Column="1" x:Name="SizeBox" Margin="0,0,0,6" AutomationProperties.Name="Overlay-Größe" />
+            <Label Grid.Row="2" Content="Anzeige_dauer (ms)" Target="{Binding ElementName=DurationBox}" VerticalAlignment="Center" />
+            <TextBox Grid.Row="2" Grid.Column="1" x:Name="DurationBox" AutomationProperties.Name="Overlay-Anzeigedauer in Millisekunden" />
+        </Grid>
+        <Button Content="Overlay _testen" Click="TestOverlay_Click" HorizontalAlignment="Left" MinHeight="32" Padding="12,4" Margin="0,8,0,0" />
+        <TextBlock Text="Hinweis: In Spielen mit exklusivem Vollbild kann kein Overlay erscheinen – dort hilft der Bestätigungston im Profil."
+                   Opacity="0.75" FontSize="12" TextWrapping="Wrap" Margin="0,6,0,0" />
+
+        <TextBlock Text="Übergang" FontWeight="SemiBold" Margin="0,18,0,6" />
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="170" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Label Content="Ü_bergangsdauer (ms)" Target="{Binding ElementName=FadeBox}" VerticalAlignment="Center" />
+            <TextBox Grid.Column="1" x:Name="FadeBox" AutomationProperties.Name="Übergangsdauer in Millisekunden, 0 bis 1000" />
+        </Grid>
+
+        <TextBlock x:Name="ErrorText" Margin="0,10,0,0" TextWrapping="Wrap" FontWeight="SemiBold" Visibility="Collapsed"
+                   Foreground="{DynamicResource SystemFillColorCriticalBrush}" />
+
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
+            <Button Content="_Speichern" IsDefault="True" Click="Save_Click" MinWidth="100" MinHeight="32" Margin="0,0,8,0" />
+            <Button Content="Abbrechen" IsCancel="True" MinWidth="100" MinHeight="32" />
+        </StackPanel>
+    </StackPanel>
+</Window>

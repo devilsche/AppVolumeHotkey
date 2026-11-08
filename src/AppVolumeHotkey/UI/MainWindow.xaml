@@ -1,0 +1,173 @@
+<Window x:Class="AppVolumeHotkey.UI.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="AppVolumeHotkey"
+        Width="1080" Height="660" MinWidth="860" MinHeight="500"
+        WindowStartupLocation="CenterScreen"
+        Icon="/Assets/app.ico">
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis" />
+        <Style x:Key="SectionHeading" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="16" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Margin" Value="0,0,0,8" />
+        </Style>
+        <Style x:Key="Panel" TargetType="Border">
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="BorderBrush" Value="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}" />
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="Padding" Value="12" />
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="230" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="270" />
+        </Grid.ColumnDefinitions>
+
+        <!-- Kopfzeile -->
+        <DockPanel Grid.ColumnSpan="3" Margin="0,0,0,12" LastChildFill="False">
+            <TextBlock DockPanel.Dock="Left" Text="AppVolumeHotkey" FontSize="22" FontWeight="SemiBold" VerticalAlignment="Center" />
+            <TextBlock x:Name="PausedHint" DockPanel.Dock="Left" Margin="16,0,0,0" VerticalAlignment="Center"
+                       Text="⏸ Hotkeys pausiert" FontWeight="SemiBold" Visibility="Collapsed" />
+            <Button DockPanel.Dock="Right" x:Name="SettingsButton" Content="⚙ _Einstellungen" Click="Settings_Click" MinHeight="32" Padding="12,4" />
+        </DockPanel>
+
+        <!-- Spalte 1: Gruppen -->
+        <Border Grid.Row="1" Grid.Column="0" Style="{StaticResource Panel}" Margin="0,0,12,0">
+            <DockPanel>
+                <Label DockPanel.Dock="Top" Target="{Binding ElementName=GroupList}" Padding="0" Margin="0,0,0,8">
+                    <TextBlock Text="_Gruppen" Style="{StaticResource SectionHeading}" Margin="0" />
+                </Label>
+                <StackPanel DockPanel.Dock="Bottom" Margin="0,8,0,0">
+                    <Button Content="+ _Neue Gruppe" Click="NewGroup_Click" HorizontalAlignment="Stretch" MinHeight="32" Margin="0,0,0,6" />
+                    <UniformGrid Columns="2">
+                        <Button x:Name="RenameGroupButton" Content="Umbenennen" Click="RenameGroup_Click" MinHeight="32" Margin="0,0,3,0"
+                                ToolTip="Gruppe umbenennen (F2)" />
+                        <Button x:Name="DeleteGroupButton" Content="Löschen" Click="DeleteGroup_Click" MinHeight="32" Margin="3,0,0,0"
+                                ToolTip="Gruppe löschen (Entf)" />
+                    </UniformGrid>
+                </StackPanel>
+                <ListBox x:Name="GroupList" DisplayMemberPath="Name" SelectionChanged="GroupList_SelectionChanged"
+                         KeyDown="GroupList_KeyDown" AutomationProperties.Name="Gruppen" />
+            </DockPanel>
+        </Border>
+
+        <!-- Spalte 2: gewählte Gruppe -->
+        <Border Grid.Row="1" Grid.Column="1" Style="{StaticResource Panel}" Margin="0,0,12,0">
+            <Grid>
+                <TextBlock x:Name="NoGroupHint" Text="Lege links eine Gruppe an oder wähle eine aus." TextWrapping="Wrap"
+                           HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="14" />
+                <DockPanel x:Name="GroupPanel" Visibility="Collapsed">
+                    <TextBlock x:Name="GroupTitle" DockPanel.Dock="Top" FontSize="20" FontWeight="SemiBold" Margin="0,0,0,12" />
+
+                    <!-- Apps -->
+                    <StackPanel DockPanel.Dock="Top">
+                        <TextBlock Text="Apps" Style="{StaticResource SectionHeading}" />
+                        <ItemsControl x:Name="AppChips" Focusable="False">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate><WrapPanel /></ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border BorderThickness="1" CornerRadius="14" Padding="10,2,2,2" Margin="0,0,6,6"
+                                            BorderBrush="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="{Binding}" VerticalAlignment="Center" />
+                                            <Button Content="✕" Click="RemoveApp_Click" Tag="{Binding}" Margin="6,0,0,0"
+                                                    MinWidth="28" MinHeight="28" Padding="0"
+                                                    AutomationProperties.Name="{Binding StringFormat='{}{0} aus Gruppe entfernen'}"
+                                                    ToolTip="{Binding StringFormat='{}{0} entfernen'}" />
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <Border x:Name="DropZone" AllowDrop="True" Drop="DropZone_Drop" DragEnter="DropZone_DragEnter" DragLeave="DropZone_DragLeave"
+                                BorderThickness="2" CornerRadius="8" Padding="10" Margin="0,2,0,8"
+                                BorderBrush="{DynamicResource {x:Static SystemColors.AccentColorBrushKey}}" Background="Transparent">
+                            <TextBlock Text="⬇ App aus „Laufende Apps“ hierher ziehen" HorizontalAlignment="Center" />
+                        </Border>
+                        <Button x:Name="AddExeButton" Content="App per ._exe hinzufügen …" Click="AddExe_Click" HorizontalAlignment="Left" MinHeight="32" Padding="12,4" />
+                    </StackPanel>
+
+                    <!-- Profile -->
+                    <DockPanel Margin="0,20,0,0">
+                        <DockPanel DockPanel.Dock="Top" LastChildFill="False">
+                            <Label DockPanel.Dock="Left" Target="{Binding ElementName=ProfileList}" Padding="0">
+                                <TextBlock Text="_Profile" Style="{StaticResource SectionHeading}" />
+                            </Label>
+                            <Button DockPanel.Dock="Right" Content="+ Pro_fil" Click="NewProfile_Click" MinHeight="32" Padding="12,4" />
+                        </DockPanel>
+                        <ListBox x:Name="ProfileList" HorizontalContentAlignment="Stretch" KeyDown="ProfileList_KeyDown"
+                                 MouseDoubleClick="ProfileList_MouseDoubleClick" AutomationProperties.Name="Profile">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Margin="0,4" AutomationProperties.Name="{Binding AccessibleName}">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <Border Grid.Column="0" BorderThickness="1" CornerRadius="4" Padding="6,2" MinWidth="90" VerticalAlignment="Center"
+                                                BorderBrush="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}">
+                                            <TextBlock Text="{Binding HotkeyText}" FontFamily="Consolas" HorizontalAlignment="Center" />
+                                        </Border>
+                                        <StackPanel Grid.Column="1" Margin="12,0">
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="{Binding Name}" FontWeight="SemiBold" />
+                                                <TextBlock Text="{Binding StatusText}" FontWeight="SemiBold" Margin="10,0,0,0"
+                                                           Foreground="{DynamicResource {x:Static SystemColors.AccentColorBrushKey}}" />
+                                            </StackPanel>
+                                            <TextBlock Text="{Binding Summary}" Opacity="0.8" TextTrimming="CharacterEllipsis" />
+                                            <TextBlock Text="{Binding Warning}" Visibility="{Binding HasWarning, Converter={StaticResource BoolToVis}}" TextWrapping="Wrap" />
+                                        </StackPanel>
+                                        <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Button Content="Bearbeiten" Click="EditProfile_Click" Tag="{Binding}" MinHeight="32" Padding="10,2" Margin="0,0,6,0"
+                                                    AutomationProperties.Name="{Binding Name, StringFormat='Profil {0} bearbeiten'}" />
+                                            <Button Content="Löschen" Click="DeleteProfile_Click" Tag="{Binding}" MinHeight="32" Padding="10,2"
+                                                    AutomationProperties.Name="{Binding Name, StringFormat='Profil {0} löschen'}" />
+                                        </StackPanel>
+                                    </Grid>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </DockPanel>
+                </DockPanel>
+            </Grid>
+        </Border>
+
+        <!-- Spalte 3: laufende Apps -->
+        <Border Grid.Row="1" Grid.Column="2" Style="{StaticResource Panel}">
+            <DockPanel>
+                <Label DockPanel.Dock="Top" Target="{Binding ElementName=RunningList}" Padding="0" Margin="0,0,0,8">
+                    <TextBlock Text="_Laufende Apps" Style="{StaticResource SectionHeading}" Margin="0" />
+                </Label>
+                <TextBlock DockPanel.Dock="Top" Text="Apps, die gerade Ton ausgeben. In eine Gruppe ziehen." TextWrapping="Wrap" Opacity="0.8" Margin="0,0,0,8" />
+                <Button DockPanel.Dock="Bottom" x:Name="AddRunningButton" Content="→ _Zur Gruppe hinzufügen" Click="AddRunning_Click"
+                        HorizontalAlignment="Stretch" MinHeight="32" Margin="0,8,0,0" />
+                <ListBox x:Name="RunningList" AutomationProperties.Name="Laufende Apps"
+                         PreviewMouseLeftButtonDown="RunningList_PreviewMouseLeftButtonDown" PreviewMouseMove="RunningList_PreviewMouseMove"
+                         MouseDoubleClick="RunningList_MouseDoubleClick">
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal" Margin="0,2" AutomationProperties.Name="{Binding DisplayName}">
+                                <Image Source="{Binding Icon}" Width="20" Height="20" Margin="0,0,8,0" VerticalAlignment="Center" />
+                                <StackPanel>
+                                    <TextBlock Text="{Binding DisplayName}" />
+                                    <TextBlock Text="{Binding Exe}" FontSize="11" Opacity="0.7" />
+                                </StackPanel>
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </DockPanel>
+        </Border>
+    </Grid>
+</Window>

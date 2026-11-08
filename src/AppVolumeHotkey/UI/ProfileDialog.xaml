@@ -1,0 +1,93 @@
+<Window x:Class="AppVolumeHotkey.UI.ProfileDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:ui="clr-namespace:AppVolumeHotkey.UI"
+        Title="Profil bearbeiten"
+        Width="560" SizeToContent="Height" MinHeight="420"
+        ResizeMode="NoResize" WindowStartupLocation="CenterOwner" ShowInTaskbar="False">
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis" />
+        <Style x:Key="Error" TargetType="TextBlock">
+            <Setter Property="Margin" Value="0,4,0,0" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Foreground" Value="{DynamicResource SystemFillColorCriticalBrush}" />
+            <Setter Property="Visibility" Value="Collapsed" />
+        </Style>
+    </Window.Resources>
+
+    <StackPanel Margin="20">
+        <TextBlock x:Name="Heading" FontSize="20" FontWeight="SemiBold" Margin="0,0,0,16" />
+
+        <!-- Name -->
+        <Label Content="_Name" Target="{Binding ElementName=NameBox}" Padding="0,0,0,4" />
+        <TextBox x:Name="NameBox" TextChanged="Any_Changed" AutomationProperties.Name="Name" />
+        <TextBlock x:Name="NameError" Style="{StaticResource Error}" />
+
+        <!-- Hotkey -->
+        <Label Content="_Hotkey" Target="{Binding ElementName=HotkeyInput}" Padding="0,14,0,4" />
+        <ui:HotkeyBox x:Name="HotkeyInput" AutomationProperties.Name="Hotkey" />
+        <TextBlock Text="Hineinklicken und die Tastenkombination drücken (z. B. Shift+Strg+A, F23). Entf löscht."
+                   Opacity="0.75" FontSize="12" Margin="0,4,0,0" TextWrapping="Wrap" />
+        <TextBlock x:Name="HotkeyError" Style="{StaticResource Error}" />
+
+        <!-- Abfolge -->
+        <Label Content="_Abfolge" Target="{Binding ElementName=StepList}" Padding="0,14,0,4" />
+        <TextBlock Text="Jeder Druck auf den Hotkey schaltet zur nächsten Stufe, nach der letzten wieder zur ersten. „Ausgangswert“ = die Lautstärke von vor dem Aktivieren."
+                   Opacity="0.75" FontSize="12" Margin="0,0,0,6" TextWrapping="Wrap" />
+        <ListBox x:Name="StepList" MaxHeight="260" HorizontalContentAlignment="Stretch" AllowDrop="True"
+                 KeyDown="StepList_KeyDown" Drop="StepList_Drop" DragOver="StepList_DragOver"
+                 AutomationProperties.Name="Abfolge der Stufen">
+            <ListBox.ItemTemplate>
+                <DataTemplate DataType="{x:Type ui:StepItem}">
+                    <Grid AutomationProperties.Name="{Binding AccessibleName}">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="Auto" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="⠿" FontSize="16" Margin="0,0,8,0" VerticalAlignment="Center" Cursor="SizeAll"
+                                   PreviewMouseLeftButtonDown="Grip_MouseDown" ToolTip="Zum Umsortieren ziehen" />
+                        <TextBlock Grid.Column="1" Text="{Binding Number}" VerticalAlignment="Center" Margin="0,0,8,0" MinWidth="20" />
+                        <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center"
+                                    Visibility="{Binding IsPercent, Converter={StaticResource BoolToVis}}">
+                            <TextBox Text="{Binding PercentText, UpdateSourceTrigger=PropertyChanged}" Width="70"
+                                     AutomationProperties.Name="{Binding Number, StringFormat='Stufe {0} Prozent'}" />
+                            <TextBlock Text="%" VerticalAlignment="Center" Margin="6,0,0,0" />
+                        </StackPanel>
+                        <Border Grid.Column="2" HorizontalAlignment="Left" BorderThickness="2" CornerRadius="12" Padding="10,3"
+                                BorderBrush="{DynamicResource {x:Static SystemColors.AccentColorBrushKey}}"
+                                Visibility="{Binding IsBaseline, Converter={StaticResource BoolToVis}}">
+                            <TextBlock Text="↺ Ausgangswert" FontWeight="SemiBold" />
+                        </Border>
+                        <StackPanel Grid.Column="3" Orientation="Horizontal">
+                            <Button Content="↑" Click="MoveUp_Click" Tag="{Binding}" MinWidth="32" MinHeight="32" Margin="4,0,0,0"
+                                    AutomationProperties.Name="{Binding Number, StringFormat='Stufe {0} nach oben'}" ToolTip="Nach oben (Alt+↑)" />
+                            <Button Content="↓" Click="MoveDown_Click" Tag="{Binding}" MinWidth="32" MinHeight="32" Margin="4,0,0,0"
+                                    AutomationProperties.Name="{Binding Number, StringFormat='Stufe {0} nach unten'}" ToolTip="Nach unten (Alt+↓)" />
+                            <Button Content="✕" Click="RemoveStep_Click" Tag="{Binding}" MinWidth="32" MinHeight="32" Margin="4,0,0,0"
+                                    AutomationProperties.Name="{Binding Number, StringFormat='Stufe {0} entfernen'}" ToolTip="Entfernen" />
+                        </StackPanel>
+                    </Grid>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+        <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+            <Button Content="+ _Prozent-Stufe" Click="AddPercent_Click" MinHeight="32" Padding="12,4" Margin="0,0,8,0" />
+            <Button Content="+ A_usgangswert" Click="AddBaseline_Click" MinHeight="32" Padding="12,4" />
+        </StackPanel>
+        <TextBlock x:Name="StepsError" Style="{StaticResource Error}" />
+
+        <!-- Rückmeldung -->
+        <TextBlock Text="Rückmeldung" FontWeight="SemiBold" Margin="0,16,0,6" />
+        <CheckBox x:Name="OverlayOnBox" Content="Overlay beim A_ktivieren anzeigen" Margin="0,0,0,6" />
+        <CheckBox x:Name="OverlayOffBox" Content="Overlay beim _Deaktivieren anzeigen" Margin="0,0,0,6" />
+        <CheckBox x:Name="SoundBox" Content="Bestätigungs_ton abspielen (hilfreich bei exklusivem Vollbild)" />
+
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
+            <Button x:Name="SaveButton" Content="_Speichern" IsDefault="True" Click="Save_Click" MinWidth="100" MinHeight="32" Margin="0,0,8,0" />
+            <Button Content="Abbrechen" IsCancel="True" MinWidth="100" MinHeight="32" />
+        </StackPanel>
+    </StackPanel>
+</Window>
