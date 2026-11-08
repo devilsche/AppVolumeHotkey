@@ -7,7 +7,7 @@
     <DockPanel Margin="20">
         <StackPanel DockPanel.Dock="Top">
             <StackPanel Orientation="Horizontal">
-                <Image Source="/Assets/app.ico" Width="56" Height="56" Margin="0,0,14,0" AutomationProperties.Name="" />
+                <Image Source="/Assets/app-96.png" Width="56" Height="56" RenderOptions.BitmapScalingMode="HighQuality" Margin="0,0,14,0" AutomationProperties.Name="" />
                 <StackPanel VerticalAlignment="Center">
                     <TextBlock Text="AppVolumeHotkey" FontSize="22" FontWeight="SemiBold" />
                     <TextBlock x:Name="VersionText" Opacity="0.8" />

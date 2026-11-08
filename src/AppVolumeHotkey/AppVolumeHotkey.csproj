@@ -11,7 +11,7 @@
     <RootNamespace>AppVolumeHotkey</RootNamespace>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <ApplicationIcon>Assets\app.ico</ApplicationIcon>
-    <Version>0.4.5</Version>
+    <Version>0.5.0</Version>
     <Product>AppVolumeHotkey</Product>
     <Authors>Dominic Ruschinski</Authors>
     <Copyright>© 2026 Dominic Ruschinski</Copyright>
@@ -29,6 +29,7 @@
   <ItemGroup>
     <Resource Include="Assets\app.ico" />
     <Resource Include="Assets\Sounds\*.wav" />
+    <Resource Include="Assets\app-96.png" />
     <EmbeddedResource Include="..\..\THIRD-PARTY-NOTICES.txt" LogicalName="THIRD-PARTY-NOTICES.txt" />
   </ItemGroup>
 

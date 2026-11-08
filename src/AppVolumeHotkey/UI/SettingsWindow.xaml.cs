@@ -24,6 +24,12 @@ public partial class SettingsWindow : Window
         (OverlaySize.Large, "Groß"),
     };
 
+    private static readonly (OverlayStyle Value, string Label)[] Styles =
+    {
+        (OverlayStyle.Compact, "Kompakt"),
+        (OverlayStyle.Normal, "Normal"),
+    };
+
     private readonly AppHost _host;
     private readonly OverlayService _preview = new();
 
@@ -41,6 +47,8 @@ public partial class SettingsWindow : Window
         CornerBox.SelectedIndex = Array.FindIndex(Corners, c => c.Value == s.OverlayCorner);
         SizeBox.ItemsSource = Sizes.Select(c => c.Label).ToList();
         SizeBox.SelectedIndex = Array.FindIndex(Sizes, c => c.Value == s.OverlaySize);
+        StyleBox.ItemsSource = Styles.Select(c => c.Label).ToList();
+        StyleBox.SelectedIndex = Array.FindIndex(Styles, c => c.Value == s.OverlayStyle);
         DurationBox.Text = s.OverlayDurationMs.ToString();
         FadeBox.Text = s.FadeDurationMs.ToString();
 
@@ -59,6 +67,7 @@ public partial class SettingsWindow : Window
             RunAsAdmin = RunAsAdminBox.IsChecked == true,
             OverlayCorner = Corners[Math.Max(0, CornerBox.SelectedIndex)].Value,
             OverlaySize = Sizes[Math.Max(0, SizeBox.SelectedIndex)].Value,
+            OverlayStyle = Styles[Math.Max(0, StyleBox.SelectedIndex)].Value,
         };
 
         ClearError();
@@ -93,7 +102,7 @@ public partial class SettingsWindow : Window
         if (!TryRead(out var s))
             return;
         var group = new AppGroup { Name = "Test" };
-        var profile = new Profile { Name = "Beispiel", Steps = { Step.Percent(20) } };
+        var profile = new Profile { Name = "Voice leise", Mode = ValueMode.Relative, Steps = { Step.Percent(20) } };
         _preview.Handle(new HotkeyResult(group, profile, Step.Percent(20), true, true, false), s);
     }
 

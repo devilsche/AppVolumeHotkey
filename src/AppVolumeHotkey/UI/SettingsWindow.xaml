@@ -26,7 +26,10 @@
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
+            <Label Grid.Row="3" Content="Dar_stellung" Target="{Binding ElementName=StyleBox}" VerticalAlignment="Center" />
+            <ComboBox Grid.Row="3" Grid.Column="1" x:Name="StyleBox" Margin="0,6,0,0" AutomationProperties.Name="Overlay-Darstellung" />
             <Label Grid.Row="0" Content="_Position" Target="{Binding ElementName=CornerBox}" VerticalAlignment="Center" />
             <ComboBox Grid.Row="0" Grid.Column="1" x:Name="CornerBox" Margin="0,0,0,6" AutomationProperties.Name="Overlay-Position" />
             <Label Grid.Row="1" Content="_Größe" Target="{Binding ElementName=SizeBox}" VerticalAlignment="Center" />

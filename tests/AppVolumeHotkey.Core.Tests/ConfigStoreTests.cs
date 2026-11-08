@@ -34,6 +34,7 @@ public sealed class ConfigStoreTests : IDisposable
         var group = new AppGroup { Name = "Voice", Apps = { "Discord.exe", "ts3client_win64.exe" }, Profiles = { profile } };
         var cfg = new AppConfig { Groups = { group } };
         cfg.Settings.OverlayCorner = OverlayCorner.BottomLeft;
+        cfg.Settings.OverlayStyle = OverlayStyle.Normal;
 
         ConfigStore.Save(ConfigPath, cfg);
         var loaded = ConfigStore.Load(ConfigPath);
@@ -47,6 +48,8 @@ public sealed class ConfigStoreTests : IDisposable
         Assert.Equal(new[] { Step.Percent(20), Step.Baseline }, p.Steps);
         Assert.True(p.Sound);
         Assert.Equal(OverlayCorner.BottomLeft, loaded.Settings.OverlayCorner);
+        Assert.Equal(OverlayStyle.Normal, loaded.Settings.OverlayStyle);
+        Assert.Equal(OverlayStyle.Compact, new AppSettings().OverlayStyle);
     }
 
     [Fact]
