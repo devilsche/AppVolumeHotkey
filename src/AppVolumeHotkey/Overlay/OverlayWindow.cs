@@ -71,7 +71,11 @@ public sealed class OverlayWindow : Window
         BeginAnimation(OpacityProperty, null);
         Opacity = 1;
         if (!IsVisible)
+        {
+            Left = -32000; // außerhalb des Bildschirms zeigen, messen, dann positionieren – kein Aufblitzen
+            Top = -32000;
             Show();
+        }
         UpdateLayout();
         Position(settings.OverlayCorner);
 

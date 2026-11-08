@@ -14,7 +14,6 @@ public partial class ProfileDialog : Window
     private const string DragFormat = "AppVolumeHotkey.StepItem";
     private readonly AppHost _host;
     private readonly Profile _profile;
-    private readonly Hotkey? _originalHotkey;
     private readonly ObservableCollection<StepItem> _steps = new();
     private bool _loaded;
 
@@ -23,7 +22,6 @@ public partial class ProfileDialog : Window
         Owner = owner;
         _host = host;
         _profile = profile;
-        _originalHotkey = isNew ? null : profile.Hotkey;
         InitializeComponent();
 
         Title = isNew ? "Neues Profil" : "Profil bearbeiten";
@@ -53,8 +51,16 @@ public partial class ProfileDialog : Window
     /// <summary>Zeigt den Dialog; gibt das bearbeitete Profil zurück oder null bei Abbruch.</summary>
     public static Profile? Edit(Window owner, AppHost host, AppGroup group, Profile profile, bool isNew)
     {
-        var d = new ProfileDialog(owner, host, group, profile, isNew);
-        return d.ShowDialog() == true ? d._profile : null;
+        host.SuspendHotkeys(); // sonst lösen bereits belegte Kombinationen beim Aufnehmen das Profil aus
+        try
+        {
+            var d = new ProfileDialog(owner, host, group, profile, isNew);
+            return d.ShowDialog() == true ? d._profile : null;
+        }
+        finally
+        {
+            host.ResumeHotkeys();
+        }
     }
 
     private StepItem Track(StepItem item)
@@ -91,7 +97,7 @@ public partial class ProfileDialog : Window
             var other = _host.Config.AllProfiles().FirstOrDefault(x => x.Profile.Id != _profile.Id && x.Profile.Hotkey == hk);
             if (other.Profile is not null)
                 hotkeyError = $"{KeyNames.Format(hk)} wird bereits von „{other.Profile.Name}“ (Gruppe „{other.Group.Name}“) verwendet.";
-            else if (hk != _originalHotkey && !_host.HotkeysPaused && !_host.Hotkeys.IsAvailable(hk))
+            else if (!_host.Hotkeys.IsAvailable(hk))
                 hotkeyError = $"{KeyNames.Format(hk)} ist von Windows oder einem anderen Programm belegt. Bitte eine andere Kombination wählen.";
         }
         ok &= SetError(HotkeyInput, HotkeyError, hotkeyError);

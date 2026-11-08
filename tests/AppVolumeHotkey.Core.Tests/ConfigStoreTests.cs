@@ -64,4 +64,40 @@ public sealed class ConfigStoreTests : IDisposable
         Assert.Equal("20 %", Step.Percent(20).Label);
         Assert.Equal("Ausgangswert", Step.Baseline.Label);
     }
+
+    [Theory]
+    [InlineData("{\"Groups\":[null]}")]
+    [InlineData("{\"Groups\":[{\"Name\":\"V\",\"Apps\":[null,\"a.exe\"],\"Profiles\":[null]}]}")]
+    [InlineData("{\"Groups\":[{\"Name\":\"V\",\"Profiles\":[{\"Name\":\"P\",\"Steps\":[null,{\"Kind\":\"Percent\",\"Value\":20}]}]}]}")]
+    [InlineData("{\"Settings\":null,\"Groups\":null}")]
+    public void Load_NullEntries_AreDropped(string json)
+    {
+        File.WriteAllText(ConfigPath, json);
+        var cfg = ConfigStore.Load(ConfigPath);
+        Assert.NotNull(cfg.Settings);
+        Assert.All(cfg.Groups, g =>
+        {
+            Assert.NotNull(g);
+            Assert.All(g.Apps, Assert.NotNull);
+            Assert.All(g.Profiles, p => Assert.All(p.Steps, Assert.NotNull));
+        });
+    }
+
+    [Fact]
+    public void Load_UnreadablePath_ReturnsDefaults()
+    {
+        Directory.CreateDirectory(ConfigPath); // Pfad ist ein Ordner -> IOException/UnauthorizedAccess beim Lesen
+        var cfg = ConfigStore.Load(ConfigPath);
+        Assert.Empty(cfg.Groups);
+    }
+
+    [Fact]
+    public void BaselineStore_SaveToUnwritablePath_DoesNotThrow()
+    {
+        var path = Path.Combine(_dir, "state.json");
+        Directory.CreateDirectory(path);
+        var store = new JsonBaselineStore(path);
+        store.Save(new() { [Guid.NewGuid()] = new() { ["a.exe"] = 0.5f } });
+        store.Save(new());
+    }
 }

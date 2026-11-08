@@ -14,10 +14,29 @@ public partial class App : Application
         base.OnStartup(e);
         ThemeMode = ThemeMode.System;
 
+        DispatcherUnhandledException += (_, args) =>
+        {
+            ErrorLog.Write(args.Exception);
+            args.Handled = true; // Tray-App weiterlaufen lassen
+            _host?.EmergencyReset();
+            MessageBox.Show("Ein unerwarteter Fehler ist aufgetreten. Die Lautstärken wurden zurückgesetzt.\n\n" + args.Exception.Message
+                + "\n\nDetails: " + ErrorLog.Path, "AppVolumeHotkey", MessageBoxButton.OK, MessageBoxImage.Error);
+        };
+        AppDomain.CurrentDomain.UnhandledException += (_, args) =>
+        {
+            if (args.ExceptionObject is Exception ex)
+                ErrorLog.Write(ex);
+            try { Dispatcher.Invoke(() => _host?.EmergencyReset()); } catch (Exception) { }
+        };
+
         _instance = new SingleInstance();
         if (!_instance.IsFirst)
         {
-            _instance.SignalFirstInstance();
+            if (_instance.OtherInstanceIsElevated)
+                MessageBox.Show("AppVolumeHotkey läuft bereits mit Administratorrechten. Öffne es über das Symbol im Infobereich.",
+                    "AppVolumeHotkey", MessageBoxButton.OK, MessageBoxImage.Information);
+            else
+                _instance.SignalFirstInstance();
             Shutdown();
             return;
         }

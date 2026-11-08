@@ -61,6 +61,9 @@ public sealed class HotkeyBox : TextBox
         };
         var mods = CurrentModifiers();
 
+        if (key == Key.Tab && mods == HotkeyModifiers.Shift)
+            return; // Shift+Tab = rückwärts navigieren
+
         if (mods == HotkeyModifiers.None)
         {
             switch (key)

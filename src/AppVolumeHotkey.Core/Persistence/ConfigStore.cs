@@ -17,9 +17,17 @@ public static class ConfigStore
         }
         catch (Exception e) when (e is JsonException or NotSupportedException or ArgumentException)
         {
-            var backup = $"{path}.broken-{DateTime.Now:yyyyMMddHHmmss}";
-            File.Move(path, backup, overwrite: true);
+            try
+            {
+                var backup = $"{path}.broken-{DateTime.Now:yyyyMMddHHmmss}";
+                File.Move(path, backup, overwrite: true);
+            }
+            catch (Exception io) when (io is IOException or UnauthorizedAccessException) { }
             return new AppConfig();
+        }
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+        {
+            return new AppConfig(); // Datei gerade gesperrt o. Ä. – nicht überschreiben, nur Defaults verwenden
         }
     }
 
@@ -28,14 +36,18 @@ public static class ConfigStore
 
     private static AppConfig Normalize(AppConfig cfg)
     {
-        cfg.Groups ??= new();
+        cfg.Groups = (cfg.Groups ?? new()).Where(g => g is not null).ToList();
         cfg.Settings ??= new();
         foreach (var g in cfg.Groups)
         {
-            g.Apps ??= new();
-            g.Profiles ??= new();
+            g.Name ??= "Gruppe";
+            g.Apps = (g.Apps ?? new()).Where(a => !string.IsNullOrWhiteSpace(a)).ToList();
+            g.Profiles = (g.Profiles ?? new()).Where(p => p is not null).ToList();
             foreach (var p in g.Profiles)
-                p.Steps ??= new();
+            {
+                p.Name ??= "Profil";
+                p.Steps = (p.Steps ?? new()).Where(s => s is not null).ToList();
+            }
         }
         return cfg;
     }

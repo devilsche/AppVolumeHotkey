@@ -56,6 +56,9 @@ public sealed class CoreAudioBackend : IAudioBackend, IDisposable
 
     public float? GetVolume(string exe)
     {
+        // Läuft gerade ein Übergang, zählt sein Ziel – sonst würde ein halber Zwischenwert als Ausgangswert gemerkt
+        if (_fades.TryGetValue(exe, out var fade) && SessionsOf(exe).Any())
+            return fade.Target;
         foreach (var s in SessionsOf(exe))
         {
             try { return s.Control.SimpleAudioVolume.Volume; }
@@ -258,10 +261,25 @@ public sealed class CoreAudioBackend : IAudioBackend, IDisposable
         }
     }
 
+    /// <summary>Alle laufenden Übergänge sofort auf ihr Ziel setzen.</summary>
+    public void CompleteFades()
+    {
+        foreach (var (_, fade) in _fades)
+        {
+            foreach (var id in fade.StartById.Keys)
+            {
+                if (_sessions.TryGetValue(id, out var s))
+                    TrySet(s, fade.Target);
+            }
+        }
+        _fades.Clear();
+        _fadeTimer.Stop();
+    }
+
     public void Dispose()
     {
         _pollTimer.Stop();
-        _fadeTimer.Stop();
+        CompleteFades();
         foreach (var s in _sessions.Values)
         {
             try { s.Control.Dispose(); } catch (Exception) { }

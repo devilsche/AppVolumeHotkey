@@ -20,20 +20,25 @@ public sealed class JsonBaselineStore(string path) : IBaselineStore
             var raw = JsonSerializer.Deserialize<Dictionary<Guid, Dictionary<string, float>>>(File.ReadAllText(path), Json.Options);
             return raw?.ToDictionary(kv => kv.Key, kv => new Dictionary<string, float>(kv.Value, StringComparer.OrdinalIgnoreCase)) ?? new();
         }
-        catch (Exception e) when (e is JsonException or IOException)
+        catch (Exception e) when (e is JsonException or IOException or UnauthorizedAccessException)
         {
             return new();
         }
     }
 
+    /// <summary>Speichert; Dateifehler (z. B. Sperre durch Virenscanner) werden geschluckt – das Umschalten darf daran nie scheitern.</summary>
     public void Save(Dictionary<Guid, Dictionary<string, float>> baselines)
     {
-        if (baselines.Count == 0)
+        try
         {
-            if (File.Exists(path))
-                File.Delete(path);
-            return;
+            if (baselines.Count == 0)
+            {
+                if (File.Exists(path))
+                    File.Delete(path);
+                return;
+            }
+            Json.WriteAtomic(path, JsonSerializer.Serialize(baselines, Json.Options));
         }
-        Json.WriteAtomic(path, JsonSerializer.Serialize(baselines, Json.Options));
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException) { }
     }
 }

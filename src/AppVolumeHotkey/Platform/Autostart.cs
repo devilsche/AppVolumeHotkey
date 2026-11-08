@@ -1,4 +1,6 @@
 using System.Diagnostics;
+using System.Security;
+using System.Text;
 using Microsoft.Win32;
 using AppVolumeHotkey.Core.Model;
 
@@ -30,7 +32,7 @@ public static class Autostart
         {
             if (!elevated)
                 return; // wird beim nächsten Start mit Adminrechten eingerichtet
-            if (RunSchtasks("/Create", "/TN", Name, "/TR", command, "/SC", "ONLOGON", "/RL", "HIGHEST", "/F"))
+            if (CreateElevatedTask())
                 SetRunValue(null);
         }
         else
@@ -38,6 +40,47 @@ public static class Autostart
             SetRunValue(command);
             if (elevated)
                 RunSchtasks("/Delete", "/TN", Name, "/F");
+        }
+    }
+
+    private static bool CreateElevatedTask()
+    {
+        var user = global::System.Security.Principal.WindowsIdentity.GetCurrent().Name;
+        var xml = $@"<?xml version=""1.0"" encoding=""UTF-16""?>
+<Task version=""1.2"" xmlns=""http://schemas.microsoft.com/windows/2004/02/mit/task"">
+  <RegistrationInfo><Description>AppVolumeHotkey beim Anmelden mit Administratorrechten starten</Description></RegistrationInfo>
+  <Triggers>
+    <LogonTrigger><Enabled>true</Enabled><UserId>{SecurityElement.Escape(user)}</UserId></LogonTrigger>
+  </Triggers>
+  <Principals>
+    <Principal id=""Author""><UserId>{SecurityElement.Escape(user)}</UserId><LogonType>InteractiveToken</LogonType><RunLevel>HighestAvailable</RunLevel></Principal>
+  </Principals>
+  <Settings>
+    <MultipleInstancesPolicy>IgnoreNew</MultipleInstancesPolicy>
+    <DisallowStartIfOnBatteries>false</DisallowStartIfOnBatteries>
+    <StopIfGoingOnBatteries>false</StopIfGoingOnBatteries>
+    <AllowHardTerminate>true</AllowHardTerminate>
+    <StartWhenAvailable>false</StartWhenAvailable>
+    <IdleSettings><StopOnIdleEnd>false</StopOnIdleEnd><RestartOnIdle>false</RestartOnIdle></IdleSettings>
+    <AllowStartOnDemand>true</AllowStartOnDemand>
+    <Enabled>true</Enabled>
+    <Hidden>false</Hidden>
+    <ExecutionTimeLimit>PT0S</ExecutionTimeLimit>
+    <Priority>4</Priority>
+  </Settings>
+  <Actions Context=""Author"">
+    <Exec><Command>{SecurityElement.Escape(AppPaths.ExePath)}</Command><Arguments>{AutostartArg}</Arguments></Exec>
+  </Actions>
+</Task>";
+        var file = global::System.IO.Path.Combine(global::System.IO.Path.GetTempPath(), $"AppVolumeHotkey-task-{Guid.NewGuid():N}.xml");
+        try
+        {
+            global::System.IO.File.WriteAllText(file, xml, Encoding.Unicode);
+            return RunSchtasks("/Create", "/TN", Name, "/XML", file, "/F");
+        }
+        finally
+        {
+            try { global::System.IO.File.Delete(file); } catch (Exception) { }
         }
     }
 

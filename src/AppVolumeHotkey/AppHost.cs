@@ -65,9 +65,49 @@ public sealed class AppHost : IDisposable
         }
     }
 
+    /// <summary>Alle Gruppen sofort (ohne Übergang) zurücksetzen – beim Beenden und im Fehlerfall.</summary>
+    public void EmergencyReset()
+    {
+        try
+        {
+            Audio.FadeDurationMs = 0;
+            Audio.CompleteFades();
+            Volume.ResetAll();
+        }
+        catch (Exception) { }
+        finally
+        {
+            Audio.FadeDurationMs = Config.Settings.FadeDurationMs;
+            Audio.CompleteFades();
+        }
+    }
+
+    private int _suspendCount;
+
+    /// <summary>Hotkeys vorübergehend abmelden (z. B. während ein Hotkey aufgenommen wird).</summary>
+    public void SuspendHotkeys()
+    {
+        _suspendCount++;
+        Hotkeys.UnregisterAll();
+    }
+
+    public void ResumeHotkeys()
+    {
+        if (_suspendCount > 0 && --_suspendCount == 0)
+            RegisterAllHotkeys();
+    }
+
     public void SaveConfig()
     {
-        ConfigStore.Save(AppPaths.ConfigFile, Config);
+        try
+        {
+            ConfigStore.Save(AppPaths.ConfigFile, Config);
+        }
+        catch (Exception e) when (e is IOException or UnauthorizedAccessException)
+        {
+            MessageBox.Show($"Die Einstellungen konnten nicht gespeichert werden:\n{e.Message}\n\nDie Änderungen gelten bis zum Beenden.",
+                "Speichern fehlgeschlagen", MessageBoxButton.OK, MessageBoxImage.Warning);
+        }
         Audio.FadeDurationMs = Config.Settings.FadeDurationMs;
         Volume.SetConfig(Config);
         RegisterAllHotkeys();
@@ -104,7 +144,7 @@ public sealed class AppHost : IDisposable
         if (_exiting)
             return;
         _exiting = true;
-        Volume.ResetAll();
+        EmergencyReset();
         _main?.ForceClose();
         Dispose();
         Application.Current.Shutdown();
@@ -125,7 +165,7 @@ public sealed class AppHost : IDisposable
         Hotkeys.UnregisterAll();
         _profileByHotkeyId.Clear();
         FailedHotkeys.Clear();
-        if (_hotkeysPaused)
+        if (_hotkeysPaused || _suspendCount > 0)
             return;
 
         var nextId = 1;

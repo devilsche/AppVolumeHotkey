@@ -8,15 +8,24 @@ public sealed class SingleInstance : IDisposable
     private const string MutexName = @"Local\AppVolumeHotkey";
     private const string EventName = @"Local\AppVolumeHotkey.Show";
 
-    private readonly Mutex _mutex;
-    private readonly EventWaitHandle _showEvent;
+    private readonly Mutex? _mutex;
+    private readonly EventWaitHandle? _showEvent;
     private bool _owned;
     private RegisteredWaitHandle? _wait;
 
     public SingleInstance()
     {
-        _mutex = new Mutex(initiallyOwned: false, MutexName);
-        _showEvent = new EventWaitHandle(false, EventResetMode.AutoReset, EventName);
+        try
+        {
+            _mutex = new Mutex(initiallyOwned: false, MutexName);
+            _showEvent = new EventWaitHandle(false, EventResetMode.AutoReset, EventName);
+        }
+        catch (UnauthorizedAccessException)
+        {
+            // Die erste Instanz läuft mit Adminrechten; wir dürfen ihre Objekte nicht öffnen
+            OtherInstanceIsElevated = true;
+            return;
+        }
         try
         {
             _owned = _mutex.WaitOne(TimeSpan.FromSeconds(3));
@@ -29,15 +38,21 @@ public sealed class SingleInstance : IDisposable
 
     public bool IsFirst => _owned;
 
-    public void SignalFirstInstance() => _showEvent.Set();
+    /// <summary>Eine andere Instanz läuft mit Adminrechten und kann nicht angesprochen werden.</summary>
+    public bool OtherInstanceIsElevated { get; }
 
-    public void ListenForShowRequests(Action onShow) =>
-        _wait = ThreadPool.RegisterWaitForSingleObject(_showEvent, (_, _) => onShow(), null, Timeout.Infinite, executeOnlyOnce: false);
+    public void SignalFirstInstance() => _showEvent?.Set();
+
+    public void ListenForShowRequests(Action onShow)
+    {
+        if (_showEvent is not null)
+            _wait = ThreadPool.RegisterWaitForSingleObject(_showEvent, (_, _) => onShow(), null, Timeout.Infinite, executeOnlyOnce: false);
+    }
 
     /// <summary>Gibt den Mutex frei (z. B. vor einem Neustart mit Adminrechten).</summary>
     public void Release()
     {
-        if (_owned)
+        if (_owned && _mutex is not null)
         {
             _mutex.ReleaseMutex();
             _owned = false;
@@ -48,7 +63,7 @@ public sealed class SingleInstance : IDisposable
     {
         _wait?.Unregister(null);
         Release();
-        _mutex.Dispose();
-        _showEvent.Dispose();
+        _mutex?.Dispose();
+        _showEvent?.Dispose();
     }
 }
