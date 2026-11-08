@@ -7,19 +7,21 @@ using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using AppVolumeHotkey.Core.Audio;
 using AppVolumeHotkey.Interop;
-using NAudio.CoreAudioApi;
-using NAudio.CoreAudioApi.Interfaces;
 
 namespace AppVolumeHotkey.Audio;
 
 /// <summary>
-/// Windows-Core-Audio über NAudio. Fragt jede Sekunde alle Sessions auf allen aktiven Ausgabegeräten ab
+/// Windows-Core-Audio über eigene COM-Anbindung (siehe Interop/CoreAudio.cs). Fragt jede Sekunde alle Sessions auf allen aktiven Ausgabegeräten ab
 /// (robuster als COM-Benachrichtigungen) und blendet Lautstärkeänderungen linear über <see cref="FadeDurationMs"/> ein.
 /// Nur auf dem UI-Thread verwenden.
 /// </summary>
 public sealed class CoreAudioBackend : IAudioBackend, IDisposable
 {
-    private sealed record SessionEntry(string Id, string Exe, uint Pid, AudioSessionControl Control);
+    private sealed record SessionEntry(string Id, string Exe, uint Pid, ISimpleAudioVolume Volume);
+
+    private sealed record Device(string Id, IAudioSessionManager2 Manager);
+
+    private static Guid _noContext = Guid.Empty;
 
     private sealed class Fade
     {
@@ -28,13 +30,13 @@ public sealed class CoreAudioBackend : IAudioBackend, IDisposable
         public required Stopwatch Clock { get; init; }
     }
 
-    private readonly MMDeviceEnumerator _enumerator = new();
+    private readonly IMMDeviceEnumerator _enumerator = CoreAudio.CreateEnumerator();
     private readonly DispatcherTimer _pollTimer;
     private readonly DispatcherTimer _fadeTimer;
     private readonly Dictionary<string, Fade> _fades = new(StringComparer.OrdinalIgnoreCase);
     private readonly Dictionary<uint, string?> _exeByPid = new();
     private readonly Dictionary<string, RunningApp> _appInfoCache = new(StringComparer.OrdinalIgnoreCase);
-    private List<MMDevice> _devices = new();
+    private List<Device> _devices = new();
     private Dictionary<string, SessionEntry> _sessions = new();
 
     public int FadeDurationMs { get; set; } = 200;
@@ -62,8 +64,8 @@ public sealed class CoreAudioBackend : IAudioBackend, IDisposable
     {
         foreach (var s in SessionsOf(exe))
         {
-            try { return s.Control.SimpleAudioVolume.Volume; }
-            catch (Exception) { }
+            if (TryGet(s) is { } v)
+                return v;
         }
         return null;
     }
@@ -75,8 +77,8 @@ public sealed class CoreAudioBackend : IAudioBackend, IDisposable
             return fade.Target;
         foreach (var s in SessionsOf(exe))
         {
-            try { return s.Control.SimpleAudioVolume.Volume; }
-            catch (Exception) { /* Session gerade verschwunden */ }
+            if (TryGet(s) is { } v)
+                return v;
         }
         return null;
     }
@@ -102,8 +104,8 @@ public sealed class CoreAudioBackend : IAudioBackend, IDisposable
         var starts = new Dictionary<string, float>();
         foreach (var s in sessions)
         {
-            try { starts[s.Id] = s.Control.SimpleAudioVolume.Volume; }
-            catch (Exception) { }
+            if (TryGet(s) is { } v)
+                starts[s.Id] = v;
         }
         _fades[exe] = new Fade { StartById = starts, Target = target, Clock = Stopwatch.StartNew() };
         _fadeTimer.Start();
@@ -119,9 +121,15 @@ public sealed class CoreAudioBackend : IAudioBackend, IDisposable
     private IEnumerable<SessionEntry> SessionsOf(string exe) =>
         _sessions.Values.Where(s => string.Equals(s.Exe, exe, StringComparison.OrdinalIgnoreCase));
 
+    private static float? TryGet(SessionEntry s)
+    {
+        try { return s.Volume.GetMasterVolume(out var v) == CoreAudio.S_OK ? v : null; }
+        catch (Exception) { return null; } // Session gerade verschwunden
+    }
+
     private static void TrySet(SessionEntry s, float v)
     {
-        try { s.Control.SimpleAudioVolume.Volume = v; }
+        try { s.Volume.SetMasterVolume(v, ref _noContext); }
         catch (Exception) { /* Session gerade verschwunden */ }
     }
 
@@ -151,14 +159,11 @@ public sealed class CoreAudioBackend : IAudioBackend, IDisposable
         var newSessions = new Dictionary<string, SessionEntry>();
 
         // Geräteliste nur alle 10 s neu holen (teuer); Sessions der bekannten Geräte jede Sekunde
-        var oldDevices = new List<MMDevice>();
         if (_devices.Count == 0 || !_sinceDeviceScan.IsRunning || _sinceDeviceScan.Elapsed > TimeSpan.FromSeconds(10))
         {
             try
             {
-                var fresh = _enumerator.EnumerateAudioEndPoints(DataFlow.Render, DeviceState.Active).ToList();
-                oldDevices = _devices;
-                _devices = fresh;
+                _devices = EnumerateDevices();
                 _sinceDeviceScan.Restart();
             }
             catch (Exception)
@@ -173,22 +178,31 @@ public sealed class CoreAudioBackend : IAudioBackend, IDisposable
             {
                 try
                 {
-                    var manager = device.AudioSessionManager;
-                    manager.RefreshSessions();
-                    var sessions = manager.Sessions;
-                    for (var i = 0; i < sessions.Count; i++)
+                    if (device.Manager.GetSessionEnumerator(out var sessions) != CoreAudio.S_OK || sessions is null)
+                        continue;
+                    if (sessions.GetCount(out var count) != CoreAudio.S_OK)
+                        continue;
+                    for (var i = 0; i < count; i++)
                     {
-                        var control = sessions[i];
                         try
                         {
-                            if (control.IsSystemSoundsSession || control.State == AudioSessionState.AudioSessionStateExpired)
+                            if (sessions.GetSession(i, out var control) != CoreAudio.S_OK || control is null)
                                 continue;
-                            var pid = control.GetProcessID;
+                            if (control.IsSystemSoundsSession() == CoreAudio.S_OK)
+                                continue;
+                            if (control.GetState(out var state) != CoreAudio.S_OK || state == CoreAudio.AudioSessionStateExpired)
+                                continue;
+                            // Erfolgscodes wie AUDCLNT_S_NO_CURRENT_PROCESS (Mehrprozess-Session) liefern trotzdem eine PID
+                            if (control.GetProcessId(out var pid) < 0)
+                                continue;
                             var exe = ExeForPid(pid);
                             if (exe is null)
                                 continue;
-                            var id = device.ID + "|" + control.GetSessionInstanceIdentifier;
-                            newSessions[id] = new SessionEntry(id, exe, pid, control);
+                            if (control.GetSessionInstanceIdentifier(out var instanceId) != CoreAudio.S_OK)
+                                continue;
+                            var id = device.Id + "|" + instanceId;
+                            // ISimpleAudioVolume per QueryInterface vom selben Session-Objekt
+                            newSessions[id] = new SessionEntry(id, exe, pid, (ISimpleAudioVolume)control);
                         }
                         catch (Exception) { }
                     }
@@ -206,16 +220,9 @@ public sealed class CoreAudioBackend : IAudioBackend, IDisposable
             .Distinct(StringComparer.OrdinalIgnoreCase).ToList();
         var removedAny = _sessions.Keys.Any(k => !newSessions.ContainsKey(k));
 
-        var oldSessions = _sessions;
+        // Alte COM-Wrapper werden vom GC freigegeben (kein ReleaseComObject: Windows liefert oft dieselben Objekte
+        // erneut, ein vorzeitiges Freigeben würde die neuen Wrapper mit zerstören).
         _sessions = newSessions;
-        foreach (var s in oldSessions.Values)
-        {
-            try { s.Control.Dispose(); } catch (Exception) { }
-        }
-        foreach (var d in oldDevices)
-        {
-            try { d.Dispose(); } catch (Exception) { }
-        }
 
         // PID-Cache klein halten
         var livePids = newSessions.Values.Select(s => s.Pid).ToHashSet();
@@ -232,6 +239,29 @@ public sealed class CoreAudioBackend : IAudioBackend, IDisposable
         if (added.Count > 0 || removedAny)
             SessionsChanged?.Invoke();
         Polled?.Invoke();
+    }
+
+    private List<Device> EnumerateDevices()
+    {
+        var result = new List<Device>();
+        if (_enumerator.EnumAudioEndpoints(EDataFlow.eRender, CoreAudio.DEVICE_STATE_ACTIVE, out var collection) != CoreAudio.S_OK || collection is null)
+            throw new InvalidOperationException("Audiogeräte konnten nicht abgefragt werden.");
+        collection.GetCount(out var count);
+        for (uint i = 0; i < count; i++)
+        {
+            try
+            {
+                if (collection.Item(i, out var device) != CoreAudio.S_OK || device is null)
+                    continue;
+                device.GetId(out var id);
+                var iid = CoreAudio.IID_IAudioSessionManager2;
+                if (device.Activate(ref iid, CoreAudio.CLSCTX_ALL, IntPtr.Zero, out var obj) != CoreAudio.S_OK || obj is not IAudioSessionManager2 manager)
+                    continue;
+                result.Add(new Device(id ?? i.ToString(), manager));
+            }
+            catch (Exception) { }
+        }
+        return result;
     }
 
     private string? ExeForPid(uint pid)
@@ -316,14 +346,7 @@ public sealed class CoreAudioBackend : IAudioBackend, IDisposable
     {
         _pollTimer.Stop();
         CompleteFades();
-        foreach (var s in _sessions.Values)
-        {
-            try { s.Control.Dispose(); } catch (Exception) { }
-        }
-        foreach (var d in _devices)
-        {
-            try { d.Dispose(); } catch (Exception) { }
-        }
-        _enumerator.Dispose();
+        _sessions = new();
+        _devices = new();
     }
 }

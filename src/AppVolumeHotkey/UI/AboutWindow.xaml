@@ -31,9 +31,9 @@
             <TextBlock TextWrapping="Wrap"
                        Text="Die Software wird ohne Gewähr bereitgestellt (MIT-Lizenz). Lautstärken werden über die Audio-Schnittstelle von Windows geändert – dieselbe, die auch der Lautstärkemixer nutzt. Andere Programme werden dabei weder verändert noch ausgelesen." />
 
-            <TextBlock Text="Verwendete Bibliotheken" FontWeight="SemiBold" Margin="0,16,0,4" />
+            <TextBlock Text="Technik" FontWeight="SemiBold" Margin="0,16,0,4" />
             <TextBlock TextWrapping="Wrap" Opacity="0.8" Margin="0,0,0,6"
-                       Text="NAudio (Zugriff auf die Windows-Audio-Schnittstelle) und H.NotifyIcon (Symbol im Infobereich), beide MIT-lizenziert. Die Lizenzen verlangen, dass ihr Text mitgeliefert wird:" />
+                       Text="Keine Bibliotheken Dritter. Audio-Zugriff und Infobereich-Symbol sind direkt gegen Windows programmiert. Enthalten ist nur die .NET-Laufzeitumgebung von Microsoft (MIT-Lizenz):" />
         </StackPanel>
 
         <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,14,0,0">

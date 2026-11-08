@@ -1,21 +1,13 @@
-AppVolumeHotkey verwendet die folgenden Komponenten Dritter.
-Ihre Lizenztexte sind unten vollständig wiedergegeben.
+AppVolumeHotkey enthält keine Bibliotheken Dritter.
 
-------------------------------------------------------------
-NAudio (NAudio.Core, NAudio.Wasapi) 2.2.1
-https://github.com/naudio/NAudio
-Copyright (c) Mark Heath
-Lizenz: MIT
+Die App wird mit der .NET-Laufzeitumgebung von Microsoft ausgeliefert
+(.NET Runtime und Windows Desktop Runtime / WPF), die in der exe enthalten ist.
 
-H.NotifyIcon / H.NotifyIcon.Wpf / H.GeneratedIcons.System.Drawing 2.3.0
-https://github.com/HavenDV/H.NotifyIcon
-Copyright (c) havendv
-Lizenz: MIT
-
-.NET Runtime, Windows Desktop Runtime (WPF), System.Drawing.Common
+.NET Runtime, Windows Desktop Runtime (WPF)
 https://github.com/dotnet
 Copyright (c) .NET Foundation and Contributors
-Lizenz: MIT (weitere Hinweise: https://github.com/dotnet/runtime/blob/main/THIRD-PARTY-NOTICES.TXT)
+Lizenz: MIT
+Weitere Hinweise: https://github.com/dotnet/runtime/blob/main/THIRD-PARTY-NOTICES.TXT
 
 ------------------------------------------------------------
 MIT License

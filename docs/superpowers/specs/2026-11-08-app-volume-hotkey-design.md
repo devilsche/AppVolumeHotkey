@@ -118,9 +118,9 @@ Modales Fenster mit:
 ## 7. Technik (Entscheidung des Builders – Nutzer hat Sprache freigestellt)
 
 - **C# / .NET 10 (LTS), WPF**, Fluent-Theme mit `ThemeMode="System"` für Hell/Dunkel.
-- Audio: Windows Core Audio API (`IMMDeviceEnumerator`, `IAudioSessionManager2`, `IAudioSessionNotification`, `ISimpleAudioVolume`) – via **NAudio** oder direkte COM-Interop.
+- Audio: Windows Core Audio API (`IMMDeviceEnumerator`, `IAudioSessionManager2`, `IAudioSessionNotification`, `ISimpleAudioVolume`) – über eigene COM-Interop (keine Fremdbibliothek).
 - Hotkeys: `RegisterHotKey` mit `MOD_NOREPEAT` auf einem Hidden-Window/HwndSource.
-- Tray: z. B. `H.NotifyIcon.Wpf`.
+- Tray: eigene Implementierung über `Shell_NotifyIcon` (keine Fremdbibliothek).
 - Overlay: eigenes WPF-Fenster mit `WS_EX_TRANSPARENT | WS_EX_NOACTIVATE | WS_EX_TOOLWINDOW | WS_EX_TOPMOST`.
 - Autostart: ohne Admin über `HKCU\…\Run`; mit Admin über eine Aufgabe in der Aufgabenplanung („mit höchsten Privilegien“), da Run-Key keine UAC-Erhöhung ohne Prompt erlaubt.
 - Einzelinstanz (Mutex); zweiter Start bringt das vorhandene Fenster nach vorn.

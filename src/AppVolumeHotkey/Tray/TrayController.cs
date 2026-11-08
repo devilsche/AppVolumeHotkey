@@ -1,38 +1,29 @@
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Media.Imaging;
-using H.NotifyIcon;
 
 namespace AppVolumeHotkey.Tray;
 
 public sealed class TrayController : IDisposable
 {
     private readonly AppHost _host;
-    private readonly TaskbarIcon _icon;
+    private readonly NotifyIcon _icon;
 
     public TrayController(AppHost host)
     {
         _host = host;
-        _icon = new TaskbarIcon
-        {
-            ToolTipText = "AppVolumeHotkey " + Platform.AppInfo.Version,
-            IconSource = new BitmapImage(new Uri("pack://application:,,,/Assets/app.ico")),
-            NoLeftClickDelay = true,
-            ContextMenu = new ContextMenu(),
-        };
-        _icon.TrayLeftMouseUp += (_, _) => _host.ShowMainWindow();
-        _icon.TrayRightMouseUp += (_, _) => Platform.DebugLog.Write("Tray: Rechtsklick empfangen");
-        _icon.ContextMenu!.Opened += (_, _) => Platform.DebugLog.Write("Tray: Menü geöffnet");
-        _icon.ForceCreate(enablesEfficiencyMode: false);
+        var ico = Application.GetResourceStream(new Uri("pack://application:,,,/Assets/app.ico"))!.Stream;
+        _icon = new NotifyIcon(ico, "AppVolumeHotkey " + Platform.AppInfo.Version);
+        _icon.LeftClick += () => _host.ShowMainWindow();
+        _icon.ContextMenu.Opened += (_, _) => Platform.DebugLog.Write("Tray: Menü geöffnet");
         Rebuild();
     }
 
-    public void ShowNotification(string title, string message) => _icon.ShowNotification(title, message);
+    public void ShowNotification(string title, string message) => _icon.ShowBalloon(title, message);
 
     /// <summary>Menü neu aufbauen (bei jeder Zustands- oder Konfigurationsänderung).</summary>
     public void Rebuild()
     {
-        var menu = _icon.ContextMenu!;
+        var menu = _icon.ContextMenu;
         menu.Items.Clear();
 
         var active = _host.ActiveProfileDescriptions().ToList();
@@ -68,8 +59,7 @@ public sealed class TrayController : IDisposable
         exit.Click += (_, _) => _host.Exit();
         menu.Items.Add(exit);
 
-        var tip = active.Count == 0 ? $"AppVolumeHotkey {Platform.AppInfo.Version}" : "AppVolumeHotkey – " + string.Join(", ", active);
-        _icon.ToolTipText = tip.Length > 120 ? tip[..117] + "…" : tip;
+        _icon.ToolTip = active.Count == 0 ? $"AppVolumeHotkey {Platform.AppInfo.Version}" : "AppVolumeHotkey – " + string.Join(", ", active);
     }
 
     public void Dispose() => _icon.Dispose();

@@ -46,4 +46,4 @@ Die Kernlogik (`src/AppVolumeHotkey.Core`) ist plattformunabhängig und getestet
 
 ## Lizenz
 
-MIT, siehe [LICENSE](LICENSE). Lizenzen der verwendeten Bibliotheken: [THIRD-PARTY-NOTICES.txt](THIRD-PARTY-NOTICES.txt).
+MIT, siehe [LICENSE](LICENSE). Keine Bibliotheken Dritter; Hinweise zur enthaltenen .NET-Laufzeit: [THIRD-PARTY-NOTICES.txt](THIRD-PARTY-NOTICES.txt).
