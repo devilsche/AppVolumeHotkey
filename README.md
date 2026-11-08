@@ -8,6 +8,8 @@ Unter **Releases** liegt `AppVolumeHotkey-vX.Y.Z.exe`. Die laufende Version steh
 
 > Windows SmartScreen kann beim ersten Start warnen, weil die exe nicht signiert ist: „Weitere Informationen“ → „Trotzdem ausführen“.
 
+**Code signing:** Free code signing for this project is being requested from [SignPath.io](https://about.signpath.io/), certificate by [SignPath Foundation](https://signpath.org/). Details: [CODE_SIGNING_POLICY.md](CODE_SIGNING_POLICY.md).
+
 ## Bedienung
 
 1. **Gruppe anlegen** (links), z. B. „Voice“.
