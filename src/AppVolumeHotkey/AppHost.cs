@@ -19,6 +19,7 @@ public sealed class AppHost : IDisposable
     private readonly Dictionary<int, Guid> _profileByHotkeyId = new();
     private readonly HashSet<Guid> _reportedFailures = new();
     private readonly OverlayService _overlay = new();
+    private StatusIndicatorWindow? _status;
     private bool _hotkeysPaused;
     private MainWindow? _main;
     private bool _exiting;
@@ -53,6 +54,40 @@ public sealed class AppHost : IDisposable
         ConfigChanged += Tray.Rebuild;
 
         RegisterAllHotkeys();
+
+        Volume.StateChanged += UpdateStatusIndicator;
+        ConfigChanged += UpdateStatusIndicator;
+        L.Changed += UpdateStatusIndicator;
+        UpdateStatusIndicator();
+    }
+
+    /// <summary>Kurzbeschreibung je aktiver Gruppe, z. B. „Voice 20 %“.</summary>
+    public IReadOnlyList<string> ActiveStatusItems()
+    {
+        var list = new List<string>();
+        foreach (var g in Config.Groups)
+        {
+            if (Volume.GetActive(g.Id) is not { } a)
+                continue;
+            var p = g.Profiles.FirstOrDefault(x => x.Id == a.ProfileId);
+            if (p is not null)
+                list.Add(L.F("Status_Item", g.Name, p.Steps[a.StepIndex].Label));
+        }
+        return list;
+    }
+
+    private void UpdateStatusIndicator()
+    {
+        if (_exiting)
+            return;
+        var items = ActiveStatusItems();
+        if (items.Count == 0 || !Config.Settings.StatusIndicator)
+        {
+            _status?.Hide();
+            return;
+        }
+        _status ??= new StatusIndicatorWindow();
+        _status.Update(items, Config.Settings);
     }
 
     public bool HotkeysPaused
@@ -214,5 +249,6 @@ public sealed class AppHost : IDisposable
         Audio.Dispose();
         Tray.Dispose();
         _overlay.Close();
+        _status?.Close();
     }
 }

@@ -36,6 +36,11 @@ public sealed class ConfigStoreTests : IDisposable
         cfg.Settings.OverlayCorner = OverlayCorner.BottomLeft;
         cfg.Settings.OverlayStyle = OverlayStyle.Normal;
         cfg.Settings.MinimizeToTray = false;
+        cfg.Settings.StatusIndicator = false;
+        cfg.Settings.StatusCorner = OverlayCorner.BottomRight;
+        cfg.Settings.StatusStyle = StatusStyle.Icon;
+        cfg.Settings.StatusOpacity = 60;
+        cfg.Settings.TrayBadge = false;
         cfg.Settings.MainWindow = new WindowPlacement(100, 50, 1300, 800, true) { GroupsWidth = 260, RunningWidth = 340 };
 
         ConfigStore.Save(ConfigPath, cfg);
@@ -56,6 +61,17 @@ public sealed class ConfigStoreTests : IDisposable
         Assert.Null(new AppSettings().MainWindow);
         Assert.True(new AppSettings().MinimizeToTray);
         Assert.False(loaded.Settings.MinimizeToTray);
+        Assert.False(loaded.Settings.StatusIndicator);
+        Assert.Equal(OverlayCorner.BottomRight, loaded.Settings.StatusCorner);
+        Assert.Equal(StatusStyle.Icon, loaded.Settings.StatusStyle);
+        Assert.Equal(60, loaded.Settings.StatusOpacity);
+        Assert.False(loaded.Settings.TrayBadge);
+        var d = new AppSettings();
+        Assert.True(d.StatusIndicator);
+        Assert.Equal(OverlayCorner.TopLeft, d.StatusCorner);
+        Assert.Equal(StatusStyle.MiniText, d.StatusStyle);
+        Assert.Equal(85, d.StatusOpacity);
+        Assert.True(d.TrayBadge);
     }
 
     [Fact]

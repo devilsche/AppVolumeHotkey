@@ -31,6 +31,7 @@ Das Fenster schließen minimiert die App in den Infobereich. Mit einem Rechtskli
 - Mit Windows starten, beim Autostart minimiert im Infobereich
 - Mit Administratorrechten ausführen: nötig, wenn eine Anwendung mit Adminrechten im Vordergrund ist (z. B. manche Spiele oder Tools), sonst kommen die Hotkeys nicht an. Der Autostart läuft dann über die Aufgabenplanung.
 - Overlay: Position, Größe, Anzeigedauer; Übergangsdauer (Standard 200 ms)
+- Statusanzeige: dauerhaft sichtbar, solange ein Profil aktiv ist – als Minitext (wie eine FPS-Anzeige), Symbol + Text oder nur Symbol; Ecke und Deckkraft einstellbar. Zusätzlich grüner Punkt am Tray-Symbol. Beides abschaltbar.
 
 ## Bekannte Grenzen
 

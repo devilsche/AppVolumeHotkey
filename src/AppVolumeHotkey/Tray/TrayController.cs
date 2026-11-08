@@ -14,6 +14,7 @@ public sealed class TrayController : IDisposable
         _host = host;
         var ico = Application.GetResourceStream(new Uri("pack://application:,,,/Assets/app.ico"))!.Stream;
         _icon = new NotifyIcon(ico, "AppVolumeHotkey " + Platform.AppInfo.Version);
+        _icon.SetActiveIcon(Application.GetResourceStream(new Uri("pack://application:,,,/Assets/app-active.ico"))!.Stream);
         _icon.LeftClick += () => _host.ShowMainWindow();
         _icon.ContextMenu.Opened += (_, _) => Platform.DebugLog.Write("Tray: Menü geöffnet");
         Rebuild();
@@ -61,6 +62,7 @@ public sealed class TrayController : IDisposable
         exit.Click += (_, _) => _host.Exit();
         menu.Items.Add(exit);
 
+        _icon.SetActive(active.Count > 0 && _host.Config.Settings.TrayBadge);
         _icon.ToolTip = active.Count == 0 ? $"AppVolumeHotkey {Platform.AppInfo.Version}" : "AppVolumeHotkey – " + string.Join(", ", active);
     }
 

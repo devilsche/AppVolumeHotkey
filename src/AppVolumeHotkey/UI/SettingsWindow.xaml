@@ -3,8 +3,9 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:l="clr-namespace:AppVolumeHotkey.Localization"
         Title="{l:T Settings_Title}"
-        Width="520" SizeToContent="Height"
+        Width="580" SizeToContent="Height"
         ResizeMode="NoResize" WindowStartupLocation="CenterOwner" ShowInTaskbar="False">
+    <ScrollViewer VerticalScrollBarVisibility="Auto" Focusable="False">
     <StackPanel Margin="20">
         <TextBlock Text="{l:T Settings_Title}" FontSize="20" FontWeight="SemiBold" Margin="0,0,0,16" />
 
@@ -50,6 +51,28 @@
         </Grid>
         <Button Content="{l:T Settings_TestOverlay}" Click="TestOverlay_Click" HorizontalAlignment="Left" MinHeight="32" Padding="12,4" Margin="0,8,0,0" />
 
+        <TextBlock Text="{l:T Settings_Status}" FontWeight="SemiBold" Margin="0,18,0,2" />
+        <TextBlock Text="{l:T Settings_StatusHint}" Opacity="0.75" FontSize="12" TextWrapping="Wrap" Margin="0,0,0,8" />
+        <CheckBox x:Name="StatusOnBox" Content="{l:T Settings_StatusOn}" Margin="0,0,0,6" />
+        <Grid Margin="0,0,0,6">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="170" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+            <Label Grid.Row="0" Content="{l:T Settings_StatusStyle}" Target="{Binding ElementName=StatusStyleBox}" VerticalAlignment="Center" />
+            <ComboBox Grid.Row="0" Grid.Column="1" x:Name="StatusStyleBox" Margin="0,0,0,6" AutomationProperties.Name="{l:T Settings_StatusStyleA11y}" />
+            <Label Grid.Row="1" Content="{l:T Settings_StatusCorner}" Target="{Binding ElementName=StatusCornerBox}" VerticalAlignment="Center" />
+            <ComboBox Grid.Row="1" Grid.Column="1" x:Name="StatusCornerBox" Margin="0,0,0,6" AutomationProperties.Name="{l:T Settings_StatusCornerA11y}" />
+            <Label Grid.Row="2" Content="{l:T Settings_StatusOpacity}" Target="{Binding ElementName=StatusOpacityBox}" VerticalAlignment="Center" />
+            <TextBox Grid.Row="2" Grid.Column="1" x:Name="StatusOpacityBox" AutomationProperties.Name="{l:T Settings_StatusOpacityA11y}" />
+        </Grid>
+        <CheckBox x:Name="TrayBadgeBox" Content="{l:T Settings_TrayBadge}" Margin="0,4,0,0" />
+
         <TextBlock Text="{l:T Settings_Transition}" FontWeight="SemiBold" Margin="0,18,0,6" />
         <Grid>
             <Grid.ColumnDefinitions>
@@ -68,4 +91,5 @@
             <Button Content="{l:T Common_Cancel}" IsCancel="True" MinWidth="100" MinHeight="32" />
         </StackPanel>
     </StackPanel>
+    </ScrollViewer>
 </Window>

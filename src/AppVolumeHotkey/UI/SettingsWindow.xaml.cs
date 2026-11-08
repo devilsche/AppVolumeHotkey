@@ -38,6 +38,13 @@ public partial class SettingsWindow : Window
         ("en", "Settings_LangEn"),
     };
 
+    private static readonly (StatusStyle Value, string Label)[] StatusStyles =
+    {
+        (StatusStyle.MiniText, "Settings_StatusMini"),
+        (StatusStyle.IconText, "Settings_StatusIconText"),
+        (StatusStyle.Icon, "Settings_StatusIcon"),
+    };
+
     private readonly AppHost _host;
     private readonly OverlayService _preview = new();
 
@@ -62,6 +69,14 @@ public partial class SettingsWindow : Window
         CornerBox.SelectedIndex = Array.FindIndex(Corners, c => c.Value == s.OverlayCorner);
         SizeBox.ItemsSource = Sizes.Select(c => L.T(c.Label)).ToList();
         SizeBox.SelectedIndex = Array.FindIndex(Sizes, c => c.Value == s.OverlaySize);
+        MaxHeight = SystemParameters.WorkArea.Height - 40;
+        StatusOnBox.IsChecked = s.StatusIndicator;
+        StatusStyleBox.ItemsSource = StatusStyles.Select(c => L.T(c.Label)).ToList();
+        StatusStyleBox.SelectedIndex = Math.Max(0, Array.FindIndex(StatusStyles, c => c.Value == s.StatusStyle));
+        StatusCornerBox.ItemsSource = Corners.Select(c => L.T(c.Label)).ToList();
+        StatusCornerBox.SelectedIndex = Math.Max(0, Array.FindIndex(Corners, c => c.Value == s.StatusCorner));
+        StatusOpacityBox.Text = s.StatusOpacity.ToString();
+        TrayBadgeBox.IsChecked = s.TrayBadge;
         LanguageBox.ItemsSource = Languages.Select(c => L.T(c.Label)).ToList();
         LanguageBox.SelectedIndex = Math.Max(0, Array.FindIndex(Languages, c => c.Value == s.Language));
         StyleBox.ItemsSource = Styles.Select(c => L.T(c.Label)).ToList();
@@ -88,6 +103,10 @@ public partial class SettingsWindow : Window
             OverlayStyle = Styles[Math.Max(0, StyleBox.SelectedIndex)].Value,
             MainWindow = _host.Config.Settings.MainWindow,
             Language = Languages[Math.Max(0, LanguageBox.SelectedIndex)].Value,
+            StatusIndicator = StatusOnBox.IsChecked == true,
+            StatusStyle = StatusStyles[Math.Max(0, StatusStyleBox.SelectedIndex)].Value,
+            StatusCorner = Corners[Math.Max(0, StatusCornerBox.SelectedIndex)].Value,
+            TrayBadge = TrayBadgeBox.IsChecked == true,
         };
 
         ClearError();
@@ -95,6 +114,9 @@ public partial class SettingsWindow : Window
             return ShowError(DurationBox, L.T("Settings_ErrDuration"));
         if (!int.TryParse(FadeBox.Text.Trim(), out var fade) || fade is < 0 or > 1000)
             return ShowError(FadeBox, L.T("Settings_ErrFade"));
+        if (!int.TryParse(StatusOpacityBox.Text.Trim(), out var opacity) || opacity is < 30 or > 100)
+            return ShowError(StatusOpacityBox, L.T("Settings_ErrOpacity"));
+        settings.StatusOpacity = opacity;
         settings.OverlayDurationMs = duration;
         settings.FadeDurationMs = fade;
         return true;
@@ -114,6 +136,7 @@ public partial class SettingsWindow : Window
     {
         ErrorText.Visibility = Visibility.Collapsed;
         DurationBox.ClearValue(AutomationProperties.HelpTextProperty);
+        StatusOpacityBox.ClearValue(AutomationProperties.HelpTextProperty);
         FadeBox.ClearValue(AutomationProperties.HelpTextProperty);
     }
 

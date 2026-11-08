@@ -65,7 +65,9 @@ internal sealed class NotifyIcon : IDisposable
 
     private readonly HwndSource _window;
     private readonly uint _taskbarCreated;
-    private readonly IntPtr _icon;
+    private readonly IntPtr _iconNormal;
+    private IntPtr _iconActive;
+    private IntPtr _icon;
     private string _tip;
     private bool _added;
 
@@ -79,7 +81,7 @@ internal sealed class NotifyIcon : IDisposable
         _taskbarCreated = RegisterWindowMessage("TaskbarCreated");
         _window = new HwndSource(new HwndSourceParameters("AppVolumeHotkey.Tray") { WindowStyle = 0, Width = 0, Height = 0 });
         _window.AddHook(WndProc);
-        _icon = LoadSmallIcon(icoStream);
+        _iconNormal = _icon = LoadSmallIcon(icoStream);
         ContextMenu.Placement = PlacementMode.MousePoint;
         Add();
     }
@@ -93,6 +95,19 @@ internal sealed class NotifyIcon : IDisposable
             var d = Data(NIF_TIP | NIF_SHOWTIP);
             Shell_NotifyIcon(NIM_MODIFY, ref d);
         }
+    }
+
+    /// <summary>Optionales zweites Symbol (z. B. mit grünem Punkt) für den Zustand „aktiv“.</summary>
+    public void SetActiveIcon(Stream ico) => _iconActive = LoadSmallIcon(ico);
+
+    public void SetActive(bool active)
+    {
+        var target = active && _iconActive != IntPtr.Zero ? _iconActive : _iconNormal;
+        if (target == _icon)
+            return;
+        _icon = target;
+        var d = Data(NIF_ICON);
+        Shell_NotifyIcon(NIM_MODIFY, ref d);
     }
 
     public void ShowBalloon(string title, string text, bool warning = false)
@@ -198,8 +213,10 @@ internal sealed class NotifyIcon : IDisposable
             Shell_NotifyIcon(NIM_DELETE, ref d);
             _added = false;
         }
-        if (_icon != IntPtr.Zero)
-            DestroyIcon(_icon);
+        if (_iconNormal != IntPtr.Zero)
+            DestroyIcon(_iconNormal);
+        if (_iconActive != IntPtr.Zero)
+            DestroyIcon(_iconActive);
         _window.RemoveHook(WndProc);
         _window.Dispose();
     }
