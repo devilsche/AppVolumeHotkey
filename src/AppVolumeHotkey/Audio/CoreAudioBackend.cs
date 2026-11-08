@@ -143,15 +143,34 @@ public sealed class CoreAudioBackend : IAudioBackend, IDisposable
             _fadeTimer.Stop();
     }
 
+    private readonly Stopwatch _sinceDeviceScan = new();
+
     private void Refresh(bool raiseEvents = true)
     {
-        var newDevices = new List<MMDevice>();
+        var timer = Stopwatch.StartNew();
         var newSessions = new Dictionary<string, SessionEntry>();
+
+        // Geräteliste nur alle 10 s neu holen (teuer); Sessions der bekannten Geräte jede Sekunde
+        var oldDevices = new List<MMDevice>();
+        if (_devices.Count == 0 || !_sinceDeviceScan.IsRunning || _sinceDeviceScan.Elapsed > TimeSpan.FromSeconds(10))
+        {
+            try
+            {
+                var fresh = _enumerator.EnumerateAudioEndPoints(DataFlow.Render, DeviceState.Active).ToList();
+                oldDevices = _devices;
+                _devices = fresh;
+                _sinceDeviceScan.Restart();
+            }
+            catch (Exception)
+            {
+                return; // Audio-Subsystem gerade nicht verfügbar – beim nächsten Tick erneut versuchen
+            }
+        }
+
         try
         {
-            foreach (var device in _enumerator.EnumerateAudioEndPoints(DataFlow.Render, DeviceState.Active))
+            foreach (var device in _devices)
             {
-                newDevices.Add(device);
                 try
                 {
                     var manager = device.AudioSessionManager;
@@ -179,16 +198,15 @@ public sealed class CoreAudioBackend : IAudioBackend, IDisposable
         }
         catch (Exception)
         {
-            return; // Audio-Subsystem gerade nicht verfügbar – beim nächsten Tick erneut versuchen
+            _sinceDeviceScan.Reset(); // beim nächsten Tick Geräte neu holen
+            return;
         }
 
         var added = newSessions.Values.Where(s => !_sessions.ContainsKey(s.Id)).Select(s => s.Exe)
             .Distinct(StringComparer.OrdinalIgnoreCase).ToList();
         var removedAny = _sessions.Keys.Any(k => !newSessions.ContainsKey(k));
 
-        var oldDevices = _devices;
         var oldSessions = _sessions;
-        _devices = newDevices;
         _sessions = newSessions;
         foreach (var s in oldSessions.Values)
         {
@@ -203,6 +221,9 @@ public sealed class CoreAudioBackend : IAudioBackend, IDisposable
         var livePids = newSessions.Values.Select(s => s.Pid).ToHashSet();
         foreach (var pid in _exeByPid.Keys.Where(p => !livePids.Contains(p)).ToList())
             _exeByPid.Remove(pid);
+
+        if (timer.ElapsedMilliseconds > 200)
+            Platform.DebugLog.Write($"Audio-Abfrage dauerte {timer.ElapsedMilliseconds} ms ({_devices.Count} Geräte, {newSessions.Count} Sessions)");
 
         if (!raiseEvents)
             return;

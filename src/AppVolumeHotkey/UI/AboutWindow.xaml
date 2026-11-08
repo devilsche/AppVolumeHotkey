@@ -25,7 +25,7 @@
 
             <TextBlock Text="Datenschutz" FontWeight="SemiBold" Margin="0,16,0,4" />
             <TextBlock TextWrapping="Wrap"
-                       Text="Die App sammelt keine Daten und sendet nichts ins Internet. Einstellungen werden nur lokal in %APPDATA%\AppVolumeHotkey gespeichert. Tastatur und Maus werden nur auf die eingestellten Hotkeys geprüft; Eingaben werden weder gespeichert noch weitergegeben." />
+                       Text="Die App sammelt keine Daten und sendet nichts ins Internet. Einstellungen und ein technisches Diagnose-Log (ohne Eingaben) werden nur lokal in %APPDATA%\AppVolumeHotkey gespeichert. Tastatur und Maus werden nur auf die eingestellten Hotkeys geprüft; Eingaben werden weder gespeichert noch weitergegeben." />
 
             <TextBlock Text="Haftung" FontWeight="SemiBold" Margin="0,16,0,4" />
             <TextBlock TextWrapping="Wrap"

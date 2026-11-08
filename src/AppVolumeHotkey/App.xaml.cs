@@ -62,6 +62,8 @@ public partial class App : Application
         try { Autostart.Apply(settings, elevated); }
         catch (Exception) { /* Autostart ist nicht kritisch */ }
 
+        DebugLog.Write($"Start (elevated={elevated}, autostart={isAutostart})");
+        DebugLog.StartUiWatchdog(Dispatcher);
         _host = new AppHost();
         _instance.ListenForShowRequests(() => Dispatcher.BeginInvoke(() => _host?.ShowMainWindow()));
 

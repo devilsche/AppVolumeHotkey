@@ -21,6 +21,8 @@ public sealed class TrayController : IDisposable
             ContextMenu = new ContextMenu(),
         };
         _icon.TrayLeftMouseUp += (_, _) => _host.ShowMainWindow();
+        _icon.TrayRightMouseUp += (_, _) => Platform.DebugLog.Write("Tray: Rechtsklick empfangen");
+        _icon.ContextMenu!.Opened += (_, _) => Platform.DebugLog.Write("Tray: Menü geöffnet");
         _icon.ForceCreate(enablesEfficiencyMode: false);
         Rebuild();
     }
