@@ -61,6 +61,28 @@ internal static partial class Native
     [DllImport("shell32.dll", CharSet = CharSet.Unicode)]
     public static extern IntPtr SHGetFileInfo(string path, uint attributes, ref SHFILEINFO info, uint size, uint flags);
 
+    [LibraryImport("kernel32.dll")]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    private static partial bool GetExitCodeProcess(IntPtr hProcess, out uint exitCode);
+
+    private const uint STILL_ACTIVE = 259;
+
+    /// <summary>Läuft der Prozess noch? (Windows behält Audio-Sessions beendeter Apps oft noch eine Weile.)</summary>
+    public static bool IsProcessAlive(uint pid)
+    {
+        var h = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, false, pid);
+        if (h == IntPtr.Zero)
+            return Marshal.GetLastPInvokeError() == 5; // ERROR_ACCESS_DENIED: läuft, aber geschützt → behalten
+        try
+        {
+            return GetExitCodeProcess(h, out var code) && code == STILL_ACTIVE;
+        }
+        finally
+        {
+            CloseHandle(h);
+        }
+    }
+
     public static string? GetProcessImagePath(uint pid)
     {
         var h = OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, false, pid);

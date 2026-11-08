@@ -215,6 +215,8 @@ public sealed class CoreAudioBackend : IAudioBackend, IDisposable
                             // Erfolgscodes wie AUDCLNT_S_NO_CURRENT_PROCESS (Mehrprozess-Session) liefern trotzdem eine PID
                             if (control.GetProcessId(out var pid) < 0)
                                 continue;
+                            if (!Native.IsProcessAlive(pid))
+                                continue; // App wurde beendet, Windows hat die Session nur noch nicht entfernt
                             var exe = ExeForPid(pid);
                             if (exe is null)
                                 continue;
