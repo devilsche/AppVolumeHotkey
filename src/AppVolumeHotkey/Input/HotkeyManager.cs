@@ -10,6 +10,7 @@ public sealed class HotkeyManager : IDisposable
     private const int ProbeId = 0xBFFF;
     private readonly HwndSource _source;
     private readonly HashSet<int> _registered = new();
+    private readonly MouseHook _mouse;
 
     public event Action<int>? Pressed;
 
@@ -22,10 +23,18 @@ public sealed class HotkeyManager : IDisposable
         };
         _source = new HwndSource(p);
         _source.AddHook(WndProc);
+        _mouse = new MouseHook(System.Windows.Threading.Dispatcher.CurrentDispatcher);
+        _mouse.Pressed += id => Pressed?.Invoke(id);
     }
 
-    public bool Register(int id, Hotkey hotkey)
+    /// <param name="passThrough">Nur für Maustasten: Klick zusätzlich an andere Programme weitergeben.</param>
+    public bool Register(int id, Hotkey hotkey, bool passThrough = false)
     {
+        if (hotkey.IsMouse)
+        {
+            _mouse.Register(id, hotkey, passThrough);
+            return true;
+        }
         Unregister(id);
         if (!Native.RegisterHotKey(_source.Handle, id, (uint)hotkey.Modifiers | Native.MOD_NOREPEAT, hotkey.VirtualKey))
             return false;
@@ -43,11 +52,14 @@ public sealed class HotkeyManager : IDisposable
     {
         foreach (var id in _registered.ToList())
             Unregister(id);
+        _mouse.UnregisterAll();
     }
 
     /// <summary>Prüft, ob die Kombination systemweit frei ist (kurz registrieren und wieder freigeben).</summary>
     public bool IsAvailable(Hotkey hotkey)
     {
+        if (hotkey.IsMouse)
+            return true; // Maustasten kann man nicht exklusiv belegen
         if (!Native.RegisterHotKey(_source.Handle, ProbeId, (uint)hotkey.Modifiers | Native.MOD_NOREPEAT, hotkey.VirtualKey))
             return false;
         Native.UnregisterHotKey(_source.Handle, ProbeId);
@@ -69,6 +81,7 @@ public sealed class HotkeyManager : IDisposable
     public void Dispose()
     {
         UnregisterAll();
+        _mouse.Dispose();
         _source.RemoveHook(WndProc);
         _source.Dispose();
     }

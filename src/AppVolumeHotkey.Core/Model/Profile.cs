@@ -10,6 +10,9 @@ public sealed class Profile
     public bool OverlayOnDeactivate { get; set; } = true;
     public bool Sound { get; set; }
 
+    /// <summary>Nur für Maus-Hotkeys: Klick zusätzlich an Spiel/andere Programme weitergeben.</summary>
+    public bool PassThrough { get; set; }
+
     [System.Text.Json.Serialization.JsonIgnore]
     public string StepsSummary => Steps.Count == 0 ? "(keine Stufen)" : string.Join(" → ", Steps.Select(s => s.Label));
 
@@ -22,5 +25,6 @@ public sealed class Profile
         OverlayOnActivate = OverlayOnActivate,
         OverlayOnDeactivate = OverlayOnDeactivate,
         Sound = Sound,
+        PassThrough = PassThrough,
     };
 }

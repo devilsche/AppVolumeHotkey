@@ -175,7 +175,7 @@ public sealed class AppHost : IDisposable
             if (profile.Hotkey is null)
                 continue;
             var id = nextId++;
-            if (Hotkeys.Register(id, profile.Hotkey))
+            if (Hotkeys.Register(id, profile.Hotkey, profile.PassThrough))
             {
                 _profileByHotkeyId[id] = profile.Id;
                 _reportedFailures.Remove(profile.Id);

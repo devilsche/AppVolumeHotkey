@@ -27,9 +27,12 @@
         <!-- Hotkey -->
         <Label Content="_Hotkey" Target="{Binding ElementName=HotkeyInput}" Padding="0,14,0,4" />
         <ui:HotkeyBox x:Name="HotkeyInput" AutomationProperties.Name="Hotkey" />
-        <TextBlock Text="Hineinklicken und die Tastenkombination drücken (z. B. Shift+Strg+A, F23). Entf löscht."
+        <TextBlock Text="Hineinklicken und die Tastenkombination oder Maustaste drücken (z. B. Shift+Strg+A, F23, Maus 4, Shift+Maus 5, Mittelklick). Entf löscht."
                    Opacity="0.75" FontSize="12" Margin="0,4,0,0" TextWrapping="Wrap" />
         <TextBlock x:Name="HotkeyError" Style="{StaticResource Error}" />
+        <CheckBox x:Name="PassThroughBox" Margin="0,8,0,0"
+                  Content="Maustaste zusätzlich an Spiel und andere Programme _weitergeben" />
+        <TextBlock x:Name="PassThroughHint" Opacity="0.75" FontSize="12" Margin="26,2,0,0" TextWrapping="Wrap" /> 
 
         <!-- Abfolge -->
         <Label Content="_Abfolge" Target="{Binding ElementName=StepList}" Padding="0,14,0,4" />

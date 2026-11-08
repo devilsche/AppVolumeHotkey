@@ -9,7 +9,13 @@ public static class KeyNames
     {
         if (hotkey is null)
             return "kein Hotkey";
-        var key = KeyName(KeyInterop.KeyFromVirtualKey((int)hotkey.VirtualKey));
+        var key = hotkey.VirtualKey switch
+        {
+            MouseButtons.Middle => "Mittelklick",
+            MouseButtons.X1 => "Maus 4",
+            MouseButtons.X2 => "Maus 5",
+            _ => KeyName(KeyInterop.KeyFromVirtualKey((int)hotkey.VirtualKey)),
+        };
         return hotkey.Modifiers == HotkeyModifiers.None ? key : FormatModifiers(hotkey.Modifiers) + "+" + key;
     }
 

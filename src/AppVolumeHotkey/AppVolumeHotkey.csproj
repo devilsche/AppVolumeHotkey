@@ -11,7 +11,7 @@
     <RootNamespace>AppVolumeHotkey</RootNamespace>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <ApplicationIcon>Assets\app.ico</ApplicationIcon>
-    <Version>0.1.0</Version>
+    <Version>0.2.0</Version>
     <!-- WPF0001: ThemeMode ist (noch) experimentell -->
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <NoWarn>$(NoWarn);WPF0001</NoWarn>

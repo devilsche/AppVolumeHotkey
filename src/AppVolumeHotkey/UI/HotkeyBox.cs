@@ -23,7 +23,7 @@ public sealed class HotkeyBox : TextBox
         IsReadOnly = true;
         IsReadOnlyCaretVisible = false;
         IsUndoEnabled = false;
-        AutomationProperties.SetHelpText(this, "Fokussieren und gewünschte Tastenkombination drücken. Entf löscht den Hotkey.");
+        AutomationProperties.SetHelpText(this, "Fokussieren und gewünschte Tastenkombination oder Maustaste (Mittelklick, Maus 4, Maus 5) drücken. Entf löscht den Hotkey.");
         UpdateText();
     }
 
@@ -95,6 +95,36 @@ public sealed class HotkeyBox : TextBox
         if (vk == 0)
             return;
         Hotkey = new Hotkey(mods, vk);
+    }
+
+    protected override void OnPreviewMouseDown(MouseButtonEventArgs e)
+    {
+        // Erst per Linksklick fokussieren, dann Mittelklick oder Maus 4/5 drücken
+        if (IsKeyboardFocusWithin)
+        {
+            uint? vk = e.ChangedButton switch
+            {
+                MouseButton.Middle => MouseButtons.Middle,
+                MouseButton.XButton1 => MouseButtons.X1,
+                MouseButton.XButton2 => MouseButtons.X2,
+                _ => null,
+            };
+            if (vk is { } v)
+            {
+                e.Handled = true;
+                Hotkey = new Hotkey(CurrentModifiers(), v);
+                return;
+            }
+        }
+        base.OnPreviewMouseDown(e);
+    }
+
+    protected override void OnPreviewMouseUp(MouseButtonEventArgs e)
+    {
+        // Maus 4/5 sonst als „Zurück/Vor“-Befehl weiterreichen
+        if (e.ChangedButton is MouseButton.Middle or MouseButton.XButton1 or MouseButton.XButton2)
+            e.Handled = true;
+        base.OnPreviewMouseUp(e);
     }
 
     private static HotkeyModifiers CurrentModifiers()

@@ -34,8 +34,10 @@ public partial class ProfileDialog : Window
         OverlayOnBox.IsChecked = profile.OverlayOnActivate;
         OverlayOffBox.IsChecked = profile.OverlayOnDeactivate;
         SoundBox.IsChecked = profile.Sound;
+        PassThroughBox.IsChecked = profile.PassThrough;
+        UpdatePassThrough();
 
-        HotkeyInput.HotkeyChanged += () => { if (_loaded) Validate(); };
+        HotkeyInput.HotkeyChanged += () => { UpdatePassThrough(); if (_loaded) Validate(); };
         _steps.CollectionChanged += (_, _) => { Renumber(); if (_loaded) Validate(); };
         Renumber();
 
@@ -61,6 +63,15 @@ public partial class ProfileDialog : Window
         {
             host.ResumeHotkeys();
         }
+    }
+
+    private void UpdatePassThrough()
+    {
+        var isMouse = HotkeyInput.Hotkey?.IsMouse == true;
+        PassThroughBox.IsEnabled = isMouse;
+        PassThroughHint.Text = isMouse
+            ? "Aus: Nur dieses Tool bekommt den Klick. An: Der Klick wirkt zusätzlich im Spiel (z. B. wenn Maus 4 dort belegt ist)."
+            : "Nur für Maustasten. Tastatur-Hotkeys werden immer nur von diesem Tool verarbeitet.";
     }
 
     private StepItem Track(StepItem item)
@@ -233,6 +244,7 @@ public partial class ProfileDialog : Window
         _profile.OverlayOnActivate = OverlayOnBox.IsChecked == true;
         _profile.OverlayOnDeactivate = OverlayOffBox.IsChecked == true;
         _profile.Sound = SoundBox.IsChecked == true;
+        _profile.PassThrough = HotkeyInput.Hotkey?.IsMouse == true && PassThroughBox.IsChecked == true;
         DialogResult = true;
     }
 }

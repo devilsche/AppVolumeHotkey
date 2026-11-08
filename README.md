@@ -12,7 +12,7 @@ Unter **Releases** liegt `AppVolumeHotkey.exe`. Einfach herunterladen und starte
 
 1. **Gruppe anlegen** (links), z. B. „Voice“.
 2. **Apps hinzufügen:** aus „Laufende Apps“ (rechts) in die Gruppe ziehen, per Doppelklick oder über „Zur Gruppe hinzufügen“. Apps, die gerade nicht laufen, gehen über „App per .exe hinzufügen …“. Erkannt werden die Apps am Namen der .exe, also auch nach einem Neustart der App.
-3. **Profil anlegen:** Name, Hotkey (ins Feld klicken und die Kombination drücken, z. B. `Shift+F9`, `Strg+Shift+A`, `F23`) und die **Abfolge**:
+3. **Profil anlegen:** Name, Hotkey (ins Feld klicken und die Kombination drücken, z. B. `Shift+F9`, `Strg+Shift+A`, `F23`, oder eine Maustaste: `Maus 4`, `Shift+Maus 5`, `Mittelklick`) und die **Abfolge**:
    - `20 % → Ausgangswert`: Toggle wie in TS3
    - `20 % → 50 % → Ausgangswert`: drei Stufen
    - **Ausgangswert** ist die Lautstärke, die die Apps vor dem ersten Druck hatten.
@@ -29,7 +29,8 @@ Das Fenster schließen minimiert die App in den Infobereich. Mit einem Rechtskli
 ## Bekannte Grenzen
 
 - In Spielen mit **exklusivem Vollbild** kann kein Overlay erscheinen. Abhilfe: „Rahmenloses Fenster“ im Spiel oder den Bestätigungston im Profil aktivieren.
-- Hotkeys sind reine Tastaturkombinationen; die Taste geht nicht zusätzlich ans Spiel weiter. Maustasten werden noch nicht unterstützt.
+- Tastatur-Hotkeys gehen nicht zusätzlich ans Spiel weiter. Bei Maustasten ist das pro Profil wählbar („zusätzlich weitergeben“).
+- Linke und rechte Maustaste sind als Hotkey bewusst nicht erlaubt.
 
 ## Entwicklung
 
