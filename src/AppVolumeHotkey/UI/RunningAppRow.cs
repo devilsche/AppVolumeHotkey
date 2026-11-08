@@ -38,10 +38,13 @@ public sealed class RunningAppRow(RunningApp app) : INotifyPropertyChanged
                 return;
             _volumePercent = value;
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(VolumePercent)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(VolumeFraction)));
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(VolumeText)));
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(AccessibleName)));
         }
     }
+
+    public double VolumeFraction => _volumePercent < 0 ? 0 : _volumePercent / 100.0;
 
     public string InGroupSuffix => IsInGroup ? " · ✓ in Gruppe" : "";
 

@@ -16,6 +16,7 @@ public partial class MainWindow : Window
     private readonly AppHost _host;
     private readonly System.Collections.ObjectModel.ObservableCollection<RunningAppRow> _running = new();
     private List<AppChipRow> _chips = new();
+    private readonly System.Windows.Threading.DispatcherTimer _liveTimer;
     private Point _dragStart;
     private bool _forceClose;
 
@@ -31,6 +32,15 @@ public partial class MainWindow : Window
         _host.Audio.SessionsChanged += RefreshRunning;
         _host.Audio.Polled += UpdateRunningVolumes;
         RunningList.ItemsSource = _running;
+
+        // Live-Anzeige: Lautstärken alle 250 ms lesen, solange das Fenster sichtbar ist (billig, ohne Neu-Abfrage der Sessions)
+        _liveTimer = new System.Windows.Threading.DispatcherTimer(TimeSpan.FromMilliseconds(250),
+            System.Windows.Threading.DispatcherPriority.Normal, (_, _) => UpdateRunningVolumes(), Dispatcher);
+        IsVisibleChanged += (_, _) =>
+        {
+            if (IsVisible) { _liveTimer.Start(); UpdateRunningVolumes(); }
+            else _liveTimer.Stop();
+        };
 
         Refresh();
         RefreshRunning();
@@ -63,6 +73,7 @@ public partial class MainWindow : Window
         _host.Volume.StateChanged -= RefreshProfiles;
         _host.Audio.SessionsChanged -= RefreshRunning;
         _host.Audio.Polled -= UpdateRunningVolumes;
+        _liveTimer.Stop();
         base.OnClosed(e);
     }
 

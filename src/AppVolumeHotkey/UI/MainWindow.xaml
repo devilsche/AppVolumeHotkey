@@ -180,10 +180,16 @@
                                 <TextBlock Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="2" FontSize="11" Opacity="0.7" TextTrimming="CharacterEllipsis">
                                     <Run Text="{Binding Exe, Mode=OneWay}" /><Run Text="{Binding InGroupSuffix, Mode=OneWay}" FontWeight="SemiBold" />
                                 </TextBlock>
-                                <!-- Balken immer volle Spaltenbreite, Füllung = Prozentwert -->
-                                <ProgressBar Grid.Row="2" Grid.ColumnSpan="3" Value="{Binding VolumePercent, Mode=OneWay}" Minimum="0" Maximum="100"
-                                             Height="4" MinHeight="4" Margin="0,4,0,0" HorizontalAlignment="Stretch"
-                                             IsTabStop="False" Focusable="False" AutomationProperties.Name="{Binding VolumeText}" />
+                                <!-- Balken immer volle Spaltenbreite, Füllung = Prozentwert (eigener Balken ohne Animation) -->
+                                <Grid Grid.Row="2" Grid.ColumnSpan="3" Height="4" Margin="0,4,0,0" ClipToBounds="True">
+                                    <Border CornerRadius="2" Background="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}" Opacity="0.5" />
+                                    <Border CornerRadius="2" Background="{DynamicResource {x:Static SystemColors.AccentColorBrushKey}}"
+                                            RenderTransformOrigin="0,0.5">
+                                        <Border.RenderTransform>
+                                            <ScaleTransform ScaleX="{Binding VolumeFraction, Mode=OneWay}" ScaleY="1" />
+                                        </Border.RenderTransform>
+                                    </Border>
+                                </Grid>
                             </Grid>
                             <DataTemplate.Triggers>
                                 <DataTrigger Binding="{Binding IsInGroup}" Value="True">
