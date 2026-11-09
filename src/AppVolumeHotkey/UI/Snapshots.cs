@@ -48,16 +48,16 @@ internal static class Snapshots
                 Pump();
                 SelectFirstGroup(main);
                 Pump();
-                Save(main, prefix + "01-main.png", theme);
+                Save(main, prefix + "01-main.png", theme, width: 1400, height: 900);
 
                 if (main.FindName("FeatureList") is ListBox features)
                 {
                     features.SelectedIndex = 0;
                     Pump();
-                    Save(main, prefix + "01b-mic.png", theme);
+                    Save(main, prefix + "01b-mic.png", theme, width: 1400);
                     features.SelectedIndex = 1;
                     Pump();
-                    Save(main, prefix + "01c-ducking.png", theme);
+                    Save(main, prefix + "01c-ducking.png", theme, width: 1400);
                     features.SelectedIndex = -1;
                     SelectFirstGroup(main);
                     Pump();
@@ -67,7 +67,7 @@ internal static class Snapshots
                 var profile = ProfileDialog.CreateForSnapshot(main, host, voice, leise.Clone());
                 profile.Show();
                 Pump();
-                Save(profile, prefix + "02-profile.png", theme);
+                Save(profile, prefix + "02-profile.png", theme, width: 680);
                 profile.Close();
                 host.ResumeHotkeys();
 
@@ -76,14 +76,14 @@ internal static class Snapshots
                     var settings = SettingsWindow.CreateForSnapshot(main, host, page);
                     settings.Show();
                     Pump();
-                    Save(settings, prefix + $"03-settings-{name}.png", theme);
+                    Save(settings, prefix + $"03-settings-{name}.png", theme, width: 840);
                     settings.Close();
                 }
 
                 var about = AboutWindow.CreateForSnapshot();
                 about.Show();
                 Pump();
-                Save(about, prefix + "04-about.png", theme);
+                Save(about, prefix + "04-about.png", theme, width: 600);
                 about.Close();
 
                 if (themeName == "dark") // Overlay/Statusanzeige sind themenunabhängig
@@ -190,10 +190,21 @@ internal static class Snapshots
         }
     }
 
-    private static void Save(Window window, string path, ThemeMode theme, bool gameScene = false)
+    /// <param name="width">Feste Breite fürs Bild (unabhängig vom kleinen Bildschirm des Build-Rechners).</param>
+    /// <param name="height">Feste Höhe; null = ganze Inhaltshöhe ohne Scrollen.</param>
+    private static void Save(Window window, string path, ThemeMode theme, bool gameScene = false, double? width = null, double? height = null)
     {
         window.UpdateLayout();
-        if (window.Content is not FrameworkElement content || content.ActualWidth < 1 || content.ActualHeight < 1)
+        if (window.Content is not FrameworkElement content)
+            return;
+        if (width is { } w0)
+        {
+            // Inhalt in Wunschgröße neu anordnen – Scrollbereiche bekommen bei unbegrenzter Höhe ihren ganzen Inhalt
+            content.Measure(new Size(w0, height ?? double.PositiveInfinity));
+            var h0 = height ?? Math.Ceiling(content.DesiredSize.Height);
+            content.Arrange(new Rect(0, 0, w0, h0));
+        }
+        if (content.ActualWidth < 1 || content.ActualHeight < 1)
             return;
 
         var dpi = VisualTreeHelper.GetDpi(content);
