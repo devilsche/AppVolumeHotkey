@@ -3,6 +3,22 @@
 Jede Version auf Deutsch und Englisch. Der Abschnitt einer Version wird automatisch als Beschreibung des GitHub-Releases verwendet.
 Every version in German and English. A version's section is used automatically as the GitHub release description.
 
+## [0.14.0] – 2026-11-09
+
+### Deutsch
+- Neu: **Mikrofon stumm** per Hotkey (auch Maustasten) – wirkt in allen Programmen. Drei Modi: Umschalten, Halten zum Stummschalten, Push-to-Talk. Wahlweise alle Mikrofone oder nur das Standard-Mikrofon; beim Beenden wird es wieder eingeschaltet (abschaltbar).
+- Neu: **Ducking** – gibt eine Gruppe (z. B. „Voice“) Ton aus, werden alle anderen Apps oder ausgewählte Gruppen automatisch leiser und nach kurzer Stille wieder lauter. Empfindlichkeit mit Live-Pegel einstellbar, optional per Hotkey an/aus.
+- Beides links unter „Funktionen“ im Hauptfenster; Zustand auch im Infobereich-Menü, im Overlay (Mikrofon rot), in der Statusanzeige („MIC STUMM“) und am Infobereich-Symbol (roter Punkt).
+- Overlay: „Darstellung“ und „Größe“ zu einer Einstellung „Größe“ (Klein/Mittel/Groß) zusammengefasst.
+- Hotkeys werden jetzt auch gegen Mikrofon- und Ducking-Hotkey auf doppelte Belegung geprüft.
+
+### English
+- New: **mute microphone** by hotkey (also mouse buttons) – works in every program. Three modes: toggle, hold to mute, push-to-talk. Either all microphones or only the default one; it's turned back on when the app exits (optional).
+- New: **ducking** – when a group (e.g. “Voice”) plays audio, all other apps or selected groups get quieter automatically and louder again after a short silence. Sensitivity adjustable with a live level meter, optional on/off hotkey.
+- Both under “Features” on the left of the main window; state also shown in the tray menu, the overlay (microphone in red), the status indicator (“MIC MUTED”) and the tray icon (red dot).
+- Overlay: “Style” and “Size” merged into one “Size” setting (small/medium/large).
+- Hotkeys are now also checked against the microphone and ducking hotkeys for duplicates.
+
 ## [0.13.0] – 2026-11-09
 
 ### Deutsch

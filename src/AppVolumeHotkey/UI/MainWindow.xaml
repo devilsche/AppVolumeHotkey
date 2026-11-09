@@ -140,7 +140,7 @@
                              KeyDown="GroupList_KeyDown" AutomationProperties.Name="{l:T Main_GroupsName}" />
                     <StackPanel Grid.Row="1" Margin="0,16,0,0">
                         <TextBlock Text="{l:T Main_Features}" Style="{StaticResource Caption}" FontWeight="SemiBold" Margin="0,0,0,4" />
-                        <ListBox x:Name="FeatureList" SelectionChanged="FeatureList_SelectionChanged" AutomationProperties.Name="{l:T Main_Features}">
+                        <ListBox x:Name="FeatureList" SelectionChanged="FeatureList_SelectionChanged" HorizontalContentAlignment="Stretch" AutomationProperties.Name="{l:T Main_Features}">
                             <ListBoxItem x:Name="MicFeatureItem" Padding="10,8">
                                 <DockPanel>
                                     <TextBlock DockPanel.Dock="Left" Style="{StaticResource Icon}" Text="&#xE720;" Margin="0,0,10,0" />
@@ -178,7 +178,7 @@
                         <Border x:Name="MicStateCard" CornerRadius="8" Padding="16,12" BorderThickness="1" Margin="0,0,0,24"
                                 BorderBrush="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}">
                             <DockPanel>
-                                <Button x:Name="MicToggleButton" DockPanel.Dock="Right" Click="MicToggle_Click" MinHeight="32" Padding="12,4" VerticalAlignment="Center">
+                                <Button x:Name="MicToggleButton" DockPanel.Dock="Right" Click="MicToggle_Click" MinHeight="32" Padding="12,4" Margin="16,0,0,0" VerticalAlignment="Center">
                                     <AccessText x:Name="MicToggleText" />
                                 </Button>
                                 <TextBlock x:Name="MicStateIcon" Style="{StaticResource Icon}" FontSize="22" Margin="0,0,12,0" />
