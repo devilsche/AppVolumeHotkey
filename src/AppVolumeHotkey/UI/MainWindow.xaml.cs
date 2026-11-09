@@ -102,7 +102,7 @@ public partial class MainWindow : Window
         var p = new WindowPlacement(r.Left, r.Top, r.Width, r.Height, WindowState == WindowState.Maximized)
         {
             GroupsWidth = GroupsColumn.ActualWidth,
-            RunningWidth = RunningColumn.ActualWidth,
+            RunningWidth = _hiddenRunningWidth ?? RunningColumn.ActualWidth,
         };
         if (p == _host.Config.Settings.MainWindow)
             return;
@@ -288,7 +288,7 @@ public partial class MainWindow : Window
     private void GroupList_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         if (GroupList.SelectedItem is not null && FeatureList.SelectedItem is not null)
-            FeatureList.SelectedIndex = -1; // Gruppe gewählt → Funktions-Seite schließen
+            FeatureList.SelectedIndex = -1; // Gruppe gewählt → Funktions-Seite schließen (zeigt „Laufende Apps“ wieder)
         RefreshGroup();
     }
 

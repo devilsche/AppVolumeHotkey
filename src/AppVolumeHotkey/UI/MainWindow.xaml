@@ -73,7 +73,7 @@
             <ColumnDefinition x:Name="GroupsColumn" Width="240" MinWidth="180" />
             <ColumnDefinition Width="12" />
             <ColumnDefinition Width="*" MinWidth="400" />
-            <ColumnDefinition Width="12" />
+            <ColumnDefinition x:Name="RunningGapColumn" Width="12" />
             <ColumnDefinition x:Name="RunningColumn" Width="320" MinWidth="220" />
         </Grid.ColumnDefinitions>
 
@@ -105,7 +105,7 @@
                       ResizeBehavior="PreviousAndNext" ResizeDirection="Columns" Cursor="SizeWE" Template="{StaticResource SplitterTemplate}"
                       DragCompleted="Splitter_DragCompleted" KeyboardIncrement="20" Focusable="True" IsTabStop="True"
                       AutomationProperties.Name="{l:T Main_SplitterLeft}" ToolTip="{l:T Main_SplitterTip}" />
-        <GridSplitter Grid.Row="1" Grid.Column="3" Width="12" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+        <GridSplitter x:Name="RunningSplitter" Grid.Row="1" Grid.Column="3" Width="12" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
                       ResizeBehavior="PreviousAndNext" ResizeDirection="Columns" Cursor="SizeWE" Template="{StaticResource SplitterTemplate}"
                       DragCompleted="Splitter_DragCompleted" KeyboardIncrement="20" Focusable="True" IsTabStop="True"
                       AutomationProperties.Name="{l:T Main_SplitterRight}" ToolTip="{l:T Main_SplitterTip}" />
@@ -349,7 +349,7 @@
         </Border>
 
         <!-- Spalte 3: laufende Apps -->
-        <Border Grid.Row="1" Grid.Column="4" Style="{StaticResource Panel}">
+        <Border x:Name="RunningPanel" Grid.Row="1" Grid.Column="4" Style="{StaticResource Panel}">
             <DockPanel>
                 <Label DockPanel.Dock="Top" Target="{Binding ElementName=RunningList}" Padding="0" Margin="0,0,0,4">
                     <AccessText Text="{l:T Main_Running}" Style="{StaticResource SectionHeading}" />

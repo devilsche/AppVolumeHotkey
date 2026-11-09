@@ -3,6 +3,14 @@
 Jede Version auf Deutsch und Englisch. Der Abschnitt einer Version wird automatisch als Beschreibung des GitHub-Releases verwendet.
 Every version in German and English. A version's section is used automatically as the GitHub release description.
 
+## [0.14.3] – 2026-11-09
+
+### Deutsch
+- „Laufende Apps“ wird auf den Seiten Mikrofon und Ducking ausgeblendet – dort hat die Liste keinen Zweck; die Mitte bekommt den Platz.
+
+### English
+- “Running apps” is hidden on the Microphone and Ducking pages, where it serves no purpose; the middle gets the space.
+
 ## [0.14.2] – 2026-11-09
 
 ### Deutsch

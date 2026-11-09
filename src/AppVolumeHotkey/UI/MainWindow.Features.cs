@@ -17,6 +17,7 @@ public partial class MainWindow
     private DispatcherTimer? _saveTimer;
     private DispatcherTimer? _meterTimer;
     private readonly List<DuckingRuleCard> _ruleCards = new();
+    private double? _hiddenRunningWidth; // Breite der Spalte „Laufende Apps“, solange sie ausgeblendet ist
 
     private void InitFeatures()
     {
@@ -68,7 +69,29 @@ public partial class MainWindow
         {
             _meterTimer?.Stop();
         }
+        ShowRunningColumn(FeatureList.SelectedItem is null);
         RefreshGroup();
+    }
+
+    /// <summary>„Laufende Apps“ nur bei Gruppen zeigen – auf den Funktionsseiten bekommt die Mitte den Platz.</summary>
+    private void ShowRunningColumn(bool show)
+    {
+        if (show && _hiddenRunningWidth is { } w)
+        {
+            RunningColumn.MinWidth = 220;
+            RunningColumn.Width = new GridLength(w);
+            RunningGapColumn.Width = new GridLength(12);
+            _hiddenRunningWidth = null;
+        }
+        else if (!show && _hiddenRunningWidth is null)
+        {
+            _hiddenRunningWidth = RunningColumn.ActualWidth > 0 ? RunningColumn.ActualWidth : 320;
+            RunningColumn.MinWidth = 0;
+            RunningColumn.Width = new GridLength(0);
+            RunningGapColumn.Width = new GridLength(0);
+        }
+        RunningPanel.Visibility = show ? Visibility.Visible : Visibility.Collapsed;
+        RunningSplitter.Visibility = show ? Visibility.Visible : Visibility.Collapsed;
     }
 
     private void ScheduleSave()
