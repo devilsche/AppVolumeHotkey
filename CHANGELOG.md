@@ -16,14 +16,12 @@ Every version in German and English. A version's section is used automatically a
 ### Deutsch
 - Mikrofon-Modi heißen wie in Discord: „Stummschaltung umschalten“, „Push-to-Mute“, „Push-to-Talk“; Knopf wie in Windows: „Stummschalten“ / „Stummschaltung aufheben“.
 - Hinweis, solange für das Mikrofon noch kein Hotkey festgelegt ist.
-- 0.14.2: Mikrofon-Zustand wird bei schmalem Fenster umgebrochen statt abgeschnitten.
 - „Funktionen“ sieht jetzt aus wie „Gruppen“; Zustand dezent als Symbol und kleiner Text statt großer Plakette.
 - Listen mit abgerundeten Einträgen, Akzentstrich bei Auswahl und deutlichem Tastaturfokus.
 
 ### English
 - Microphone modes use Discord's terms: “Toggle mute”, “Push to mute”, “Push to talk”; button as in Windows: “Mute” / “Unmute”.
 - Hint while no microphone hotkey is set.
-- 0.14.2: microphone state wraps instead of being cut off in narrow windows.
 - “Features” now looks like “Groups”; state shown subtly as icon and small text instead of a large badge.
 - Lists with rounded entries, accent bar for the selection and clear keyboard focus.
 
