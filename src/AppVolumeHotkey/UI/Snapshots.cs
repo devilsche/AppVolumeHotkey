@@ -202,7 +202,8 @@ internal static class Snapshots
         {
             // Fenster auf Wunschbreite bringen (der Build-Rechner läuft dafür in 1920×1080) und den Inhalt
             // mit unbegrenzter Höhe anordnen – Scrollbereiche zeigen so ihren ganzen Inhalt.
-            window.Width = Math.Min(w0, SystemParameters.WorkArea.Width - 8);
+            window.Width = Math.Min(w0, SystemParameters.WorkArea.Width - 64);
+            window.Left = 0;
             window.UpdateLayout();
             // Verfügbare Breite = Breite des Inhaltsbereichs des Fensters (inkl. Rand des Inhalts)
             var slot = VisualTreeHelper.GetParent(content) is FrameworkElement parent && parent.ActualWidth > 0
@@ -234,12 +235,11 @@ internal static class Snapshots
                     ? solid
                     : new SolidColorBrush(theme == ThemeMode.Dark ? Color.FromRgb(0x20, 0x20, 0x20) : Color.FromRgb(0xF3, 0xF3, 0xF3));
             dc.DrawRectangle(background, null, rect);
-            // Auch Schatten/Ränder außerhalb der Elementgrenzen erfassen (sonst rechts abgeschnitten)
-            var bounds = VisualTreeHelper.GetDescendantBounds(content);
-            bounds.Union(new Rect(0, 0, content.ActualWidth, content.ActualHeight));
-            dc.DrawRectangle(new VisualBrush(content) { Stretch = Stretch.None, ViewboxUnits = BrushMappingMode.Absolute, Viewbox = bounds,
-                    AlignmentX = AlignmentX.Left, AlignmentY = AlignmentY.Top },
-                null, new Rect(pad + m.Left + bounds.X, pad + m.Top + bounds.Y, bounds.Width, bounds.Height));
+            dc.PushTransform(new TranslateTransform(pad + m.Left, pad + m.Top));
+            dc.DrawRectangle(new VisualBrush(content) { Stretch = Stretch.Fill, ViewboxUnits = BrushMappingMode.Absolute,
+                    Viewbox = new Rect(0, 0, content.ActualWidth, content.ActualHeight) },
+                null, new Rect(0, 0, content.ActualWidth, content.ActualHeight));
+            dc.Pop();
         }
 
         var bmp = new RenderTargetBitmap(
