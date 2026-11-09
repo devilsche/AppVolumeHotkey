@@ -32,12 +32,6 @@
         <Style x:Key="FieldLabel" TargetType="Label" BasedOn="{StaticResource {x:Type Label}}">
             <Setter Property="Padding" Value="0,0,0,4" />
         </Style>
-        <Style x:Key="Field" TargetType="FrameworkElement">
-            <Setter Property="MaxWidth" Value="360" />
-            <Setter Property="HorizontalAlignment" Value="Left" />
-            <Setter Property="MinWidth" Value="240" />
-            <Setter Property="Margin" Value="0,0,0,16" />
-        </Style>
         <Style x:Key="Icon" TargetType="TextBlock">
             <Setter Property="FontFamily" Value="{StaticResource IconFont}" />
             <Setter Property="FontSize" Value="16" />
@@ -92,7 +86,7 @@
                     <TextBlock Text="{l:T Settings_NavGeneral}" Style="{StaticResource PageHeading}" />
 
                     <Label Content="{l:T Settings_Language}" Target="{Binding ElementName=LanguageBox}" Style="{StaticResource FieldLabel}" Margin="0,16,0,0" />
-                    <ComboBox x:Name="LanguageBox" Style="{StaticResource Field}" AutomationProperties.Name="{l:T Settings_LanguageA11y}" />
+                    <ComboBox x:Name="LanguageBox" MinWidth="240" MaxWidth="360" HorizontalAlignment="Left" Margin="0,0,0,16" AutomationProperties.Name="{l:T Settings_LanguageA11y}" />
 
                     <TextBlock Text="{l:T Settings_Start}" Style="{StaticResource SectionHeading}" />
                     <CheckBox x:Name="StartWithWindowsBox" Content="{l:T Settings_StartWithWindows}" />
@@ -103,7 +97,7 @@
 
                     <TextBlock Text="{l:T Settings_Transition}" Style="{StaticResource SectionHeading}" />
                     <Label Content="{l:T Settings_Fade}" Target="{Binding ElementName=FadeBox}" Style="{StaticResource FieldLabel}" />
-                    <TextBox x:Name="FadeBox" Style="{StaticResource Field}" AutomationProperties.Name="{l:T Settings_FadeA11y}" />
+                    <TextBox x:Name="FadeBox" MinWidth="240" MaxWidth="360" HorizontalAlignment="Left" Margin="0,0,0,16" AutomationProperties.Name="{l:T Settings_FadeA11y}" />
                 </StackPanel>
             </ScrollViewer>
 
@@ -114,13 +108,13 @@
                     <TextBlock Text="{l:T Settings_OverlayHint}" Style="{StaticResource Caption}" Margin="0,0,0,24" />
 
                     <Label Content="{l:T Settings_Style}" Target="{Binding ElementName=StyleBox}" Style="{StaticResource FieldLabel}" />
-                    <ComboBox x:Name="StyleBox" Style="{StaticResource Field}" AutomationProperties.Name="{l:T Settings_StyleA11y}" />
+                    <ComboBox x:Name="StyleBox" MinWidth="240" MaxWidth="360" HorizontalAlignment="Left" Margin="0,0,0,16" AutomationProperties.Name="{l:T Settings_StyleA11y}" />
                     <Label Content="{l:T Settings_Position}" Target="{Binding ElementName=CornerBox}" Style="{StaticResource FieldLabel}" />
-                    <ComboBox x:Name="CornerBox" Style="{StaticResource Field}" AutomationProperties.Name="{l:T Settings_PositionA11y}" />
+                    <ComboBox x:Name="CornerBox" MinWidth="240" MaxWidth="360" HorizontalAlignment="Left" Margin="0,0,0,16" AutomationProperties.Name="{l:T Settings_PositionA11y}" />
                     <Label Content="{l:T Settings_Size}" Target="{Binding ElementName=SizeBox}" Style="{StaticResource FieldLabel}" />
-                    <ComboBox x:Name="SizeBox" Style="{StaticResource Field}" AutomationProperties.Name="{l:T Settings_SizeA11y}" />
+                    <ComboBox x:Name="SizeBox" MinWidth="240" MaxWidth="360" HorizontalAlignment="Left" Margin="0,0,0,16" AutomationProperties.Name="{l:T Settings_SizeA11y}" />
                     <Label Content="{l:T Settings_Duration}" Target="{Binding ElementName=DurationBox}" Style="{StaticResource FieldLabel}" />
-                    <TextBox x:Name="DurationBox" Style="{StaticResource Field}" AutomationProperties.Name="{l:T Settings_DurationA11y}" />
+                    <TextBox x:Name="DurationBox" MinWidth="240" MaxWidth="360" HorizontalAlignment="Left" Margin="0,0,0,16" AutomationProperties.Name="{l:T Settings_DurationA11y}" />
 
                     <Button Content="{l:T Settings_TestOverlay}" Click="TestOverlay_Click" HorizontalAlignment="Left" MinHeight="32" Padding="12,4" Margin="0,8,0,0" />
                 </StackPanel>
@@ -134,11 +128,11 @@
 
                     <CheckBox x:Name="StatusOnBox" Content="{l:T Settings_StatusOn}" Margin="0,0,0,24" />
                     <Label Content="{l:T Settings_StatusStyle}" Target="{Binding ElementName=StatusStyleBox}" Style="{StaticResource FieldLabel}" />
-                    <ComboBox x:Name="StatusStyleBox" Style="{StaticResource Field}" AutomationProperties.Name="{l:T Settings_StatusStyleA11y}" />
+                    <ComboBox x:Name="StatusStyleBox" MinWidth="240" MaxWidth="360" HorizontalAlignment="Left" Margin="0,0,0,16" AutomationProperties.Name="{l:T Settings_StatusStyleA11y}" />
                     <Label Content="{l:T Settings_StatusCorner}" Target="{Binding ElementName=StatusCornerBox}" Style="{StaticResource FieldLabel}" />
-                    <ComboBox x:Name="StatusCornerBox" Style="{StaticResource Field}" AutomationProperties.Name="{l:T Settings_StatusCornerA11y}" />
+                    <ComboBox x:Name="StatusCornerBox" MinWidth="240" MaxWidth="360" HorizontalAlignment="Left" Margin="0,0,0,16" AutomationProperties.Name="{l:T Settings_StatusCornerA11y}" />
                     <Label Content="{l:T Settings_StatusOpacity}" Target="{Binding ElementName=StatusOpacityBox}" Style="{StaticResource FieldLabel}" />
-                    <TextBox x:Name="StatusOpacityBox" Style="{StaticResource Field}" AutomationProperties.Name="{l:T Settings_StatusOpacityA11y}" />
+                    <TextBox x:Name="StatusOpacityBox" MinWidth="240" MaxWidth="360" HorizontalAlignment="Left" Margin="0,0,0,16" AutomationProperties.Name="{l:T Settings_StatusOpacityA11y}" />
 
                     <CheckBox x:Name="TrayBadgeBox" Content="{l:T Settings_TrayBadge}" Margin="0,8,0,0" />
                 </StackPanel>

@@ -37,18 +37,25 @@ internal static class Snapshots
                 var prefix = Path.Combine(outDir, $"{lang}-{themeName}-");
                 Pump();
 
-                var main = new MainWindow(host) { Left = 0, Top = 0, Width = 1320, Height = 760, ShowActivated = false };
+                var area = SystemParameters.WorkArea;
+                var main = new MainWindow(host)
+                {
+                    Left = 0, Top = 0, ShowActivated = false,
+                    Width = Math.Min(1320, area.Width), Height = Math.Min(760, area.Height),
+                };
                 main.Show();
                 Pump();
                 SelectFirstGroup(main);
                 Pump();
                 Save(main, prefix + "01-main.png", theme);
 
+                host.SuspendHotkeys(); // wie beim echten Öffnen des Dialogs, sonst gilt F13 als „belegt“
                 var profile = ProfileDialog.CreateForSnapshot(main, host, voice, leise.Clone());
                 profile.Show();
                 Pump();
                 Save(profile, prefix + "02-profile.png", theme);
                 profile.Close();
+                host.ResumeHotkeys();
 
                 foreach (var (page, name) in new[] { (0, "general"), (1, "overlay"), (2, "status") })
                 {
