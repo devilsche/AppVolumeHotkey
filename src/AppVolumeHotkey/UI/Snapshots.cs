@@ -27,7 +27,7 @@ internal static class Snapshots
         var (config, voice, leise) = SampleConfig();
         var host = new AppHost(config, SampleApps());
         host.Volume.OnHotkey(leise.Id); // ein aktives Profil für die Ansicht
-        host.Mic.SetMuted(true);        // Mikrofon stumm für die Ansicht
+        host.Mic.SetMuted(host.Config.Mic.Rules[0], true); // Mikrofon stumm für die Ansicht
 
         foreach (var (theme, themeName) in new[] { (ThemeMode.Light, "light"), (ThemeMode.Dark, "dark") })
         {
@@ -108,7 +108,7 @@ internal static class Snapshots
                         overlay.Close();
                     }
                     var micOverlay = new OverlayWindow();
-                    micOverlay.ShowMic(true, MicScope.AllMicrophones, new AppSettings());
+                    micOverlay.ShowMic(true, L.T("Mic_OverlayAll"), new AppSettings());
                     Pump();
                     Save(micOverlay, prefix + "05-overlay-mic.png", theme, gameScene: true);
                     micOverlay.Close();
@@ -166,7 +166,12 @@ internal static class Snapshots
         };
         var musik = new AppGroup { Name = "Musik", Apps = { "Spotify.exe" } };
         var cfg = new AppConfig { Groups = { voice, spiel, musik } };
-        cfg.Mic.Hotkey = new Hotkey(HotkeyModifiers.None, 0x7D); // F14
+        cfg.Mic.Rules.Add(new MicRule { Hotkey = new Hotkey(HotkeyModifiers.None, 0x7D) }); // F14: alle Mikrofone
+        cfg.Mic.Rules.Add(new MicRule
+        {
+            Hotkey = new Hotkey(HotkeyModifiers.None, MouseButtons.X1), Mode = MicMode.PushToTalk,
+            Scope = MicScope.Group, GroupId = voice.Id, ShowOverlay = false,
+        }); // Maus 4: Push-to-Talk nur für Voice
         cfg.Ducking.Enabled = true;
         cfg.Ducking.ToggleHotkey = new Hotkey(HotkeyModifiers.Control, 0x79); // Strg+F10
         cfg.Ducking.Rules.Add(new DuckingRule { SourceGroupId = voice.Id, Percent = 35 });

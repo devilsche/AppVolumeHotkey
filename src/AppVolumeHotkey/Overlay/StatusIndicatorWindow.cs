@@ -82,7 +82,13 @@ public sealed class StatusIndicatorWindow : Window
         {
             if (i > 0)
                 tb.Inlines.Add(new System.Windows.Documents.Run("  ·  ") { Foreground = new SolidColorBrush(Color.FromArgb(0xB0, 0xFF, 0xFF, 0xFF)) });
-            tb.Inlines.Add(new System.Windows.Documents.Run(items[i].Text) { Foreground = items[i].Alert ? new SolidColorBrush(AlertRed) : normal });
+            var brush = items[i].Kind switch
+            {
+                StatusKind.Alert => new SolidColorBrush(AlertRed),
+                StatusKind.Live => new SolidColorBrush(Color.FromRgb(0x4A, 0xDE, 0x80)),
+                _ => normal,
+            };
+            tb.Inlines.Add(new System.Windows.Documents.Run(items[i].Text) { Foreground = brush });
         }
         return tb;
     }

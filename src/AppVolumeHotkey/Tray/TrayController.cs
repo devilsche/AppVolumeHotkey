@@ -1,6 +1,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using AppVolumeHotkey.Core.Localization;
+using AppVolumeHotkey.Core.Model;
 
 namespace AppVolumeHotkey.Tray;
 
@@ -51,9 +52,12 @@ public sealed class TrayController : IDisposable
         reset.Click += (_, _) => _host.Volume.ResetAll();
         menu.Items.Add(reset);
 
-        var micMuted = _host.Mic.IsMuted == true;
-        var mic = new MenuItem { Header = L.T(micMuted ? "Tray_MicUnmute" : "Tray_MicMute") };
-        mic.Click += (_, _) => _host.Mic.SetMuted(!micMuted);
+        var micMuted = _host.Mic.AnyMuted;
+        var deviceRule = _host.Config.Mic.Rules.FirstOrDefault(r => r.Scope != MicScope.Group)
+            ?? new MicRule { Scope = MicScope.AllMicrophones };
+        var deviceMuted = _host.Mic.IsMuted(deviceRule) == true;
+        var mic = new MenuItem { Header = L.T(deviceMuted ? "Tray_MicUnmute" : "Tray_MicMute") };
+        mic.Click += (_, _) => _host.Mic.SetMuted(deviceRule, !deviceMuted);
         menu.Items.Add(mic);
 
         var ducking = new MenuItem { Header = L.T("Tray_Ducking"), IsCheckable = true, IsChecked = _host.Config.Ducking.Enabled };

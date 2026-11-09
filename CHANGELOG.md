@@ -3,6 +3,20 @@
 Jede Version auf Deutsch und Englisch. Der Abschnitt einer Version wird automatisch als Beschreibung des GitHub-Releases verwendet.
 Every version in German and English. A version's section is used automatically as the GitHub release description.
 
+## [0.17.0] – 2026-11-09
+
+### Deutsch
+- Neu: **mehrere Mikrofon-Hotkeys**, jeder mit eigenem Modus und Bereich – z. B. Hotkey 1 schaltet alle Mikrofone stumm, Hotkey 2 ist Push-to-Talk nur für Edge (Meet).
+- Neu: Mikrofon **nur für Apps einer Gruppe** stummschalten – z. B. im Voice (Discord, TeamSpeak) stumm, während OBS weiter aufnimmt.
+- Statusanzeige zeigt Push-to-Talk: „Meet · PTT“ (bereit) bzw. grün „Meet · LIVE“ (Taste gehalten); stumme Gruppen rot „MIC STUMM · Voice“.
+- Der bisherige Mikrofon-Hotkey wird automatisch übernommen.
+
+### English
+- New: **multiple microphone hotkeys**, each with its own mode and scope – e.g. hotkey 1 mutes all microphones, hotkey 2 is push to talk for Edge (Meet) only.
+- New: mute the microphone **only for the apps of a group** – e.g. muted in voice chat (Discord, TeamSpeak) while OBS keeps recording.
+- Status indicator shows push to talk: “Meet · PTT” (ready) or green “Meet · LIVE” (key held); muted groups in red “MIC MUTED · Voice”.
+- The existing microphone hotkey is migrated automatically.
+
 ## [0.16.2] – 2026-11-09
 
 ### Deutsch

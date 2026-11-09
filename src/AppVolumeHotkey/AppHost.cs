@@ -13,13 +13,37 @@ using AppVolumeHotkey.Core.Localization;
 
 namespace AppVolumeHotkey;
 
-/// <summary>Ein Eintrag der Statusanzeige; <see cref="Alert"/> = rot (z. B. Mikrofon stumm).</summary>
-public sealed record StatusItem(string Text, bool Alert);
+public enum StatusKind
+{
+    /// <summary>Gold – normaler Zustand (Profil aktiv, Push-to-Talk bereit, Ducking).</summary>
+    Normal,
+
+    /// <summary>Rot – stumm.</summary>
+    Alert,
+
+    /// <summary>Grün – gerade live (Push-to-Talk gehalten).</summary>
+    Live,
+}
+
+/// <summary>Ein Eintrag der Statusanzeige.</summary>
+public sealed record StatusItem(string Text, StatusKind Kind)
+{
+    public bool Alert => Kind == StatusKind.Alert;
+}
 
 /// <summary>Verdrahtet Konfiguration, Audio, Hotkeys, Overlay, Tray und Fenster.</summary>
 public sealed class AppHost : IDisposable
 {
     private readonly Dictionary<int, Guid> _profileByHotkeyId = new();
+    private readonly Dictionary<int, Guid> _micRuleByHotkeyId = new();
+
+    /// <summary>Text für das Overlay: „alle Mikrofone“, „Standard-Mikrofon“ oder der Gruppenname.</summary>
+    public string MicTargetName(MicRule rule) => rule.Scope switch
+    {
+        MicScope.AllMicrophones => L.T("Mic_OverlayAll"),
+        MicScope.DefaultMicrophone => L.T("Mic_OverlayDefault"),
+        _ => Config.Groups.FirstOrDefault(g => g.Id == rule.GroupId)?.Name ?? "?",
+    };
     private readonly HashSet<Guid> _reportedFailures = new();
     private readonly OverlayService _overlay = new();
     private StatusIndicatorWindow? _status;
@@ -27,7 +51,7 @@ public sealed class AppHost : IDisposable
     private MainWindow? _main;
     private bool _exiting;
 
-    private const int MicHotkeyId = 9001;
+    private const int MicHotkeyBaseId = 9100; // 9100 + Index der Mikrofon-Regel
     private const int DuckingHotkeyId = 9002;
     private readonly System.Windows.Threading.DispatcherTimer _duckTimer;
     private readonly System.Windows.Threading.DispatcherTimer _micPoll;
@@ -39,8 +63,8 @@ public sealed class AppHost : IDisposable
     public MicController Mic { get; }
     public DuckingController Ducking { get; }
 
-    /// <summary>Mikrofon-/Ducking-Hotkey ließ sich nicht registrieren (belegt).</summary>
-    public bool MicHotkeyFailed { get; private set; }
+    /// <summary>Mikrofon-Regeln, deren Hotkey sich nicht registrieren ließ (belegt).</summary>
+    public HashSet<Guid> FailedMicHotkeys { get; } = new();
     public bool DuckingHotkeyFailed { get; private set; }
 
     /// <summary>Mikrofon stumm/an hat sich geändert (auch von außen, z. B. in Windows).</summary>
@@ -72,9 +96,9 @@ public sealed class AppHost : IDisposable
         // „Lautstärke festhalten“: nach jeder Abfrage prüfen, Apps im Ducking auslassen
         Audio.Polled += () => Volume.Enforce(exe => Ducking?.IsDucked(exe) == true);
 
-        MicAudio = new MicBackend(fake: snapshotConfig is not null) { Scope = Config.Mic.Scope };
+        MicAudio = new MicBackend(fake: snapshotConfig is not null);
         Mic = new MicController(MicAudio);
-        Mic.SetSettings(Config.Mic);
+        Mic.SetConfig(Config);
         Ducking = new DuckingController(Audio, Audio);
         Ducking.SetConfig(Config);
 
@@ -100,7 +124,7 @@ public sealed class AppHost : IDisposable
             System.Windows.Threading.Dispatcher.CurrentDispatcher);
         // Mikrofon-Zustand auch bei Änderungen außerhalb der App mitbekommen
         _micPoll = new System.Windows.Threading.DispatcherTimer(TimeSpan.FromSeconds(1), System.Windows.Threading.DispatcherPriority.Background,
-            (_, _) => OnMicChanged(), System.Windows.Threading.Dispatcher.CurrentDispatcher);
+            (_, _) => { Mic.EnforceApps(); OnMicChanged(); }, System.Windows.Threading.Dispatcher.CurrentDispatcher);
         if (snapshotConfig is not null)
         {
             _duckTimer.Stop();
@@ -110,12 +134,16 @@ public sealed class AppHost : IDisposable
         UpdateStatusIndicator();
     }
 
+    private string _lastMicState = "";
+
+    /// <summary>Zustand aller Mikrofon-Regeln hat sich geändert (auch von außen) → Anzeige aktualisieren.</summary>
     private void OnMicChanged()
     {
-        var muted = Mic.IsMuted;
-        if (muted == _lastMicMuted)
+        var state = string.Join("|", Mic.Rules.Select(r => $"{r.Id}:{Mic.IsMuted(r)}:{Mic.IsHeld(r)}"));
+        if (state == _lastMicState)
             return;
-        _lastMicMuted = muted;
+        _lastMicState = state;
+        _lastMicMuted = Mic.AnyMuted;
         UpdateStatusIndicator();
         Tray.Rebuild();
         MicStateChanged?.Invoke();
@@ -132,7 +160,7 @@ public sealed class AppHost : IDisposable
             if (p.Hotkey == hotkey && !Equals(self, p.Id))
                 return L.F("Profile_ErrHotkeyUsed", KeyNames.Format(hotkey), p.Name, g.Name);
         }
-        if (Config.Mic.Hotkey == hotkey && !Equals(self, "mic"))
+        if (Config.Mic.Rules.Any(r => r.Hotkey == hotkey && !Equals(self, r.Id)))
             return L.F("Hotkey_UsedByMic", KeyNames.Format(hotkey));
         if (Config.Ducking.ToggleHotkey == hotkey && !Equals(self, "ducking"))
             return L.F("Hotkey_UsedByDucking", KeyNames.Format(hotkey));
@@ -143,8 +171,30 @@ public sealed class AppHost : IDisposable
     public IReadOnlyList<StatusItem> ActiveStatusItems()
     {
         var list = new List<StatusItem>();
-        if (Config.Mic.ShowInStatus && _lastMicMuted == true)
-            list.Add(new StatusItem(L.T("Status_MicMuted"), Alert: true));
+        // Mikrofon: Gerät stumm (rot), Gruppe stumm (rot), Push-to-Talk bereit (gold) bzw. gerade live (grün)
+        var deviceMutedShown = false;
+        foreach (var rule in Config.Mic.Rules.Where(r => r.ShowInStatus))
+        {
+            var muted = Mic.IsMuted(rule) == true;
+            if (rule.Scope != MicScope.Group)
+            {
+                if (rule.Mode == MicMode.PushToTalk)
+                    list.Add(muted ? new StatusItem(L.F("Status_PttIdle", L.T("Mic_Title")), StatusKind.Normal)
+                                   : new StatusItem(L.F("Status_PttLive", L.T("Mic_Title")), StatusKind.Live));
+                else if (muted && !deviceMutedShown)
+                {
+                    list.Add(new StatusItem(L.T("Status_MicMuted"), StatusKind.Alert));
+                    deviceMutedShown = true;
+                }
+                continue;
+            }
+            var name = Config.Groups.FirstOrDefault(g => g.Id == rule.GroupId)?.Name ?? "?";
+            if (rule.Mode == MicMode.PushToTalk)
+                list.Add(muted ? new StatusItem(L.F("Status_PttIdle", name), StatusKind.Normal)
+                               : new StatusItem(L.F("Status_PttLive", name), StatusKind.Live));
+            else if (muted)
+                list.Add(new StatusItem(L.F("Status_MicGroupMuted", name), StatusKind.Alert));
+        }
         if (!Config.Settings.StatusIndicator)
             return list;
         foreach (var g in Config.Groups)
@@ -153,10 +203,10 @@ public sealed class AppHost : IDisposable
                 continue;
             var p = g.Profiles.FirstOrDefault(x => x.Id == a.ProfileId);
             if (p is not null)
-                list.Add(new StatusItem(L.F("Status_Item", g.Name, p.Steps[a.StepIndex].Label), Alert: false));
+                list.Add(new StatusItem(L.F("Status_Item", g.Name, p.Steps[a.StepIndex].Label), StatusKind.Normal));
         }
         if (Ducking.IsDucking)
-            list.Add(new StatusItem(L.T("Status_Ducking"), Alert: false));
+            list.Add(new StatusItem(L.T("Status_Ducking"), StatusKind.Normal));
         return list;
     }
 
@@ -238,8 +288,7 @@ public sealed class AppHost : IDisposable
         }
         Audio.FadeDurationMs = Config.Settings.FadeDurationMs;
         Volume.SetConfig(Config);
-        MicAudio.Scope = Config.Mic.Scope;
-        Mic.SetSettings(Config.Mic);
+        Mic.SetConfig(Config);
         Ducking.SetConfig(Config);
         RegisterAllHotkeys();
         ConfigChanged?.Invoke();
@@ -299,7 +348,9 @@ public sealed class AppHost : IDisposable
         Hotkeys.UnregisterAll();
         _profileByHotkeyId.Clear();
         FailedHotkeys.Clear();
-        MicHotkeyFailed = DuckingHotkeyFailed = false;
+        FailedMicHotkeys.Clear();
+        _micRuleByHotkeyId.Clear();
+        DuckingHotkeyFailed = false;
         if (_hotkeysPaused || _suspendCount > 0)
             return;
 
@@ -322,10 +373,20 @@ public sealed class AppHost : IDisposable
                     newFailures.Add($"{KeyNames.Format(profile.Hotkey)} ({profile.Name})");
             }
         }
-        if (Config.Mic.Hotkey is { } micKey && !Hotkeys.Register(MicHotkeyId, micKey, Config.Mic.PassThrough))
+        for (var i = 0; i < Config.Mic.Rules.Count; i++)
         {
-            MicHotkeyFailed = true;
-            newFailures.Add($"{KeyNames.Format(micKey)} ({L.T("Mic_Title")})");
+            var rule = Config.Mic.Rules[i];
+            if (rule.Hotkey is not { } micKey)
+                continue;
+            if (Hotkeys.Register(MicHotkeyBaseId + i, micKey, rule.PassThrough))
+            {
+                _micRuleByHotkeyId[MicHotkeyBaseId + i] = rule.Id;
+            }
+            else
+            {
+                FailedMicHotkeys.Add(rule.Id);
+                newFailures.Add($"{KeyNames.Format(micKey)} ({L.T("Mic_Title")})");
+            }
         }
         if (Config.Ducking.ToggleHotkey is { } duckKey && !Hotkeys.Register(DuckingHotkeyId, duckKey))
         {
@@ -357,10 +418,10 @@ public sealed class AppHost : IDisposable
 
     private void OnHotkeyPressed(int id)
     {
-        if (id == MicHotkeyId)
+        if (_micRuleByHotkeyId.TryGetValue(id, out var micRule))
         {
-            if (Mic.OnPressed() is { } mic)
-                _overlay.HandleMic(mic, Config.Mic, Config.Settings);
+            if (Mic.OnPressed(micRule) is { } mic)
+                _overlay.HandleMic(mic, MicTargetName(mic.Rule), Config.Settings);
             return;
         }
         if (id == DuckingHotkeyId)
@@ -376,10 +437,10 @@ public sealed class AppHost : IDisposable
 
     private void OnHotkeyReleased(int id)
     {
-        if (id == MicHotkeyId)
+        if (_micRuleByHotkeyId.TryGetValue(id, out var micRule))
         {
-            if (Mic.OnReleased() is { } mic)
-                _overlay.HandleMic(mic, Config.Mic, Config.Settings);
+            if (Mic.OnReleased(micRule) is { } mic)
+                _overlay.HandleMic(mic, MicTargetName(mic.Rule), Config.Settings);
             return;
         }
         if (!_profileByHotkeyId.TryGetValue(id, out var profileId))

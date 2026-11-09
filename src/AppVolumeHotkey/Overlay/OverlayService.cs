@@ -18,12 +18,12 @@ public sealed class OverlayService
             SoundBank.Play(r.Profile.SoundVariant, r.IsActive);
     }
 
-    public void HandleMic(MicResult r, MicSettings mic, AppSettings settings)
+    public void HandleMic(MicResult r, string target, AppSettings settings)
     {
         if (r.ShowOverlay)
         {
             _window ??= new OverlayWindow();
-            _window.ShowMic(r.Muted, mic.Scope, settings);
+            _window.ShowMic(r.Muted, target, settings);
         }
         if (r.PlaySound)
             SoundBank.Play(r.Sound, active: !r.Muted);

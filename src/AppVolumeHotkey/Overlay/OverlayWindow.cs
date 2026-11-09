@@ -118,8 +118,8 @@ public sealed class OverlayWindow : Window
     }
 
     /// <summary>Mikrofon stumm/an – rote Kennzeichnung.</summary>
-    public void ShowMic(bool muted, MicScope scope, AppSettings settings) =>
-        ShowCard(L.T("Mic_Title"), scope == MicScope.AllMicrophones ? L.T("Mic_OverlayAll") : L.T("Mic_OverlayDefault"),
+    public void ShowMic(bool muted, string target, AppSettings settings) =>
+        ShowCard(L.T("Mic_Title"), target,
             muted ? L.T("State_Muted") : L.T("State_Live"), Red, filledBadge: muted, showBar: false, settings);
 
     /// <summary>Ducking an/aus.</summary>

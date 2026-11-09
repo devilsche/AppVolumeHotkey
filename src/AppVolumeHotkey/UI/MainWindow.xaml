@@ -184,32 +184,20 @@
                             </DockPanel>
                         </Border>
 
-                        <Label Content="{l:T Mic_Hotkey}" Target="{Binding ElementName=MicHotkeyBox}" Padding="0,0,0,4" />
-                        <ui:HotkeyBox x:Name="MicHotkeyBox" MaxWidth="360" HorizontalAlignment="Left" MinWidth="240"
-                                      AutomationProperties.Name="{l:T Mic_Title}" />
-                        <TextBlock Text="{l:T Profile_HotkeyHint}" Style="{StaticResource Caption}" Margin="0,4,0,0" />
-                        <TextBlock x:Name="MicHotkeyError" Margin="0,4,0,0" TextWrapping="Wrap" FontWeight="SemiBold" Visibility="Collapsed"
-                                   Foreground="{DynamicResource SystemFillColorCriticalBrush}" />
-                        <CheckBox x:Name="MicPassThroughBox" Content="{l:T Mic_PassThrough}" Margin="0,8,0,0" Click="MicOption_Changed" />
+                        <DockPanel Margin="0,0,0,8" LastChildFill="False">
+                            <TextBlock DockPanel.Dock="Left" Text="{l:T Mic_Hotkeys}" FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center" />
+                            <Button DockPanel.Dock="Right" Click="AddMicRule_Click" MinHeight="32" Padding="12,4">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Style="{StaticResource Icon}" Text="&#xE710;" Margin="0,0,8,0" />
+                                    <AccessText Text="{l:T Mic_AddRule}" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+                        </DockPanel>
+                        <TextBlock x:Name="MicNoRulesHint" Text="{l:T Mic_NoRules}" Style="{StaticResource Caption}" FontSize="14" Margin="0,8,0,0" />
+                        <StackPanel x:Name="MicRuleCards" />
 
-                        <TextBlock Text="{l:T Mic_Mode}" FontSize="14" FontWeight="SemiBold" Margin="0,24,0,8" />
-                        <RadioButton x:Name="MicModeToggle" GroupName="MicMode" Content="{l:T Mic_ModeToggle}" Margin="0,0,0,8" Click="MicOption_Changed" />
-                        <RadioButton x:Name="MicModeHold" GroupName="MicMode" Content="{l:T Mic_ModeHold}" Margin="0,0,0,8" Click="MicOption_Changed" />
-                        <RadioButton x:Name="MicModePtt" GroupName="MicMode" Content="{l:T Mic_ModePtt}" Click="MicOption_Changed" />
-
-                        <TextBlock Text="{l:T Mic_Scope}" FontSize="14" FontWeight="SemiBold" Margin="0,24,0,8" />
-                        <RadioButton x:Name="MicScopeAll" GroupName="MicScope" Content="{l:T Mic_ScopeAll}" Margin="0,0,0,8" Click="MicOption_Changed" />
-                        <RadioButton x:Name="MicScopeDefault" GroupName="MicScope" Content="{l:T Mic_ScopeDefault}" Click="MicOption_Changed" />
-
-                        <TextBlock Text="{l:T Mic_Feedback}" FontSize="14" FontWeight="SemiBold" Margin="0,24,0,8" />
-                        <CheckBox x:Name="MicOverlayBox" Content="{l:T Mic_ShowOverlay}" Margin="0,0,0,8" Click="MicOption_Changed" />
-                        <CheckBox x:Name="MicSoundBox" Content="{l:T Mic_PlaySound}" Margin="0,0,0,8" Click="MicOption_Changed" />
-                        <StackPanel Orientation="Horizontal" Margin="28,0,0,8">
-                            <Label Content="{l:T Mic_SoundLabel}" Target="{Binding ElementName=MicSoundCombo}" Padding="0,0,8,0" VerticalAlignment="Center" />
-                            <ComboBox x:Name="MicSoundCombo" MinWidth="160" SelectionChanged="MicSound_Changed" AutomationProperties.Name="{l:T Profile_SoundA11y}" />
-                        </StackPanel>
-                        <CheckBox x:Name="MicStatusBox" Content="{l:T Mic_ShowInStatus}" Margin="0,0,0,8" Click="MicOption_Changed" />
-                        <CheckBox x:Name="MicUnmuteExitBox" Content="{l:T Mic_UnmuteOnExit}" Click="MicOption_Changed" />
+                        <TextBlock Text="{l:T Mic_General}" FontSize="14" FontWeight="SemiBold" Margin="0,24,0,8" />
+                        <CheckBox x:Name="MicUnmuteExitBox" Content="{l:T Mic_UnmuteOnExit}" Click="MicUnmuteExit_Click" />
                     </StackPanel>
                 </ScrollViewer>
 

@@ -79,6 +79,8 @@ public static class ConfigStore
         cfg.Groups = (cfg.Groups ?? new()).Where(g => g is not null).ToList();
         cfg.Settings ??= new();
         cfg.Mic ??= new();
+        cfg.Mic.Rules = (cfg.Mic.Rules ?? new()).Where(r => r is not null).ToList();
+        cfg.Mic.MigrateLegacy();
         cfg.Ducking ??= new();
         cfg.Ducking.Rules = (cfg.Ducking.Rules ?? new()).Where(r => r is not null).ToList();
         foreach (var r in cfg.Ducking.Rules)
