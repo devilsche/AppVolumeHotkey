@@ -3,6 +3,24 @@
 Jede Version auf Deutsch und Englisch. Der Abschnitt einer Version wird automatisch als Beschreibung des GitHub-Releases verwendet.
 Every version in German and English. A version's section is used automatically as the GitHub release description.
 
+## [0.13.0] – 2026-11-09
+
+### Deutsch
+- Aufgeräumte Oberfläche nach UX-Prüfung: mehr Luft, einheitliche Abstände, Schriftgrößen und Windows-Symbole.
+- Einstellungen in Bereiche aufgeteilt: Allgemein, Overlay, Statusanzeige.
+- Profil-Dialog in übersichtlichen Abschnitten; Speichern/Abbrechen bleiben immer sichtbar, auch auf kleinen Bildschirmen.
+- Aktive Profile mit goldener Plakette; Bearbeiten/Löschen als Symbolknöpfe, nichts wird mehr abgeschnitten.
+- Hinweise bei leeren Listen, kürzere und einheitlichere Texte („Infobereich“, „Ausgangswert“, „Lautstärke-Übergang“).
+- Barrierefreiheit: eindeutige Alt-Tastenkürzel, bessere Screenreader-Namen, besser lesbare ausgegraute Einträge, größere Overlay-Schrift.
+
+### English
+- Cleaned-up interface after a UX review: more breathing room, consistent spacing, font sizes and Windows icons.
+- Settings split into sections: General, Overlay, Status indicator.
+- Profile dialog in clear sections; Save/Cancel always stay visible, even on small screens.
+- Active profiles get a gold badge; Edit/Delete are icon buttons, nothing gets cut off anymore.
+- Hints for empty lists, shorter and more consistent wording (“tray”, “original volume”, “volume fade”).
+- Accessibility: unique access keys, better screen reader names, more readable greyed-out entries, larger overlay text.
+
 ## [0.12.2] – 2026-11-08
 
 ### Deutsch

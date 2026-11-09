@@ -114,9 +114,9 @@
                         </StackPanel>
                     </Button>
                     <UniformGrid Columns="2">
-                        <Button x:Name="RenameGroupButton" Content="{l:T Main_Rename}" Click="RenameGroup_Click" MinHeight="32"
+                        <Button x:Name="RenameGroupButton" Content="{l:T Main_Rename}" Click="RenameGroup_Click" MinHeight="32" Padding="6,4"
                                 HorizontalAlignment="Stretch" Margin="0,0,4,0" ToolTip="{l:T Main_RenameTip}" />
-                        <Button x:Name="DeleteGroupButton" Content="{l:T Main_Delete}" Click="DeleteGroup_Click" MinHeight="32"
+                        <Button x:Name="DeleteGroupButton" Content="{l:T Main_Delete}" Click="DeleteGroup_Click" MinHeight="32" Padding="6,4"
                                 HorizontalAlignment="Stretch" Margin="4,0,0,0" ToolTip="{l:T Main_DeleteGroupTip}" />
                     </UniformGrid>
                 </StackPanel>
