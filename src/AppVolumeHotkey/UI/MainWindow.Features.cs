@@ -141,8 +141,10 @@ public partial class MainWindow
             MicFeatureIcon.Foreground = new SolidColorBrush(Color.FromRgb(0xDC, 0x26, 0x26));
         else
             MicFeatureIcon.ClearValue(TextBlock.ForegroundProperty);
-        MicFeatureState.Text = muted ? L.T("Feature_Muted") : "";
-        AutomationSetName(MicFeatureItem, L.T("Main_FeatureMic") + (muted ? ", " + L.T("Feature_Muted") : ""));
+        var noHotkey = _host.Config.Mic.Hotkey is null;
+        MicFeatureState.Text = muted ? L.T("Feature_Muted") : noHotkey ? L.T("Feature_NoHotkey") : "";
+        MicNoHotkeyHint.Visibility = noHotkey ? Visibility.Visible : Visibility.Collapsed;
+        AutomationSetName(MicFeatureItem, L.T("Main_FeatureMic") + (MicFeatureState.Text.Length > 0 ? ", " + MicFeatureState.Text : ""));
 
         var on = _host.Config.Ducking.Enabled;
         DuckingFeatureState.Text = on ? L.T("Feature_On") : "";

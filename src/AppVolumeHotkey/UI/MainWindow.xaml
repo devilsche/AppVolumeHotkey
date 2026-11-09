@@ -177,8 +177,10 @@
                                     <AccessText x:Name="MicToggleText" />
                                 </Button>
                                 <TextBlock x:Name="MicStateIcon" Style="{StaticResource Icon}" FontSize="22" Margin="0,0,12,0" />
-                                <TextBlock x:Name="MicStateText" FontSize="16" FontWeight="SemiBold" VerticalAlignment="Center"
-                                           AutomationProperties.LiveSetting="Polite" />
+                                <StackPanel VerticalAlignment="Center">
+                                    <TextBlock x:Name="MicStateText" FontSize="16" FontWeight="SemiBold" AutomationProperties.LiveSetting="Polite" />
+                                    <TextBlock x:Name="MicNoHotkeyHint" Text="{l:T Mic_NoHotkeyHint}" Style="{StaticResource Caption}" Margin="0,2,0,0" />
+                                </StackPanel>
                             </DockPanel>
                         </Border>
 
