@@ -339,6 +339,7 @@ public static class Strings
         ["Settings_ImportFailed"] = "Die Datei konnte nicht importiert werden:\n{0}",
         ["Settings_ImportDone"] = "Einstellungen importiert.",
         ["Settings_FileFilter"] = "AppVolumeHotkey-Einstellungen (*.json)|*.json",
+        ["Profile_SequenceNav"] = "Abfolge",
     };
 
     public static readonly IReadOnlyDictionary<string, string> En = new Dictionary<string, string>
@@ -675,5 +676,6 @@ public static class Strings
         ["Settings_ImportFailed"] = "The file could not be imported:\n{0}",
         ["Settings_ImportDone"] = "Settings imported.",
         ["Settings_FileFilter"] = "AppVolumeHotkey settings (*.json)|*.json",
+        ["Profile_SequenceNav"] = "Sequence",
     };
 }

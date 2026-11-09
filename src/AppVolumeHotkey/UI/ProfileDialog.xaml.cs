@@ -25,6 +25,8 @@ public partial class ProfileDialog : Window
         _profile = profile;
         InitializeComponent();
         MaxHeight = SystemParameters.WorkArea.Height - 40;
+        Height = Math.Min(Height, MaxHeight);
+        NavList.SelectedIndex = 0;
 
         Title = isNew ? L.T("Profile_TitleNew") : L.T("Profile_TitleEdit");
         Heading.Text = isNew ? L.F("Profile_HeadingNew", group.Name) : L.F("Profile_HeadingEdit", profile.Name, group.Name);
@@ -83,6 +85,18 @@ public partial class ProfileDialog : Window
         PassThroughHint.Text = isMouse
             ? L.T("Profile_PassThroughOn")
             : L.T("Profile_PassThroughKeyboard");
+    }
+
+    private void NavList_SelectionChanged(object sender, SelectionChangedEventArgs e) => ShowPage(NavList.SelectedIndex);
+
+    internal void ShowPage(int index)
+    {
+        if (NavList.SelectedIndex != index)
+            NavList.SelectedIndex = index;
+        GeneralPage.Visibility = index == 0 ? Visibility.Visible : Visibility.Collapsed;
+        BehaviorPage.Visibility = index == 1 ? Visibility.Visible : Visibility.Collapsed;
+        SequencePage.Visibility = index == 2 ? Visibility.Visible : Visibility.Collapsed;
+        FeedbackPage.Visibility = index == 3 ? Visibility.Visible : Visibility.Collapsed;
     }
 
     private StepItem Track(StepItem item)
@@ -332,6 +346,7 @@ public partial class ProfileDialog : Window
             Control first = NameError.Visibility == Visibility.Visible ? NameBox
                 : HotkeyError.Visibility == Visibility.Visible ? HotkeyInput
                 : StepList;
+            NavList.SelectedIndex = first == StepList ? 2 : 0; // Bereich mit dem Fehler zeigen
             first.Focus();
             first.BringIntoView();
             return;

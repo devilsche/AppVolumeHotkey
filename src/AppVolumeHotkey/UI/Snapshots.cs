@@ -38,26 +38,30 @@ internal static class Snapshots
                 var prefix = Path.Combine(outDir, $"{lang}-{themeName}-");
                 Pump();
 
-                var area = SystemParameters.WorkArea;
+                // Echte Bildschirmfotos: Fenster mit 90 % der Bildschirmgröße mittig, dann ganzen Bildschirm aufnehmen
+                var screenW = SystemParameters.PrimaryScreenWidth;
+                var screenH = SystemParameters.PrimaryScreenHeight;
                 var main = new MainWindow(host)
                 {
-                    Left = 0, Top = 0, ShowActivated = false,
-                    Width = Math.Min(1320, area.Width), Height = Math.Min(760, area.Height),
+                    WindowStartupLocation = WindowStartupLocation.Manual,
+                    Width = screenW * 0.9, Height = screenH * 0.9,
+                    Left = screenW * 0.05, Top = screenH * 0.05,
                 };
                 main.Show();
+                main.Activate();
                 Pump();
                 SelectFirstGroup(main);
                 Pump();
-                Save(main, prefix + "01-main.png", theme, width: 1920, height: 1080);
+                CaptureScreen(prefix + "01-main.png");
 
                 if (main.FindName("FeatureList") is ListBox features)
                 {
                     features.SelectedIndex = 0;
                     Pump();
-                    Save(main, prefix + "01b-mic.png", theme, width: 1920, minHeight: 1080);
+                    CaptureScreen(prefix + "01b-mic.png");
                     features.SelectedIndex = 1;
                     Pump();
-                    Save(main, prefix + "01c-ducking.png", theme, width: 1920, minHeight: 1080);
+                    CaptureScreen(prefix + "01c-ducking.png");
                     features.SelectedIndex = -1;
                     SelectFirstGroup(main);
                     Pump();
@@ -66,8 +70,12 @@ internal static class Snapshots
                 host.SuspendHotkeys(); // wie beim echten Öffnen des Dialogs, sonst gilt F13 als „belegt“
                 var profile = ProfileDialog.CreateForSnapshot(main, host, voice, leise.Clone());
                 profile.Show();
-                Pump();
-                Save(profile, prefix + "02-profile.png", theme, width: 680);
+                foreach (var (page, name) in new[] { (0, "general"), (1, "behavior"), (2, "sequence"), (3, "feedback") })
+                {
+                    profile.ShowPage(page);
+                    Pump();
+                    CaptureScreen(prefix + $"02-profile-{name}.png");
+                }
                 profile.Close();
                 host.ResumeHotkeys();
 
@@ -76,14 +84,16 @@ internal static class Snapshots
                     var settings = SettingsWindow.CreateForSnapshot(main, host, page);
                     settings.Show();
                     Pump();
-                    Save(settings, prefix + $"03-settings-{name}.png", theme, width: 840);
+                    CaptureScreen(prefix + $"03-settings-{name}.png");
                     settings.Close();
                 }
 
                 var about = AboutWindow.CreateForSnapshot();
+                about.Owner = main;
+                about.WindowStartupLocation = WindowStartupLocation.CenterOwner;
                 about.Show();
                 Pump();
-                Save(about, prefix + "04-about.png", theme, width: 600);
+                CaptureScreen(prefix + "04-about.png");
                 about.Close();
 
                 if (themeName == "dark") // Overlay/Statusanzeige sind themenunabhängig
@@ -176,6 +186,43 @@ internal static class Snapshots
     {
         if (main.FindName("GroupList") is ListBox list && list.Items.Count > 0)
             list.SelectedIndex = 0;
+    }
+
+    [System.Runtime.InteropServices.DllImport("user32.dll")] private static extern IntPtr GetDC(IntPtr hwnd);
+    [System.Runtime.InteropServices.DllImport("user32.dll")] private static extern int ReleaseDC(IntPtr hwnd, IntPtr hdc);
+    [System.Runtime.InteropServices.DllImport("gdi32.dll")] private static extern IntPtr CreateCompatibleDC(IntPtr hdc);
+    [System.Runtime.InteropServices.DllImport("gdi32.dll")] private static extern IntPtr CreateCompatibleBitmap(IntPtr hdc, int w, int h);
+    [System.Runtime.InteropServices.DllImport("gdi32.dll")] private static extern IntPtr SelectObject(IntPtr hdc, IntPtr obj);
+    [System.Runtime.InteropServices.DllImport("gdi32.dll")] private static extern bool BitBlt(IntPtr dst, int x, int y, int w, int h, IntPtr src, int sx, int sy, int rop);
+    [System.Runtime.InteropServices.DllImport("gdi32.dll")] private static extern bool DeleteObject(IntPtr obj);
+    [System.Runtime.InteropServices.DllImport("gdi32.dll")] private static extern bool DeleteDC(IntPtr hdc);
+    [System.Runtime.InteropServices.DllImport("user32.dll")] private static extern int GetSystemMetrics(int index);
+
+    /// <summary>Ganzen Bildschirm als PNG speichern (wie ein normaler Screenshot).</summary>
+    private static void CaptureScreen(string path)
+    {
+        const int SRCCOPY = 0x00CC0020;
+        int w = GetSystemMetrics(0), h = GetSystemMetrics(1); // SM_CXSCREEN / SM_CYSCREEN in Pixeln
+        var screen = GetDC(IntPtr.Zero);
+        var mem = CreateCompatibleDC(screen);
+        var bmp = CreateCompatibleBitmap(screen, w, h);
+        var old = SelectObject(mem, bmp);
+        try
+        {
+            BitBlt(mem, 0, 0, w, h, screen, 0, 0, SRCCOPY);
+            SelectObject(mem, old);
+            var source = System.Windows.Interop.Imaging.CreateBitmapSourceFromHBitmap(bmp, IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+            var encoder = new PngBitmapEncoder();
+            encoder.Frames.Add(BitmapFrame.Create(source));
+            using var file = File.Create(path);
+            encoder.Save(file);
+        }
+        finally
+        {
+            DeleteObject(bmp);
+            DeleteDC(mem);
+            ReleaseDC(IntPtr.Zero, screen);
+        }
     }
 
     /// <summary>Layout, Bindungen und Rendern abarbeiten lassen.</summary>

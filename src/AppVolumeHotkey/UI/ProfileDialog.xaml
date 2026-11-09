@@ -4,8 +4,8 @@
         xmlns:l="clr-namespace:AppVolumeHotkey.Localization"
         xmlns:ui="clr-namespace:AppVolumeHotkey.UI"
         Title="{l:T Profile_TitleEdit}"
-        Width="680" SizeToContent="Height"
-        ResizeMode="NoResize" WindowStartupLocation="CenterOwner" ShowInTaskbar="False">
+        Width="880" Height="640" MinWidth="700" MinHeight="460"
+        WindowStartupLocation="CenterOwner" ShowInTaskbar="False">
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis" />
         <!-- Lange Beschriftungen umbrechen statt abschneiden (Fluent-Stil bleibt erhalten) -->
@@ -64,14 +64,33 @@
             </StackPanel>
         </Border>
 
-        <ScrollViewer x:Name="Scroller" VerticalScrollBarVisibility="Auto" Focusable="False">
-            <StackPanel Margin="24,24,24,8">
-                <TextBlock x:Name="Heading" FontSize="20" FontWeight="SemiBold" Margin="0,0,0,16" TextWrapping="Wrap" />
+        <!-- Bereiche links -->
+        <Border DockPanel.Dock="Left" Width="230" Padding="12,24,12,12" BorderThickness="0,0,1,0"
+                BorderBrush="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}">
+            <DockPanel>
+                <TextBlock x:Name="Heading" DockPanel.Dock="Top" FontSize="14" FontWeight="SemiBold" TextWrapping="Wrap" Margin="12,0,12,16" />
+                <ListBox x:Name="NavList" Style="{StaticResource PlainList}" ItemContainerStyle="{StaticResource RoundedListItem}"
+                         SelectionChanged="NavList_SelectionChanged" AutomationProperties.Name="{l:T Settings_NavA11y}">
+                    <ListBoxItem AutomationProperties.Name="{l:T Profile_CardGeneral}">
+                        <StackPanel Orientation="Horizontal"><TextBlock Style="{StaticResource Icon}" Text="&#xE765;" Margin="0,0,12,0" /><TextBlock Text="{l:T Profile_CardGeneral}" VerticalAlignment="Center" /></StackPanel>
+                    </ListBoxItem>
+                    <ListBoxItem AutomationProperties.Name="{l:T Profile_CardBehavior}">
+                        <StackPanel Orientation="Horizontal"><TextBlock Style="{StaticResource Icon}" Text="&#xE9E9;" Margin="0,0,12,0" /><TextBlock Text="{l:T Profile_CardBehavior}" VerticalAlignment="Center" /></StackPanel>
+                    </ListBoxItem>
+                    <ListBoxItem AutomationProperties.Name="{l:T Profile_SequenceA11y}">
+                        <StackPanel Orientation="Horizontal"><TextBlock Style="{StaticResource Icon}" Text="&#xE8CB;" Margin="0,0,12,0" /><TextBlock Text="{l:T Profile_SequenceNav}" VerticalAlignment="Center" /></StackPanel>
+                    </ListBoxItem>
+                    <ListBoxItem AutomationProperties.Name="{l:T Profile_Feedback}">
+                        <StackPanel Orientation="Horizontal"><TextBlock Style="{StaticResource Icon}" Text="&#xE7E7;" Margin="0,0,12,0" /><TextBlock Text="{l:T Profile_Feedback}" VerticalAlignment="Center" /></StackPanel>
+                    </ListBoxItem>
+                </ListBox>
+            </DockPanel>
+        </Border>
 
-                <!-- Name und Hotkey -->
-                <Border Style="{StaticResource Card}">
-                    <StackPanel>
-                        <TextBlock Text="{l:T Profile_CardGeneral}" Style="{StaticResource CardHeading}" />
+        <Grid>
+            <ScrollViewer x:Name="GeneralPage" VerticalScrollBarVisibility="Auto" Focusable="False">
+                <StackPanel Margin="32,24,32,24">
+                    <TextBlock Text="{l:T Profile_CardGeneral}" FontSize="20" FontWeight="SemiBold" Margin="0,0,0,16" />
                         <Label Content="{l:T Profile_Name}" Target="{Binding ElementName=NameBox}" Padding="0,0,0,4" />
                         <TextBox x:Name="NameBox" TextChanged="Any_Changed" AutomationProperties.Name="{l:T Profile_NameA11y}" />
                         <TextBlock x:Name="NameError" Style="{StaticResource Error}" />
@@ -82,13 +101,12 @@
                         <TextBlock x:Name="HotkeyError" Style="{StaticResource Error}" />
                         <CheckBox x:Name="PassThroughBox" Margin="0,12,0,0" Content="{l:T Profile_PassThrough}" />
                         <TextBlock x:Name="PassThroughHint" Style="{StaticResource Caption}" Margin="28,4,0,0" />
-                    </StackPanel>
-                </Border>
-
-                <!-- Verhalten -->
-                <Border Style="{StaticResource Card}">
-                    <StackPanel>
-                        <TextBlock Text="{l:T Profile_CardBehavior}" Style="{StaticResource CardHeading}" />
+                    
+                </StackPanel>
+            </ScrollViewer>
+            <ScrollViewer x:Name="BehaviorPage" VerticalScrollBarVisibility="Auto" Focusable="False" Visibility="Collapsed">
+                <StackPanel Margin="32,24,32,24">
+                    <TextBlock Text="{l:T Profile_CardBehavior}" FontSize="20" FontWeight="SemiBold" Margin="0,0,0,16" />
                         <TextBlock Text="{l:T Profile_TriggerHeading}" FontWeight="SemiBold" Margin="0,0,0,8" />
                         <RadioButton x:Name="ToggleRadio" GroupName="Trigger" Checked="Mode_Changed" Margin="0,0,0,8" Content="{l:T Profile_TriggerToggle}" />
                         <RadioButton x:Name="HoldRadio" GroupName="Trigger" Checked="Mode_Changed" Margin="0,0,0,4" Content="{l:T Profile_TriggerHold}" />
@@ -99,14 +117,14 @@
                         <TextBlock Text="{l:T Profile_ModeRelativeHint}" Style="{StaticResource Caption}" Margin="28,0,0,8" />
                         <RadioButton x:Name="AbsoluteRadio" GroupName="Mode" Checked="Mode_Changed" Margin="0,0,0,4" Content="{l:T Profile_ModeAbsolute}" />
                         <TextBlock Text="{l:T Profile_ModeAbsoluteHint}" Style="{StaticResource Caption}" Margin="28,0,0,0" />
-                    </StackPanel>
-                </Border>
-
-                <!-- Abfolge -->
-                <Border Style="{StaticResource Card}">
-                    <StackPanel>
-                        <Label Target="{Binding ElementName=StepList}" Padding="0" Margin="0,0,0,12">
-                            <AccessText Text="{l:T Profile_Sequence}" FontSize="14" FontWeight="SemiBold" />
+                    
+                </StackPanel>
+            </ScrollViewer>
+            <ScrollViewer x:Name="SequencePage" VerticalScrollBarVisibility="Auto" Focusable="False" Visibility="Collapsed">
+                <StackPanel Margin="32,24,32,24">
+                    <TextBlock Text="{l:T Profile_SequenceNav}" FontSize="20" FontWeight="SemiBold" Margin="0,0,0,16" />
+                        <Label Target="{Binding ElementName=StepList}" Padding="0" Margin="0,0,0,8">
+                            <AccessText Text="{l:T Profile_Sequence}" FontWeight="SemiBold" />
                         </Label>
                         <WrapPanel Margin="0,0,0,12">
                             <TextBlock Text="{l:T Profile_Preset}" VerticalAlignment="Center" Margin="0,0,8,0" Style="{StaticResource Caption}" />
@@ -203,13 +221,11 @@
                                 <TextBlock x:Name="PreviewText" TextWrapping="Wrap" Margin="0,4,0,0" AutomationProperties.LiveSetting="Polite" />
                             </StackPanel>
                         </Border>
-                    </StackPanel>
-                </Border>
-
-                <!-- Rückmeldung -->
-                <Border Style="{StaticResource Card}">
-                    <StackPanel>
-                        <TextBlock Text="{l:T Profile_Feedback}" Style="{StaticResource CardHeading}" />
+                </StackPanel>
+            </ScrollViewer>
+            <ScrollViewer x:Name="FeedbackPage" VerticalScrollBarVisibility="Auto" Focusable="False" Visibility="Collapsed">
+                <StackPanel Margin="32,24,32,24">
+                    <TextBlock Text="{l:T Profile_Feedback}" FontSize="20" FontWeight="SemiBold" Margin="0,0,0,16" />
                         <CheckBox x:Name="OverlayOnBox" Content="{l:T Profile_OverlayOn}" Margin="0,0,0,8" />
                         <CheckBox x:Name="OverlayOffBox" Content="{l:T Profile_OverlayOff}" Margin="0,0,0,8" />
                         <CheckBox x:Name="SoundBox" Content="{l:T Profile_Sound}" />
@@ -231,9 +247,9 @@
                                 </StackPanel>
                             </Button>
                         </StackPanel>
-                    </StackPanel>
-                </Border>
-            </StackPanel>
-        </ScrollViewer>
+                    
+                </StackPanel>
+            </ScrollViewer>
+        </Grid>
     </DockPanel>
 </Window>
