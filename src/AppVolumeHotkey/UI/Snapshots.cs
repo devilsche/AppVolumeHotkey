@@ -235,10 +235,11 @@ internal static class Snapshots
                     ? solid
                     : new SolidColorBrush(theme == ThemeMode.Dark ? Color.FromRgb(0x20, 0x20, 0x20) : Color.FromRgb(0xF3, 0xF3, 0xF3));
             dc.DrawRectangle(background, null, rect);
-            dc.PushTransform(new TranslateTransform(pad + m.Left, pad + m.Top));
+            // Der Rand (Margin) ist bereits im Koordinatensystem des Elements enthalten → ganzen Bereich inkl. Rand abbilden
+            dc.PushTransform(new TranslateTransform(pad, pad));
             dc.DrawRectangle(new VisualBrush(content) { Stretch = Stretch.Fill, ViewboxUnits = BrushMappingMode.Absolute,
-                    Viewbox = new Rect(0, 0, content.ActualWidth, content.ActualHeight) },
-                null, new Rect(0, 0, content.ActualWidth, content.ActualHeight));
+                    Viewbox = new Rect(0, 0, w, h) },
+                null, new Rect(0, 0, w, h));
             dc.Pop();
         }
 
