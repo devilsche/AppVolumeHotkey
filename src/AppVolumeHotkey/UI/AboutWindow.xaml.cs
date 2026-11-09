@@ -21,6 +21,9 @@ public partial class AboutWindow : Window
         Closed += (_, _) => _open = null;
     }
 
+    /// <summary>Nur für --ui-snapshots.</summary>
+    internal static AboutWindow CreateForSnapshot() => new();
+
     public static void Show(Window? owner)
     {
         if (_open is not null)

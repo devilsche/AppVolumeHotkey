@@ -31,7 +31,10 @@ public sealed class CoreAudioBackend : IAudioBackend, IDisposable
         public required Stopwatch Clock { get; init; }
     }
 
-    private readonly IMMDeviceEnumerator _enumerator = CoreAudio.CreateEnumerator();
+    private readonly IMMDeviceEnumerator _enumerator = null!;
+
+    // Nur für den Snapshot-Modus (--ui-snapshots): feste Beispiel-Apps statt echter Audio-Sessions
+    private readonly Dictionary<string, (RunningApp App, float Volume)>? _fake;
     private readonly DispatcherTimer _pollTimer;
     private readonly DispatcherTimer _fadeTimer;
     private readonly Dictionary<string, Fade> _fades = new(StringComparer.OrdinalIgnoreCase);
@@ -57,8 +60,19 @@ public sealed class CoreAudioBackend : IAudioBackend, IDisposable
     /// <summary>Nach jedem Abfragezyklus (ca. 1 s), z. B. für die Live-Anzeige der Lautstärken.</summary>
     public event Action? Polled;
 
+    /// <summary>Beispiel-Backend für Screenshots: keine Windows-Audio-Abfragen.</summary>
+    public CoreAudioBackend(IEnumerable<(RunningApp App, float Volume)> fakeApps)
+    {
+        _fake = fakeApps.ToDictionary(a => a.App.Exe, a => a, StringComparer.OrdinalIgnoreCase);
+        _pollTimer = new DispatcherTimer();
+        _fadeTimer = new DispatcherTimer();
+        _quickRefresh = new DispatcherTimer();
+        _notifier = new SessionCreatedNotifier(() => { });
+    }
+
     public CoreAudioBackend()
     {
+        _enumerator = CoreAudio.CreateEnumerator();
         _pollTimer = new DispatcherTimer(TimeSpan.FromSeconds(1), DispatcherPriority.Background, (_, _) => Refresh(), Dispatcher.CurrentDispatcher);
         _fadeTimer = new DispatcherTimer(TimeSpan.FromMilliseconds(15), DispatcherPriority.Render, (_, _) => FadeTick(), Dispatcher.CurrentDispatcher);
         _fadeTimer.Stop();
@@ -81,6 +95,8 @@ public sealed class CoreAudioBackend : IAudioBackend, IDisposable
     /// <summary>Tatsächliche aktuelle Lautstärke der ersten Session (ohne Rücksicht auf laufende Übergänge), für die Anzeige.</summary>
     public float? GetCurrentVolume(string exe)
     {
+        if (_fake is not null)
+            return _fake.TryGetValue(exe, out var f) ? f.Volume : null;
         foreach (var s in SessionsOf(exe))
         {
             if (TryGet(s) is { } v)
@@ -91,6 +107,8 @@ public sealed class CoreAudioBackend : IAudioBackend, IDisposable
 
     public float? GetVolume(string exe)
     {
+        if (_fake is not null)
+            return _fake.TryGetValue(exe, out var f) ? f.Volume : null;
         // Läuft gerade ein Übergang, zählt sein Ziel – sonst würde ein halber Zwischenwert als Ausgangswert gemerkt
         if (_fades.TryGetValue(exe, out var fade) && SessionsOf(exe).Any())
             return fade.Target;
@@ -104,6 +122,12 @@ public sealed class CoreAudioBackend : IAudioBackend, IDisposable
 
     public void SetVolume(string exe, float volume01)
     {
+        if (_fake is not null)
+        {
+            if (_fake.TryGetValue(exe, out var f))
+                _fake[exe] = (f.App, Math.Clamp(volume01, 0f, 1f));
+            return;
+        }
         var target = Math.Clamp(volume01, 0f, 1f);
         var sessions = SessionsOf(exe).ToList();
         if (sessions.Count == 0)
@@ -130,8 +154,9 @@ public sealed class CoreAudioBackend : IAudioBackend, IDisposable
         _fadeTimer.Start();
     }
 
-    public IReadOnlyList<RunningApp> GetRunningApps() =>
-        _sessions.Values
+    public IReadOnlyList<RunningApp> GetRunningApps() => _fake is not null
+        ? _fake.Values.Select(f => f.App).OrderBy(a => a.DisplayName).ToList()
+        : _sessions.Values
             .GroupBy(s => s.Exe, StringComparer.OrdinalIgnoreCase)
             .Select(g => GetAppInfo(g.Key, g.First().Pid))
             .OrderBy(a => a.DisplayName, StringComparer.CurrentCultureIgnoreCase)

@@ -35,12 +35,14 @@ public sealed class AppHost : IDisposable
 
     public event Action? ConfigChanged;
 
-    public AppHost()
+    /// <param name="snapshotConfig">Nur für --ui-snapshots: feste Beispielkonfiguration und Beispiel-Apps.</param>
+    public AppHost(AppConfig? snapshotConfig = null, IEnumerable<(RunningApp App, float Volume)>? fakeApps = null)
     {
         Directory.CreateDirectory(AppPaths.DataDir);
-        Config = ConfigStore.Load(AppPaths.ConfigFile);
+        Config = snapshotConfig ?? ConfigStore.Load(AppPaths.ConfigFile);
 
-        Audio = new CoreAudioBackend { FadeDurationMs = Config.Settings.FadeDurationMs };
+        Audio = fakeApps is not null ? new CoreAudioBackend(fakeApps) : new CoreAudioBackend();
+        Audio.FadeDurationMs = Config.Settings.FadeDurationMs;
         Volume = new VolumeController(Audio, new JsonBaselineStore(AppPaths.StateFile));
         Volume.SetConfig(Config);
         Volume.RestorePersistedBaselines();

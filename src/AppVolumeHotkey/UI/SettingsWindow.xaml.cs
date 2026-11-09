@@ -88,6 +88,9 @@ public partial class SettingsWindow : Window
         Loaded += (_, _) => StartWithWindowsBox.Focus();
     }
 
+    /// <summary>Nur für --ui-snapshots.</summary>
+    internal static SettingsWindow CreateForSnapshot(Window owner, AppHost host) => new(owner, host) { MaxHeight = double.PositiveInfinity };
+
     public static void Open(Window owner, AppHost host) => new SettingsWindow(owner, host).ShowDialog();
 
     private bool TryRead(out AppSettings settings)

@@ -16,6 +16,26 @@ public partial class App : Application
         ThemeMode = ThemeMode.System;
         L.SetLanguage(L.Resolve("auto"));
 
+        // Nur für den Build: Bilder aller Fenster erzeugen und beenden
+        var snapIndex = Array.IndexOf(e.Args, "--ui-snapshots");
+        if (snapIndex >= 0)
+        {
+            var dir = snapIndex + 1 < e.Args.Length ? e.Args[snapIndex + 1] : "snapshots";
+            try
+            {
+                UI.Snapshots.Run(dir);
+            }
+            catch (Exception ex)
+            {
+                ErrorLog.Write(ex);
+                Console.Error.WriteLine(ex);
+                Shutdown(1);
+                return;
+            }
+            Shutdown(0);
+            return;
+        }
+
         DispatcherUnhandledException += (_, args) =>
         {
             ErrorLog.Write(args.Exception);

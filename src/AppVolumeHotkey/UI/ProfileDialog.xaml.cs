@@ -57,6 +57,10 @@ public partial class ProfileDialog : Window
     }
 
     /// <summary>Zeigt den Dialog; gibt das bearbeitete Profil zurück oder null bei Abbruch.</summary>
+    /// <summary>Nur für --ui-snapshots: Dialog ohne Modalität erzeugen.</summary>
+    internal static ProfileDialog CreateForSnapshot(Window owner, AppHost host, AppGroup group, Profile profile) =>
+        new(owner, host, group, profile, isNew: false);
+
     public static Profile? Edit(Window owner, AppHost host, AppGroup group, Profile profile, bool isNew)
     {
         host.SuspendHotkeys(); // sonst lösen bereits belegte Kombinationen beim Aufnehmen das Profil aus

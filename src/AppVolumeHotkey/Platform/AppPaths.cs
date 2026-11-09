@@ -4,7 +4,7 @@ namespace AppVolumeHotkey.Platform;
 
 public static class AppPaths
 {
-    public static string DataDir { get; } =
+    public static string DataDir { get; set; } =
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "AppVolumeHotkey");
 
     public static string ConfigFile => Path.Combine(DataDir, "config.json");

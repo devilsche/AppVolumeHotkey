@@ -53,6 +53,23 @@ jobs:
           name: AppVolumeHotkey-v${{ env.VERSION }}
           path: out/${{ env.EXE_NAME }}
 
+      # Bilder aller Fenster (DE/EN, hell/dunkel) für UI-Reviews
+      - name: UI-Snapshots
+        shell: pwsh
+        continue-on-error: true
+        run: |
+          $p = Start-Process -FilePath "out/$env:EXE_NAME" -ArgumentList '--ui-snapshots', "$PWD\ui-snapshots" -PassThru
+          if (-not $p.WaitForExit(180000)) { $p.Kill(); throw "Snapshots: Zeitüberschreitung" }
+          Get-ChildItem ui-snapshots | Format-Table Name, Length
+          if ($p.ExitCode -ne 0) { throw "Snapshots: Exitcode $($p.ExitCode)" }
+
+      - uses: actions/upload-artifact@v5
+        if: always()
+        with:
+          name: ui-snapshots-v${{ env.VERSION }}
+          path: ui-snapshots
+          if-no-files-found: warn
+
       # ---------- Microsoft-Store-Paket (MSIX, unsigniert – Microsoft signiert beim Einreichen) ----------
       - name: MSIX bauen
         shell: pwsh
