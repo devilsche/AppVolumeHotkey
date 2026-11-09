@@ -200,25 +200,13 @@ internal static class Snapshots
             return;
         if (width is { } w0)
         {
-            // Inhalt aus dem Fenster lösen (Fenster dürfen nicht größer als der Bildschirm sein) und frei anordnen.
-            // Fenster-Ressourcen mitnehmen, damit Stile erhalten bleiben.
-            var resources = window.Resources;
-            window.Content = null;
-            content.Resources.MergedDictionaries.Add(resources);
-            try
-            {
-                content.Measure(new Size(w0, height ?? double.PositiveInfinity));
-                var h0 = height ?? Math.Max(minHeight, Math.Ceiling(content.DesiredSize.Height));
-                content.Arrange(new Rect(0, 0, w0, h0));
-                content.UpdateLayout();
-                Render(content, window, path, theme, gameScene);
-            }
-            finally
-            {
-                content.Resources.MergedDictionaries.Remove(resources);
-                window.Content = content;
-            }
-            return;
+            // Fenster auf Wunschbreite bringen (der Build-Rechner läuft dafür in 1920×1080) und den Inhalt
+            // mit unbegrenzter Höhe anordnen – Scrollbereiche zeigen so ihren ganzen Inhalt.
+            window.Width = w0 + 16;
+            window.UpdateLayout();
+            content.Measure(new Size(content.ActualWidth, height ?? double.PositiveInfinity));
+            var h0 = height ?? Math.Max(minHeight, Math.Ceiling(content.DesiredSize.Height));
+            content.Arrange(new Rect(0, 0, content.ActualWidth, h0));
         }
         if (content.ActualWidth < 1 || content.ActualHeight < 1)
             return;
