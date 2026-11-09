@@ -1,0 +1,149 @@
+<Window xmlns="https://github.com/avaloniaui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="Spike.MainWindow" Title="AVH Avalonia Spike" Width="1100" Height="660">
+    <Window.Styles>
+        <Style Selector="Border.panel">
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="BorderBrush" Value="{DynamicResource SystemControlForegroundBaseLowBrush}" />
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="Padding" Value="16" />
+        </Style>
+        <Style Selector="TextBlock.h">
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Margin" Value="0,0,0,8" />
+        </Style>
+        <Style Selector="TextBlock.cap">
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Opacity" Value="0.75" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+        <Style Selector="ListBox">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+        </Style>
+        <Style Selector="ListBoxItem">
+            <Setter Property="CornerRadius" Value="6" />
+            <Setter Property="Margin" Value="0,1" />
+            <Setter Property="Padding" Value="12,8" />
+        </Style>
+        <Style Selector="ListBoxItem /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="CornerRadius" Value="6" />
+        </Style>
+        <Style Selector="ListBoxItem:selected /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundBaseLowBrush}" />
+        </Style>
+        <Style Selector="ListBoxItem:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource SystemControlBackgroundBaseLowBrush}" />
+        </Style>
+        <Style Selector="ListBoxItem:selected">
+            <Setter Property="BorderBrush" Value="{DynamicResource SystemAccentColor}" />
+            <Setter Property="BorderThickness" Value="3,0,0,0" />
+        </Style>
+        <Style Selector="Path.icon">
+            <Setter Property="Stroke" Value="{DynamicResource SystemControlForegroundBaseHighBrush}" />
+            <Setter Property="StrokeThickness" Value="1.6" />
+            <Setter Property="StrokeLineCap" Value="Round" />
+            <Setter Property="Width" Value="16" />
+            <Setter Property="Height" Value="16" />
+            <Setter Property="Stretch" Value="Uniform" />
+            <Setter Property="Margin" Value="0,0,10,0" />
+        </Style>
+    </Window.Styles>
+    <Grid Margin="16" RowDefinitions="Auto,*" ColumnDefinitions="240,12,*,12,300">
+        <DockPanel Grid.ColumnSpan="5" Margin="0,0,0,16" LastChildFill="False">
+            <Image DockPanel.Dock="Left" Source="/app-96.png" Width="28" Height="28" Margin="0,0,10,0" />
+            <TextBlock DockPanel.Dock="Left" Text="AppVolumeHotkey" FontSize="20" FontWeight="SemiBold" VerticalAlignment="Center" />
+            <TextBlock DockPanel.Dock="Left" Text="0.15.0 (Avalonia, verfeinert)" Classes="cap" Margin="10,4,0,0" VerticalAlignment="Center" />
+            
+            <Button DockPanel.Dock="Right"><StackPanel Orientation="Horizontal"><Path Classes="icon" Data="M12,8 A4,4 0 1 1 11.99,8 Z M12,2 L12,5 M12,19 L12,22 M2,12 L5,12 M19,12 L22,12 M4.9,4.9 L7,7 M17,17 L19.1,19.1 M4.9,19.1 L7,17 M17,7 L19.1,4.9" /><TextBlock Text="Einstellungen" VerticalAlignment="Center" /></StackPanel></Button>
+            <Button DockPanel.Dock="Right" Margin="0,0,8,0"><StackPanel Orientation="Horizontal"><Path Classes="icon" Data="M12,3 A9,9 0 1 1 11.99,3 Z M12,11 L12,17 M12,7.5 L12,7.6" /><TextBlock Text="Über" VerticalAlignment="Center" /></StackPanel></Button>
+        </DockPanel>
+
+        <Border Grid.Row="1" Classes="panel">
+            <DockPanel>
+                <TextBlock DockPanel.Dock="Top" Classes="h" Text="Gruppen" />
+                <StackPanel DockPanel.Dock="Bottom" Spacing="8">
+                    <TextBlock Classes="h" Text="Funktionen" Margin="0,16,0,0" />
+                    <ListBox>
+                        <ListBoxItem><DockPanel>
+                            <Path Classes="icon" Stroke="#DC2626" Data="M12,3 C13.7,3 15,4.3 15,6 L15,11 C15,12.7 13.7,14 12,14 C10.3,14 9,12.7 9,11 L9,6 C9,4.3 10.3,3 12,3 Z M6,11 C6,14.3 8.7,17 12,17 C15.3,17 18,14.3 18,11 M12,17 L12,21 M4,4 L20,20" />
+                            <TextBlock DockPanel.Dock="Right" Classes="cap" Text="Stumm" VerticalAlignment="Center" />
+                            <TextBlock Text="Mikrofon" VerticalAlignment="Center" /></DockPanel></ListBoxItem>
+                        <ListBoxItem><DockPanel>
+                            <Path Classes="icon" Data="M4,9 L8,9 L13,5 L13,19 L8,15 L4,15 Z M16,9 C17.5,10.5 17.5,13.5 16,15" />
+                            <TextBlock DockPanel.Dock="Right" Classes="cap" Text="An" VerticalAlignment="Center" />
+                            <TextBlock Text="Ducking" VerticalAlignment="Center" /></DockPanel></ListBoxItem>
+                    </ListBox>
+                    <Button Content="+  Neue Gruppe" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" />
+                </StackPanel>
+                <ListBox SelectedIndex="0">
+                    <ListBoxItem>Voice</ListBoxItem>
+                    <ListBoxItem>Spiel</ListBoxItem>
+                    <ListBoxItem>Musik</ListBoxItem>
+                </ListBox>
+            </DockPanel>
+        </Border>
+
+        <Border Grid.Row="1" Grid.Column="2" Classes="panel">
+            <StackPanel Spacing="8">
+                <TextBlock Text="Gruppe „Voice“" FontSize="20" FontWeight="SemiBold" Margin="0,0,0,8" />
+                <TextBlock Classes="h" Text="Apps" />
+                <WrapPanel>
+                    <Border BorderThickness="1" BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}" CornerRadius="16" Padding="12,4" Margin="0,0,8,8">
+                        <StackPanel Orientation="Horizontal" Spacing="8"><TextBlock Text="Discord.exe" VerticalAlignment="Center" /><TextBlock Classes="cap" Text="16 %" VerticalAlignment="Center" /><TextBlock Text="✕" VerticalAlignment="Center" /></StackPanel>
+                    </Border>
+                    <Border BorderThickness="1" BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}" CornerRadius="16" Padding="12,4" Margin="0,0,8,8">
+                        <StackPanel Orientation="Horizontal" Spacing="8"><TextBlock Text="ts3client_win64.exe" VerticalAlignment="Center" /><TextBlock Classes="cap" Text="20 %" VerticalAlignment="Center" /><TextBlock Text="✕" VerticalAlignment="Center" /></StackPanel>
+                    </Border>
+                </WrapPanel>
+                <Border BorderThickness="2" BorderBrush="{DynamicResource SystemAccentColor}" CornerRadius="8" Padding="12">
+                    <TextBlock Text="App aus „Laufende Apps“ hierher ziehen" HorizontalAlignment="Center" />
+                </Border>
+                <DockPanel Margin="0,16,0,0">
+                    <Button DockPanel.Dock="Right" Content="+  Profil" />
+                    <TextBlock Classes="h" Text="Profile" VerticalAlignment="Center" />
+                </DockPanel>
+                <Border CornerRadius="6" Padding="12" BorderThickness="0,0,0,0">
+                    <Grid ColumnDefinitions="Auto,*,Auto">
+                        <Border BorderThickness="1" BorderBrush="{DynamicResource SystemControlForegroundBaseLowBrush}" CornerRadius="4" Padding="8,3" MinWidth="80" VerticalAlignment="Center">
+                            <TextBlock Text="F13" FontWeight="SemiBold" HorizontalAlignment="Center" />
+                        </Border>
+                        <StackPanel Grid.Column="1" Margin="12,0" Spacing="2">
+                            <TextBlock Text="Voice leise" FontWeight="SemiBold" />
+                            <TextBlock Classes="cap" Text="20 % vom Ausgangswert → Ausgangswert" />
+                            <Border HorizontalAlignment="Left" CornerRadius="9" Padding="8,1" Background="#E8B84A">
+                                <TextBlock Text="Aktiv · 20 % vom Ausgangswert" Foreground="#1C1606" FontSize="12" FontWeight="SemiBold" />
+                            </Border>
+                        </StackPanel>
+                        <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                            <Button Content="✎" Width="36" HorizontalContentAlignment="Center" />
+                            <Button Content="🗑" Width="36" HorizontalContentAlignment="Center" />
+                        </StackPanel>
+                    </Grid>
+                </Border>
+            </StackPanel>
+        </Border>
+
+        <Border Grid.Row="1" Grid.Column="4" Classes="panel">
+            <StackPanel Spacing="12">
+                <TextBlock Classes="h" Text="Laufende Apps" Margin="0" />
+                <TextBlock Classes="cap" Text="Apps, die gerade Ton ausgeben, mit aktueller Mixer-Lautstärke. In eine Gruppe ziehen." />
+                <StackPanel Spacing="2">
+                    <DockPanel><TextBlock DockPanel.Dock="Right" Classes="cap" Text="65 %" /><TextBlock Text="Counter-Strike 2" /></DockPanel>
+                    <TextBlock Classes="cap" Text="cs2.exe · in „Spiel“" FontWeight="SemiBold" />
+                    <ProgressBar Value="65" Height="4" MinHeight="4" />
+                </StackPanel>
+                <StackPanel Spacing="2">
+                    <DockPanel><TextBlock DockPanel.Dock="Right" Classes="cap" Text="16 %" /><TextBlock Text="Discord" /></DockPanel>
+                    <TextBlock Classes="cap" Text="Discord.exe · ✓ in „Voice“" FontWeight="SemiBold" />
+                    <ProgressBar Value="16" Height="4" MinHeight="4" />
+                </StackPanel>
+                <StackPanel Spacing="2">
+                    <DockPanel><TextBlock DockPanel.Dock="Right" Classes="cap" Text="40 %" /><TextBlock Text="Spotify" /></DockPanel>
+                    <TextBlock Classes="cap" Text="Spotify.exe · in „Musik“" FontWeight="SemiBold" />
+                    <ProgressBar Value="40" Height="4" MinHeight="4" />
+                </StackPanel>
+            </StackPanel>
+        </Border>
+    </Grid>
+</Window>
