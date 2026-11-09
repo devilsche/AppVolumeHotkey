@@ -204,9 +204,13 @@ internal static class Snapshots
             // mit unbegrenzter Höhe anordnen – Scrollbereiche zeigen so ihren ganzen Inhalt.
             window.Width = Math.Min(w0, SystemParameters.WorkArea.Width - 8);
             window.UpdateLayout();
-            content.Measure(new Size(content.ActualWidth, height ?? double.PositiveInfinity));
+            // Verfügbare Breite = Breite des Inhaltsbereichs des Fensters (inkl. Rand des Inhalts)
+            var slot = VisualTreeHelper.GetParent(content) is FrameworkElement parent && parent.ActualWidth > 0
+                ? parent.ActualWidth
+                : content.ActualWidth + content.Margin.Left + content.Margin.Right;
+            content.Measure(new Size(slot, height ?? double.PositiveInfinity));
             var h0 = height ?? Math.Max(minHeight, Math.Ceiling(content.DesiredSize.Height));
-            content.Arrange(new Rect(0, 0, content.ActualWidth, h0));
+            content.Arrange(new Rect(0, 0, slot, h0));
         }
         if (content.ActualWidth < 1 || content.ActualHeight < 1)
             return;
@@ -217,7 +221,8 @@ internal static class Snapshots
     {
 
         var dpi = VisualTreeHelper.GetDpi(content);
-        double w = content.ActualWidth, h = content.ActualHeight;
+        var m = content.Margin;
+        double w = content.ActualWidth + m.Left + m.Right, h = content.ActualHeight + m.Top + m.Bottom;
         var pad = gameScene ? 40.0 : 0.0;
         var visual = new DrawingVisual();
         using (var dc = visual.RenderOpen())
@@ -231,10 +236,10 @@ internal static class Snapshots
             dc.DrawRectangle(background, null, rect);
             // Auch Schatten/Ränder außerhalb der Elementgrenzen erfassen (sonst rechts abgeschnitten)
             var bounds = VisualTreeHelper.GetDescendantBounds(content);
-            bounds.Union(new Rect(0, 0, w, h));
+            bounds.Union(new Rect(0, 0, content.ActualWidth, content.ActualHeight));
             dc.DrawRectangle(new VisualBrush(content) { Stretch = Stretch.None, ViewboxUnits = BrushMappingMode.Absolute, Viewbox = bounds,
                     AlignmentX = AlignmentX.Left, AlignmentY = AlignmentY.Top },
-                null, new Rect(pad + bounds.X, pad + bounds.Y, bounds.Width, bounds.Height));
+                null, new Rect(pad + m.Left + bounds.X, pad + m.Top + bounds.Y, bounds.Width, bounds.Height));
         }
 
         var bmp = new RenderTargetBitmap(
