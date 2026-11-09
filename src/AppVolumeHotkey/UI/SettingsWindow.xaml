@@ -98,6 +98,14 @@
                     <TextBlock Text="{l:T Settings_Transition}" Style="{StaticResource SectionHeading}" />
                     <Label Content="{l:T Settings_Fade}" Target="{Binding ElementName=FadeBox}" Style="{StaticResource FieldLabel}" />
                     <TextBox x:Name="FadeBox" MinWidth="240" MaxWidth="360" HorizontalAlignment="Left" Margin="0,0,0,16" AutomationProperties.Name="{l:T Settings_FadeA11y}" />
+
+                    <TextBlock Text="{l:T Settings_Backup}" Style="{StaticResource SectionHeading}" />
+                    <TextBlock Text="{l:T Settings_BackupHint}" Style="{StaticResource Caption}" Margin="0,0,0,12" />
+                    <StackPanel Orientation="Horizontal">
+                        <Button Content="{l:T Settings_Export}" Click="Export_Click" MinHeight="32" Padding="12,4" Margin="0,0,8,0" />
+                        <Button Content="{l:T Settings_Import}" Click="Import_Click" MinHeight="32" Padding="12,4" />
+                    </StackPanel>
+                    <TextBlock x:Name="BackupResult" Style="{StaticResource Caption}" Margin="0,8,0,0" AutomationProperties.LiveSetting="Polite" />
                 </StackPanel>
             </ScrollViewer>
 

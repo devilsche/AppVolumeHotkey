@@ -156,6 +156,33 @@ public sealed class CoreAudioBackend : IAudioBackend, IPeakMeter, IDisposable
         _fadeTimer.Start();
     }
 
+    public bool? GetMuted(string exe)
+    {
+        if (_fake is not null)
+            return _fake.ContainsKey(exe) ? false : null;
+        foreach (var s in SessionsOf(exe))
+        {
+            try
+            {
+                if (s.Volume.GetMute(out var m) == CoreAudio.S_OK)
+                    return m;
+            }
+            catch (Exception) { }
+        }
+        return null;
+    }
+
+    public void SetMuted(string exe, bool muted)
+    {
+        if (_fake is not null)
+            return;
+        foreach (var s in SessionsOf(exe))
+        {
+            try { s.Volume.SetMute(muted, ref _noContext); }
+            catch (Exception) { }
+        }
+    }
+
     /// <summary>Spitzenpegel der lautesten Session der App (0..1); null, wenn sie nicht läuft.</summary>
     public float? GetPeak(string exe)
     {

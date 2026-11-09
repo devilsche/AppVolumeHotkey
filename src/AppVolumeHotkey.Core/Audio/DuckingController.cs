@@ -37,6 +37,9 @@ public sealed class DuckingController(IAudioBackend audio, IPeakMeter meter, Fun
 
     public bool IsDucking => _states.Values.Any(s => s.Ducked);
 
+    /// <summary>Wird diese App gerade vom Ducking leiser gehalten?</summary>
+    public bool IsDucked(string exe) => _states.Values.Any(s => s.Ducked && s.Apps.ContainsKey(exe));
+
     public void SetConfig(AppConfig config)
     {
         _config = config;

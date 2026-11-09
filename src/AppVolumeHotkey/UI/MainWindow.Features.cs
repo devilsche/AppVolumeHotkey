@@ -34,6 +34,7 @@ public partial class MainWindow
         _host.Ducking.StateChanged += UpdateFeatureBadges;
         _host.ConfigChanged += UpdateFeatureBadges;
         L.Changed += LoadFeatures;
+        _host.ConfigReplaced += OnConfigReplaced;
 
         MicHotkeyBox.HotkeyChanged += OnMicHotkeyChanged;
         DuckingHotkeyBox.HotkeyChanged += OnDuckingHotkeyChanged;
@@ -49,10 +50,20 @@ public partial class MainWindow
             _host.Ducking.StateChanged -= UpdateFeatureBadges;
             _host.ConfigChanged -= UpdateFeatureBadges;
             L.Changed -= LoadFeatures;
+            _host.ConfigReplaced -= OnConfigReplaced;
             _meterTimer.Stop();
             if (_saveTimer.IsEnabled)
                 _host.SaveConfig();
         };
+        LoadFeatures();
+    }
+
+    private void OnConfigReplaced()
+    {
+        FeatureList.SelectedIndex = -1;
+        ProfileList.ItemsSource = null;
+        Refresh();
+        GroupList.SelectedIndex = _host.Config.Groups.Count > 0 ? 0 : -1;
         LoadFeatures();
     }
 

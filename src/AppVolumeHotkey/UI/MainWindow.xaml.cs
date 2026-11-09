@@ -181,6 +181,7 @@ public partial class MainWindow : Window
         if (g is null)
             return;
         GroupTitle.Text = L.F("Main_GroupTitle", g.Name);
+        LockVolumeBox.IsChecked = g.LockVolume;
         _chips = g.Apps.Select(a => new AppChipRow(a)).ToList();
         AppChips.ItemsSource = _chips;
         UpdateRunningVolumes();
@@ -337,6 +338,14 @@ public partial class MainWindow : Window
     {
         if (e.Key == Key.F2) { RenameGroup(); e.Handled = true; }
         else if (e.Key == Key.Delete) { DeleteGroup(); e.Handled = true; }
+    }
+
+    private void LockVolume_Click(object sender, RoutedEventArgs e)
+    {
+        if (SelectedGroup is not { } g)
+            return;
+        g.LockVolume = LockVolumeBox.IsChecked == true;
+        _host.SaveConfig();
     }
 
     // ---------- Apps ----------

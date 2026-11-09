@@ -279,6 +279,8 @@
                             </StackPanel>
                         </Border>
                         <Button x:Name="AddExeButton" Content="{l:T Main_AddExe}" Click="AddExe_Click" HorizontalAlignment="Left" MinHeight="32" Padding="12,4" />
+                        <CheckBox x:Name="LockVolumeBox" Content="{l:T Group_LockVolume}" Margin="0,16,0,4" Click="LockVolume_Click" />
+                        <TextBlock Text="{l:T Group_LockVolumeHint}" Style="{StaticResource Caption}" Margin="28,0,0,0" />
                     </StackPanel>
 
                     <!-- Profile -->

@@ -19,6 +19,7 @@ public sealed class StepItem : INotifyPropertyChanged
     public StepKind Kind { get; }
     public bool IsPercent => Kind == StepKind.Percent;
     public bool IsBaseline => Kind == StepKind.Baseline;
+    public bool IsMute => Kind == StepKind.Mute;
 
     public int Number
     {
@@ -39,6 +40,11 @@ public sealed class StepItem : INotifyPropertyChanged
             step = Step.Baseline;
             return true;
         }
+        if (IsMute)
+        {
+            step = Step.Mute;
+            return true;
+        }
         if (int.TryParse(PercentText.Trim().TrimEnd('%').Trim(), out var v) && v is >= 0 and <= 100)
         {
             step = Step.Percent(v);
@@ -48,7 +54,9 @@ public sealed class StepItem : INotifyPropertyChanged
         return false;
     }
 
-    public string AccessibleName => IsBaseline ? L.F("Profile_StepAccBaseline", Number) : L.F("Profile_StepAccPercent", Number, PercentText);
+    public string AccessibleName => IsBaseline ? L.F("Profile_StepAccBaseline", Number)
+        : IsMute ? L.F("Profile_StepAccMute", Number)
+        : L.F("Profile_StepAccPercent", Number, PercentText);
 
     public string PercentName => L.F("Profile_StepPercentA11y", Number);
     public string UpName => L.F("Profile_StepUpA11y", Number);

@@ -54,6 +54,9 @@ public sealed class AppHost : IDisposable
 
     public event Action? ConfigChanged;
 
+    /// <summary>Komplette Konfiguration ersetzt (Import) – Fenster müssen alles neu laden.</summary>
+    public event Action? ConfigReplaced;
+
     /// <param name="snapshotConfig">Nur für --ui-snapshots: feste Beispielkonfiguration und Beispiel-Apps.</param>
     public AppHost(AppConfig? snapshotConfig = null, IEnumerable<(RunningApp App, float Volume)>? fakeApps = null)
     {
@@ -66,6 +69,8 @@ public sealed class AppHost : IDisposable
         Volume.SetConfig(Config);
         Volume.RestorePersistedBaselines();
         Audio.SessionAdded += Volume.OnSessionAdded;
+        // „Lautstärke festhalten“: nach jeder Abfrage prüfen, Apps im Ducking auslassen
+        Audio.Polled += () => Volume.Enforce(exe => Ducking?.IsDucked(exe) == true);
 
         MicAudio = new MicBackend(fake: snapshotConfig is not null) { Scope = Config.Mic.Scope };
         Mic = new MicController(MicAudio);
@@ -329,6 +334,16 @@ public sealed class AppHost : IDisposable
         }
         if (newFailures.Count > 0)
             Tray.ShowNotification(L.T("Msg_HotkeyTakenTitle"), L.F("Msg_HotkeyTaken", string.Join(", ", newFailures)));
+    }
+
+    /// <summary>Exportierte Einstellungen übernehmen: alles zurücksetzen, ersetzen, speichern.</summary>
+    public void ImportConfig(AppConfig imported)
+    {
+        EmergencyReset();
+        imported.Settings.MainWindow = Config.Settings.MainWindow; // Fensterposition dieses PCs behalten
+        Config = imported;
+        SaveConfig();
+        ConfigReplaced?.Invoke();
     }
 
     /// <summary>Ducking an/aus (Hotkey, Infobereich-Menü oder Oberfläche).</summary>

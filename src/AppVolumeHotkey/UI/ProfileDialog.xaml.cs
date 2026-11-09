@@ -160,7 +160,7 @@ public partial class ProfileDialog : Window
         var probe = new Profile { Mode = SelectedMode, Steps = steps };
         if (SelectedTrigger == TriggerMode.Hold)
         {
-            var first = steps.FirstOrDefault(s => s.Kind == StepKind.Percent);
+            var first = steps.FirstOrDefault(s => s.Kind != StepKind.Baseline);
             PreviewText.Text = first is null
                 ? L.T("Profile_ErrHoldNeedsPercent")
                 : L.F("Profile_PreviewHoldDown", probe.StepLabel(first)) + "\n" + L.T("Profile_PreviewHoldUp");
@@ -168,6 +168,7 @@ public partial class ProfileDialog : Window
         }
         var lines = steps.Select((s, i) => L.F("Profile_PreviewPress", i + 1, s.Kind == StepKind.Baseline
             ? L.T("Profile_PreviewBack")
+            : s.Kind == StepKind.Mute ? L.T("Profile_PreviewMute")
             : probe.StepLabel(s) + (probe.Mode == ValueMode.Relative ? L.F("Profile_PreviewExample", Math.Round(80 * s.Value / 100.0)) : "")));
         var tail = steps.Any(s => s.Kind == StepKind.Baseline)
             ? L.T("Profile_PreviewAgain")
@@ -227,6 +228,15 @@ public partial class ProfileDialog : Window
         // Vor einem abschließenden „Ausgangswert“ einfügen, damit die Rückkehr am Ende bleibt
         var index = _steps.Count > 0 && _steps[^1].IsBaseline ? _steps.Count - 1 : _steps.Count;
         var item = Track(new StepItem(Step.Percent(50)));
+        _steps.Insert(index, item);
+        StepList.SelectedItem = item;
+    }
+
+    private void AddMute_Click(object sender, RoutedEventArgs e)
+    {
+        // Wie Prozent-Stufen vor einem abschließenden „Ausgangswert“ einfügen
+        var index = _steps.Count > 0 && _steps[^1].IsBaseline ? _steps.Count - 1 : _steps.Count;
+        var item = Track(new StepItem(Step.Mute));
         _steps.Insert(index, item);
         StepList.SelectedItem = item;
     }

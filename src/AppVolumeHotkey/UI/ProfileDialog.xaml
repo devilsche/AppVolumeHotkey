@@ -141,6 +141,14 @@
                                             <TextBlock Text="%" VerticalAlignment="Center" Margin="8,0,0,0" />
                                         </StackPanel>
                                         <Border Grid.Column="2" HorizontalAlignment="Left" VerticalAlignment="Center" BorderThickness="1.5" CornerRadius="14" Padding="10,3"
+                                                BorderBrush="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}"
+                                                Visibility="{Binding IsMute, Converter={StaticResource BoolToVis}}">
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Style="{StaticResource Icon}" Text="&#xE74F;" FontSize="12" Margin="0,0,6,0" />
+                                                <TextBlock Text="{l:T Profile_MuteChip}" FontWeight="SemiBold" />
+                                            </StackPanel>
+                                        </Border>
+                                        <Border Grid.Column="2" HorizontalAlignment="Left" VerticalAlignment="Center" BorderThickness="1.5" CornerRadius="14" Padding="10,3"
                                                 BorderBrush="{StaticResource GoldBrush}"
                                                 Visibility="{Binding IsBaseline, Converter={StaticResource BoolToVis}}">
                                             <StackPanel Orientation="Horizontal">
@@ -171,6 +179,12 @@
                                 <StackPanel Orientation="Horizontal">
                                     <TextBlock Style="{StaticResource Icon}" Text="&#xE710;" Margin="0,0,8,0" />
                                     <AccessText Text="{l:T Profile_AddPercent}" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+                            <Button Click="AddMute_Click" MinHeight="32" Padding="12,4" Margin="0,0,8,0">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Style="{StaticResource Icon}" Text="&#xE710;" Margin="0,0,8,0" />
+                                    <AccessText Text="{l:T Profile_AddMute}" VerticalAlignment="Center" />
                                 </StackPanel>
                             </Button>
                             <Button Click="AddBaseline_Click" MinHeight="32" Padding="12,4">

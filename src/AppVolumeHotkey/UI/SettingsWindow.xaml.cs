@@ -158,6 +158,48 @@ public partial class SettingsWindow : Window
         FadeBox.ClearValue(AutomationProperties.HelpTextProperty);
     }
 
+    private void Export_Click(object sender, RoutedEventArgs e)
+    {
+        var dlg = new Microsoft.Win32.SaveFileDialog
+        {
+            Title = L.T("Settings_Export").Replace("_", "").TrimEnd('…'),
+            Filter = L.T("Settings_FileFilter"),
+            FileName = $"AppVolumeHotkey-{DateTime.Now:yyyy-MM-dd}.json",
+        };
+        if (dlg.ShowDialog(this) != true)
+            return;
+        try
+        {
+            Core.Persistence.ConfigStore.Export(dlg.FileName, _host.Config);
+            BackupResult.Text = L.F("Settings_ExportDone", dlg.FileName);
+        }
+        catch (Exception ex) when (ex is System.IO.IOException or UnauthorizedAccessException)
+        {
+            MessageBox.Show(this, ex.Message, L.T("Settings_Backup"), MessageBoxButton.OK, MessageBoxImage.Warning);
+        }
+    }
+
+    private void Import_Click(object sender, RoutedEventArgs e)
+    {
+        var dlg = new Microsoft.Win32.OpenFileDialog { Title = L.T("Settings_ImportTitle"), Filter = L.T("Settings_FileFilter") };
+        if (dlg.ShowDialog(this) != true)
+            return;
+        if (!Core.Persistence.ConfigStore.TryImport(dlg.FileName, out var imported, out var error) || imported is null)
+        {
+            MessageBox.Show(this, L.F("Settings_ImportFailed", error), L.T("Settings_ImportTitle"), MessageBoxButton.OK, MessageBoxImage.Warning);
+            return;
+        }
+        if (MessageBox.Show(this, L.T("Settings_ImportQuestion"), L.T("Settings_ImportTitle"),
+                MessageBoxButton.YesNo, MessageBoxImage.Question, MessageBoxResult.No) != MessageBoxResult.Yes)
+            return;
+        _host.ImportConfig(imported);
+        var lang = L.Resolve(imported.Settings.Language);
+        if (lang != L.Language)
+            L.SetLanguage(lang);
+        MessageBox.Show(this, L.T("Settings_ImportDone"), L.T("Settings_ImportTitle"), MessageBoxButton.OK, MessageBoxImage.Information);
+        DialogResult = false; // Dialog schließen, ohne die alten Felder darüberzuschreiben
+    }
+
     private void TestOverlay_Click(object sender, RoutedEventArgs e)
     {
         if (!TryRead(out var s))

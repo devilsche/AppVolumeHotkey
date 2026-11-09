@@ -10,5 +10,8 @@ public sealed class AppGroup
 
     public List<Profile> Profiles { get; set; } = new();
 
+    /// <summary>Solange ein Profil aktiv ist: Lautstärke halten, falls eine App sie selbst zurücksetzt.</summary>
+    public bool LockVolume { get; set; }
+
     public bool ContainsApp(string exe) => Apps.Contains(exe, StringComparer.OrdinalIgnoreCase);
 }

@@ -31,6 +31,46 @@ public static class ConfigStore
         }
     }
 
+    /// <summary>Alles außer Fensterposition als Datei speichern (Backup / anderer PC).</summary>
+    public static void Export(string path, AppConfig cfg)
+    {
+        var json = JsonSerializer.Serialize(cfg, Json.Options);
+        var copy = JsonSerializer.Deserialize<AppConfig>(json, Json.Options)!;
+        copy.Settings.MainWindow = null;
+        Json.WriteAtomic(path, JsonSerializer.Serialize(copy, Json.Options));
+    }
+
+    /// <summary>Exportierte Datei lesen. Die Datei wird nie verändert; bei Fehlern false und eine Meldung.</summary>
+    public static bool TryImport(string path, out AppConfig? config, out string? error)
+    {
+        config = null;
+        error = null;
+        try
+        {
+            using var doc = JsonDocument.Parse(File.ReadAllText(path));
+            if (doc.RootElement.ValueKind != JsonValueKind.Object
+                || !(doc.RootElement.TryGetProperty("Groups", out _) || doc.RootElement.TryGetProperty("Settings", out _)))
+            {
+                error = "Keine AppVolumeHotkey-Einstellungen.";
+                return false;
+            }
+            var cfg = JsonSerializer.Deserialize<AppConfig>(doc.RootElement.GetRawText(), Json.Options);
+            if (cfg is null)
+            {
+                error = "Leere Datei.";
+                return false;
+            }
+            config = Normalize(cfg);
+            config.Settings.MainWindow = null;
+            return true;
+        }
+        catch (Exception e) when (e is JsonException or IOException or UnauthorizedAccessException or NotSupportedException or ArgumentException)
+        {
+            error = e.Message;
+            return false;
+        }
+    }
+
     public static void Save(string path, AppConfig cfg) =>
         Json.WriteAtomic(path, JsonSerializer.Serialize(cfg, Json.Options));
 

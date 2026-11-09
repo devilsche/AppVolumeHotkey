@@ -17,6 +17,7 @@ public sealed class VolumeController(IAudioBackend audio, IBaselineStore store)
     private AppConfig _config = new();
     private readonly Dictionary<Guid, ActiveState> _active = new();
     private readonly Dictionary<Guid, Dictionary<string, float>> _baselines = new();
+    private readonly Dictionary<Guid, HashSet<string>> _mutedByUs = new(); // nur selbst stummgeschaltete Apps wieder aufheben
     private Dictionary<Guid, Dictionary<string, float>> _pendingRestore = new();
 
     public event Action? StateChanged;
@@ -94,7 +95,7 @@ public sealed class VolumeController(IAudioBackend audio, IBaselineStore store)
 
     private HotkeyResult? OnHoldPressed(AppGroup group, Profile profile)
     {
-        var index = profile.Steps.FindIndex(s => s.Kind == StepKind.Percent);
+        var index = profile.Steps.FindIndex(s => s.Kind != StepKind.Baseline);
         if (index < 0)
             return null;
 
@@ -211,7 +212,18 @@ public sealed class VolumeController(IAudioBackend audio, IBaselineStore store)
     /// <summary>Setzt die App auf den Wert der aktuellen Stufe (absolut oder relativ zu ihrem Ausgangswert).</summary>
     private void Apply(Guid groupId, ActiveState state, string exe)
     {
-        var fraction = state.Steps[state.StepIndex].Value / 100f;
+        var step = state.Steps[state.StepIndex];
+        if (step.Kind == StepKind.Mute)
+        {
+            if (audio.GetMuted(exe) == false)
+            {
+                audio.SetMuted(exe, true);
+                MutedSet(groupId).Add(exe);
+            }
+            return;
+        }
+        Unmute(groupId, exe);
+        var fraction = step.Value / 100f;
         if (state.Mode == ValueMode.Absolute)
         {
             audio.SetVolume(exe, fraction);
@@ -241,8 +253,61 @@ public sealed class VolumeController(IAudioBackend audio, IBaselineStore store)
         _baselines[group.Id] = d;
     }
 
+    private HashSet<string> MutedSet(Guid groupId)
+    {
+        if (!_mutedByUs.TryGetValue(groupId, out var set))
+            _mutedByUs[groupId] = set = new(StringComparer.OrdinalIgnoreCase);
+        return set;
+    }
+
+    private void Unmute(Guid groupId, string exe)
+    {
+        if (_mutedByUs.TryGetValue(groupId, out var set) && set.Remove(exe))
+            audio.SetMuted(exe, false);
+    }
+
+    /// <summary>
+    /// „Lautstärke festhalten“: Für aktive Gruppen mit <see cref="AppGroup.LockVolume"/> den Wert der aktuellen Stufe
+    /// erneut setzen, falls eine App ihn selbst verändert hat. <paramref name="exempt"/>: Apps, die gerade anderweitig
+    /// gesteuert werden (z. B. Ducking).
+    /// </summary>
+    public void Enforce(Func<string, bool>? exempt = null)
+    {
+        foreach (var (groupId, state) in _active)
+        {
+            var group = _config.Groups.FirstOrDefault(g => g.Id == groupId);
+            if (group is null || !group.LockVolume)
+                continue;
+            var step = state.Steps[state.StepIndex];
+            foreach (var exe in state.Apps)
+            {
+                if (exempt?.Invoke(exe) == true || audio.GetVolume(exe) is not { } current)
+                    continue;
+                if (step.Kind == StepKind.Mute)
+                {
+                    if (audio.GetMuted(exe) == false)
+                    {
+                        audio.SetMuted(exe, true);
+                        MutedSet(groupId).Add(exe);
+                    }
+                    continue;
+                }
+                var target = state.Mode == ValueMode.Absolute
+                    ? step.Value / 100f
+                    : _baselines.TryGetValue(groupId, out var b) && b.TryGetValue(exe, out var baseline) ? baseline * step.Value / 100f : (float?)null;
+                if (target is { } t && Math.Abs(current - t) > 0.02f)
+                    audio.SetVolume(exe, t);
+            }
+        }
+    }
+
     private void ResetGroupCore(Guid groupId)
     {
+        if (_mutedByUs.Remove(groupId, out var muted))
+        {
+            foreach (var exe in muted)
+                audio.SetMuted(exe, false);
+        }
         if (_baselines.Remove(groupId, out var values))
         {
             foreach (var (exe, v) in values)

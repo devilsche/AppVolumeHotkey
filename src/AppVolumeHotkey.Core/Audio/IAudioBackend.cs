@@ -7,4 +7,9 @@ public interface IAudioBackend
 
     /// <summary>Setzt alle Sessions der App auf den Wert (0..1). Fading ist Sache der Implementierung.</summary>
     void SetVolume(string exe, float volume01);
+
+    /// <summary>Stummschaltung der App im Mixer (null = läuft nicht).</summary>
+    bool? GetMuted(string exe) => null;
+
+    void SetMuted(string exe, bool muted) { }
 }

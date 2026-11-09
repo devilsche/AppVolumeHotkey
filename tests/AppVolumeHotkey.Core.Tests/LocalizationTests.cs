@@ -71,9 +71,9 @@ public sealed class AccessKeyTests
     // Texte mit Alt-Kürzel (_X), die gleichzeitig in einem Fenster bzw. einer Einstellungsseite sichtbar sind
     public static TheoryData<string, string[]> Windows => new()
     {
-        { "Hauptfenster", new[] { "Main_Settings", "Main_About", "Main_Groups", "Main_NewGroup", "Main_AddExe", "Main_Profiles", "Main_NewProfile", "Main_Running", "Main_AddToGroup" } },
-        { "Profil-Dialog", new[] { "Profile_Name", "Profile_Hotkey", "Profile_PassThrough", "Profile_TriggerToggle", "Profile_TriggerHold", "Profile_ModeRelative", "Profile_ModeAbsolute", "Profile_Sequence", "Profile_AddPercent", "Profile_AddBaseline", "Profile_OverlayOn", "Profile_OverlayOff", "Profile_Sound", "Profile_SoundLabel", "Common_Save" } },
-        { "Einstellungen/Allgemein", new[] { "Settings_Language", "Settings_StartWithWindows", "Settings_StartMinimized", "Settings_MinimizeToTray", "Settings_RunAsAdmin", "Settings_Fade", "Common_Save" } },
+        { "Hauptfenster", new[] { "Main_Settings", "Main_About", "Main_Groups", "Main_NewGroup", "Main_AddExe", "Main_Profiles", "Main_NewProfile", "Main_Running", "Main_AddToGroup", "Group_LockVolume" } },
+        { "Profil-Dialog", new[] { "Profile_Name", "Profile_Hotkey", "Profile_PassThrough", "Profile_TriggerToggle", "Profile_TriggerHold", "Profile_ModeRelative", "Profile_ModeAbsolute", "Profile_Sequence", "Profile_AddPercent", "Profile_AddBaseline", "Profile_AddMute", "Profile_OverlayOn", "Profile_OverlayOff", "Profile_Sound", "Profile_SoundLabel", "Common_Save" } },
+        { "Einstellungen/Allgemein", new[] { "Settings_Language", "Settings_StartWithWindows", "Settings_StartMinimized", "Settings_MinimizeToTray", "Settings_RunAsAdmin", "Settings_Fade", "Settings_Export", "Settings_Import", "Common_Save" } },
         { "Einstellungen/Overlay", new[] { "Settings_Position", "Settings_Size", "Settings_Duration", "Settings_TestOverlay", "Common_Save" } },
         { "Hauptfenster/Mikrofon (an)", new[] { "Main_Settings", "Main_About", "Main_Groups", "Main_NewGroup", "Main_Running", "Main_AddToGroup",
             "Mic_TurnOff", "Mic_Hotkey", "Mic_ModeToggle", "Mic_ModeHold", "Mic_ModePtt", "Mic_ScopeAll", "Mic_ScopeDefault", "Mic_ShowOverlay",

@@ -3,6 +3,18 @@
 Jede Version auf Deutsch und Englisch. Der Abschnitt einer Version wird automatisch als Beschreibung des GitHub-Releases verwendet.
 Every version in German and English. A version's section is used automatically as the GitHub release description.
 
+## [0.15.0] – 2026-11-09
+
+### Deutsch
+- Neu: Stufe **„Stumm“** – schaltet die App im Windows-Mixer wirklich stumm (Lautstärke bleibt erhalten), auch mit „Halten“.
+- Neu: **Lautstärke festhalten** pro Gruppe – setzt eine App (z. B. Discord) ihre Lautstärke selbst zurück, solange ein Profil aktiv ist, stellt AppVolumeHotkey den Profilwert wieder her.
+- Neu: Einstellungen **exportieren und importieren** (Einstellungen → Allgemein) – als Backup oder für einen anderen PC.
+
+### English
+- New: **“Muted”** step – really mutes the app in the Windows mixer (volume is kept), also with “Hold”.
+- New: **keep volume** per group – if an app (e.g. Discord) resets its own volume while a profile is active, AppVolumeHotkey restores the profile value.
+- New: **export and import** settings (Settings → General) – as a backup or for another PC.
+
 ## [0.14.3] – 2026-11-09
 
 ### Deutsch
