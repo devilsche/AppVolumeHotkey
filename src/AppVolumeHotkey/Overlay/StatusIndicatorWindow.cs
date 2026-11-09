@@ -43,19 +43,20 @@ public sealed class StatusIndicatorWindow : Window
     }
 
     /// <summary>Anzeige aktualisieren; leere Liste oder abgeschaltet → ausblenden.</summary>
-    public void Update(IReadOnlyList<string> activeItems, AppSettings settings)
+    public void Update(IReadOnlyList<StatusItem> activeItems, AppSettings settings)
     {
-        if (!settings.StatusIndicator || activeItems.Count == 0)
+        if (activeItems.Count == 0)
         {
             Hide();
             return;
         }
 
+        var alert = activeItems.Any(i => i.Alert);
         Content = settings.StatusStyle switch
         {
-            StatusStyle.Icon => BuildIcon(),
-            StatusStyle.IconText => BuildPill(string.Join("  ·  ", activeItems)),
-            _ => BuildMiniText(string.Join("  ·  ", activeItems)),
+            StatusStyle.Icon => BuildIcon(alert),
+            StatusStyle.IconText => BuildPill(activeItems, alert),
+            _ => BuildMiniText(activeItems),
         };
         Opacity = Math.Clamp(settings.StatusOpacity, 50, 100) / 100.0;
 
@@ -71,32 +72,51 @@ public sealed class StatusIndicatorWindow : Window
         Topmost = true;
     }
 
-    private static FrameworkElement BuildMiniText(string text) => new TextBlock
-    {
-        Text = text,
-        Foreground = new SolidColorBrush(Gold),
-        FontSize = 13,
-        FontWeight = FontWeights.Bold,
-        Margin = new Thickness(4),
-        Effect = new DropShadowEffect { BlurRadius = 3, ShadowDepth = 1, Opacity = 0.9, Color = Colors.Black },
-    };
+    private static readonly Color AlertRed = Color.FromRgb(0xF8, 0x71, 0x71);
 
-    private static FrameworkElement BuildIcon()
+    /// <summary>Text mit Trennpunkten; Alarm-Einträge (Mikrofon stumm) rot, sonst Gold.</summary>
+    private static TextBlock Runs(IReadOnlyList<StatusItem> items, Brush normal)
+    {
+        var tb = new TextBlock();
+        for (var i = 0; i < items.Count; i++)
+        {
+            if (i > 0)
+                tb.Inlines.Add(new System.Windows.Documents.Run("  ·  ") { Foreground = new SolidColorBrush(Color.FromArgb(0xB0, 0xFF, 0xFF, 0xFF)) });
+            tb.Inlines.Add(new System.Windows.Documents.Run(items[i].Text) { Foreground = items[i].Alert ? new SolidColorBrush(AlertRed) : normal });
+        }
+        return tb;
+    }
+
+    private static FrameworkElement BuildMiniText(IReadOnlyList<StatusItem> items)
+    {
+        var tb = Runs(items, new SolidColorBrush(Gold));
+        tb.FontSize = 13;
+        tb.FontWeight = FontWeights.Bold;
+        tb.Margin = new Thickness(4);
+        tb.Effect = new DropShadowEffect { BlurRadius = 3, ShadowDepth = 1, Opacity = 0.9, Color = Colors.Black };
+        return tb;
+    }
+
+    private static FrameworkElement BuildIcon(bool alert)
     {
         var grid = new Grid { Width = 26, Height = 26, Margin = new Thickness(4) };
         grid.Children.Add(AppIcon(26));
-        grid.Children.Add(Dot(10, HorizontalAlignment.Right, VerticalAlignment.Bottom));
+        grid.Children.Add(Dot(10, HorizontalAlignment.Right, VerticalAlignment.Bottom, alert));
         return grid;
     }
 
-    private static FrameworkElement BuildPill(string text)
+    private static FrameworkElement BuildPill(IReadOnlyList<StatusItem> items, bool alert)
     {
         var row = new StackPanel { Orientation = Orientation.Horizontal };
         row.Children.Add(AppIcon(18));
-        var dot = Dot(8, HorizontalAlignment.Left, VerticalAlignment.Center);
+        var dot = Dot(8, HorizontalAlignment.Left, VerticalAlignment.Center, alert);
         dot.Margin = new Thickness(6, 0, 6, 0);
         row.Children.Add(dot);
-        row.Children.Add(new TextBlock { Text = text, Foreground = Brushes.White, FontSize = 12, FontWeight = FontWeights.SemiBold, VerticalAlignment = VerticalAlignment.Center });
+        var text = Runs(items, Brushes.White);
+        text.FontSize = 12;
+        text.FontWeight = FontWeights.SemiBold;
+        text.VerticalAlignment = VerticalAlignment.Center;
+        row.Children.Add(text);
         return new Border
         {
             Background = new SolidColorBrush(Color.FromArgb(0xD0, 0x14, 0x14, 0x14)),
@@ -116,12 +136,12 @@ public sealed class StatusIndicatorWindow : Window
         return img;
     }
 
-    private static FrameworkElement Dot(double size, HorizontalAlignment h, VerticalAlignment v) => new Border
+    private static FrameworkElement Dot(double size, HorizontalAlignment h, VerticalAlignment v, bool alert) => new Border
     {
         Width = size,
         Height = size,
         CornerRadius = new CornerRadius(size / 2),
-        Background = new SolidColorBrush(Green),
+        Background = new SolidColorBrush(alert ? Color.FromRgb(0xEF, 0x44, 0x44) : Green),
         BorderBrush = Brushes.White,
         BorderThickness = new Thickness(1.5),
         HorizontalAlignment = h,

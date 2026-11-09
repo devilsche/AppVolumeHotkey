@@ -81,8 +81,6 @@ public partial class SettingsWindow : Window
         TrayBadgeBox.IsChecked = s.TrayBadge;
         LanguageBox.ItemsSource = Languages.Select(c => L.T(c.Label)).ToList();
         LanguageBox.SelectedIndex = Math.Max(0, Array.FindIndex(Languages, c => c.Value == s.Language));
-        StyleBox.ItemsSource = Styles.Select(c => L.T(c.Label)).ToList();
-        StyleBox.SelectedIndex = Array.FindIndex(Styles, c => c.Value == s.OverlayStyle);
         DurationBox.Text = s.OverlayDurationMs.ToString();
         FadeBox.Text = s.FadeDurationMs.ToString();
 
@@ -110,7 +108,6 @@ public partial class SettingsWindow : Window
             MinimizeToTray = MinimizeToTrayBox.IsChecked == true,
             OverlayCorner = Corners[Math.Max(0, CornerBox.SelectedIndex)].Value,
             OverlaySize = Sizes[Math.Max(0, SizeBox.SelectedIndex)].Value,
-            OverlayStyle = Styles[Math.Max(0, StyleBox.SelectedIndex)].Value,
             MainWindow = _host.Config.Settings.MainWindow,
             Language = Languages[Math.Max(0, LanguageBox.SelectedIndex)].Value,
             StatusIndicator = StatusOnBox.IsChecked == true,

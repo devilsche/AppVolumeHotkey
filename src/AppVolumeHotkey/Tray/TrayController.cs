@@ -15,6 +15,7 @@ public sealed class TrayController : IDisposable
         var ico = Application.GetResourceStream(new Uri("pack://application:,,,/Assets/app.ico"))!.Stream;
         _icon = new NotifyIcon(ico, "AppVolumeHotkey " + Platform.AppInfo.Version);
         _icon.SetActiveIcon(Application.GetResourceStream(new Uri("pack://application:,,,/Assets/app-active.ico"))!.Stream);
+        _icon.SetAlertIcon(Application.GetResourceStream(new Uri("pack://application:,,,/Assets/app-mic.ico"))!.Stream);
         _icon.LeftClick += () => _host.ShowMainWindow();
         _icon.ContextMenu.Opened += (_, _) => Platform.DebugLog.Write("Tray: Menü geöffnet");
         Rebuild();
@@ -50,6 +51,15 @@ public sealed class TrayController : IDisposable
         reset.Click += (_, _) => _host.Volume.ResetAll();
         menu.Items.Add(reset);
 
+        var micMuted = _host.Mic.IsMuted == true;
+        var mic = new MenuItem { Header = L.T(micMuted ? "Tray_MicUnmute" : "Tray_MicMute") };
+        mic.Click += (_, _) => _host.Mic.SetMuted(!micMuted);
+        menu.Items.Add(mic);
+
+        var ducking = new MenuItem { Header = L.T("Tray_Ducking"), IsCheckable = true, IsChecked = _host.Config.Ducking.Enabled };
+        ducking.Click += (_, _) => _host.ToggleDucking();
+        menu.Items.Add(ducking);
+
         var pause = new MenuItem { Header = L.T("Tray_Pause"), IsCheckable = true, IsChecked = _host.HotkeysPaused };
         pause.Click += (_, _) => _host.HotkeysPaused = pause.IsChecked;
         menu.Items.Add(pause);
@@ -67,7 +77,7 @@ public sealed class TrayController : IDisposable
         exit.Click += (_, _) => _host.Exit();
         menu.Items.Add(exit);
 
-        _icon.SetActive(active.Count > 0 && _host.Config.Settings.TrayBadge);
+        _icon.SetActive(active.Count > 0 && _host.Config.Settings.TrayBadge, alert: micMuted);
         _icon.ToolTip = active.Count == 0 ? $"AppVolumeHotkey {Platform.AppInfo.Version}" : "AppVolumeHotkey – " + string.Join(", ", active);
     }
 

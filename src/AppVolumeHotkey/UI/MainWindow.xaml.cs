@@ -47,6 +47,7 @@ public partial class MainWindow : Window
         Refresh();
         RefreshRunning();
         L.Changed += OnLanguageChanged;
+        InitFeatures();
         if (_host.Config.Groups.Count > 0)
             GroupList.SelectedIndex = 0;
     }
@@ -169,8 +170,11 @@ public partial class MainWindow : Window
     {
         var g = SelectedGroup;
         var hasGroup = g is not null;
-        GroupPanel.Visibility = hasGroup ? Visibility.Visible : Visibility.Collapsed;
-        NoGroupHint.Visibility = hasGroup ? Visibility.Collapsed : Visibility.Visible;
+        var feature = FeatureList.SelectedItem;
+        GroupPanel.Visibility = hasGroup && feature is null ? Visibility.Visible : Visibility.Collapsed;
+        NoGroupHint.Visibility = !hasGroup && feature is null ? Visibility.Visible : Visibility.Collapsed;
+        MicPanel.Visibility = feature == MicFeatureItem ? Visibility.Visible : Visibility.Collapsed;
+        DuckingPanel.Visibility = feature == DuckingFeatureItem ? Visibility.Visible : Visibility.Collapsed;
         RenameGroupButton.IsEnabled = hasGroup;
         DeleteGroupButton.IsEnabled = hasGroup;
         UpdateInGroupMarks();
@@ -281,7 +285,12 @@ public partial class MainWindow : Window
 
     // ---------- Gruppen ----------
 
-    private void GroupList_SelectionChanged(object sender, SelectionChangedEventArgs e) => RefreshGroup();
+    private void GroupList_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        if (GroupList.SelectedItem is not null && FeatureList.SelectedItem is not null)
+            FeatureList.SelectedIndex = -1; // Gruppe gewählt → Funktions-Seite schließen
+        RefreshGroup();
+    }
 
     private void NewGroup_Click(object sender, RoutedEventArgs e)
     {

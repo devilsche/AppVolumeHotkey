@@ -27,6 +27,7 @@ internal static class Snapshots
         var (config, voice, leise) = SampleConfig();
         var host = new AppHost(config, SampleApps());
         host.Volume.OnHotkey(leise.Id); // ein aktives Profil für die Ansicht
+        host.Mic.SetMuted(true);        // Mikrofon stumm für die Ansicht
 
         foreach (var (theme, themeName) in new[] { (ThemeMode.Light, "light"), (ThemeMode.Dark, "dark") })
         {
@@ -48,6 +49,19 @@ internal static class Snapshots
                 SelectFirstGroup(main);
                 Pump();
                 Save(main, prefix + "01-main.png", theme);
+
+                if (main.FindName("FeatureList") is ListBox features)
+                {
+                    features.SelectedIndex = 0;
+                    Pump();
+                    Save(main, prefix + "01b-mic.png", theme);
+                    features.SelectedIndex = 1;
+                    Pump();
+                    Save(main, prefix + "01c-ducking.png", theme);
+                    features.SelectedIndex = -1;
+                    SelectFirstGroup(main);
+                    Pump();
+                }
 
                 host.SuspendHotkeys(); // wie beim echten Öffnen des Dialogs, sonst gilt F13 als „belegt“
                 var profile = ProfileDialog.CreateForSnapshot(main, host, voice, leise.Clone());
@@ -75,14 +89,19 @@ internal static class Snapshots
                 if (themeName == "dark") // Overlay/Statusanzeige sind themenunabhängig
                 {
                     var result = new HotkeyResult(voice, leise, leise.Steps[0], true, true, false);
-                    foreach (var style in new[] { OverlayStyle.Compact, OverlayStyle.Normal })
+                    foreach (var size in new[] { OverlaySize.Small, OverlaySize.Medium, OverlaySize.Large })
                     {
                         var overlay = new OverlayWindow();
-                        overlay.ShowResult(result, new AppSettings { OverlayStyle = style, FadeDurationMs = 0 });
+                        overlay.ShowResult(result, new AppSettings { OverlaySize = size, FadeDurationMs = 0 });
                         Pump();
-                        Save(overlay, prefix + $"05-overlay-{style.ToString().ToLowerInvariant()}.png", theme, gameScene: true);
+                        Save(overlay, prefix + $"05-overlay-{size.ToString().ToLowerInvariant()}.png", theme, gameScene: true);
                         overlay.Close();
                     }
+                    var micOverlay = new OverlayWindow();
+                    micOverlay.ShowMic(true, MicScope.AllMicrophones, new AppSettings());
+                    Pump();
+                    Save(micOverlay, prefix + "05-overlay-mic.png", theme, gameScene: true);
+                    micOverlay.Close();
                     foreach (var style in new[] { StatusStyle.MiniText, StatusStyle.IconText, StatusStyle.Icon })
                     {
                         var status = new StatusIndicatorWindow();
@@ -136,7 +155,12 @@ internal static class Snapshots
             },
         };
         var musik = new AppGroup { Name = "Musik", Apps = { "Spotify.exe" } };
-        return (new AppConfig { Groups = { voice, spiel, musik } }, voice, leise);
+        var cfg = new AppConfig { Groups = { voice, spiel, musik } };
+        cfg.Mic.Hotkey = new Hotkey(HotkeyModifiers.None, 0x7D); // F14
+        cfg.Ducking.Enabled = true;
+        cfg.Ducking.ToggleHotkey = new Hotkey(HotkeyModifiers.Control, 0x79); // Strg+F10
+        cfg.Ducking.Rules.Add(new DuckingRule { SourceGroupId = voice.Id, Percent = 35 });
+        return (cfg, voice, leise);
     }
 
     private static IEnumerable<(RunningApp, float)> SampleApps() => new[]

@@ -108,36 +108,51 @@ public sealed class OverlayWindow : Window
         Native.SetWindowLongPtr(hwnd, Native.GWL_EXSTYLE, new IntPtr(ex));
     }
 
+    private static readonly Color Red = Color.FromRgb(0xDC, 0x26, 0x26); // mit weißer Schrift ≥ 4,5:1
+
     public void ShowResult(HotkeyResult r, AppSettings settings)
     {
-        _name.Text = r.Profile.Name;
-        if (r.IsActive)
+        ShowCard(r.Profile.Name, r.IsActive ? r.Profile.StepLabel(r.Step) : L.T("Overlay_Back"),
+            r.IsActive ? L.T("Overlay_Active") : L.T("Overlay_Off"), Gold, filledBadge: r.IsActive, showBar: true, settings);
+        AnimateBar(r, settings);
+    }
+
+    /// <summary>Mikrofon stumm/an – rote Kennzeichnung.</summary>
+    public void ShowMic(bool muted, MicScope scope, AppSettings settings) =>
+        ShowCard(L.T("Mic_Title"), scope == MicScope.AllMicrophones ? L.T("Mic_OverlayAll") : L.T("Mic_OverlayDefault"),
+            muted ? L.T("State_Muted") : L.T("State_On"), Red, filledBadge: muted, showBar: false, settings);
+
+    /// <summary>Ducking an/aus.</summary>
+    public void ShowDucking(bool on, AppSettings settings) =>
+        ShowCard(L.T("Main_FeatureDucking"), L.T("Ducking_Intro"), on ? L.T("State_On") : L.T("State_Off"), Gold,
+            filledBadge: on, showBar: false, settings);
+
+    private void ShowCard(string title, string detail, string badge, Color accent, bool filledBadge, bool showBar, AppSettings settings)
+    {
+        _name.Text = title;
+        _detail.Text = detail;
+        _badgeText.Text = badge;
+        if (filledBadge)
         {
-            _detail.Text = r.Profile.StepLabel(r.Step);
-            _badgeText.Text = L.T("Overlay_Active");
-            _badgeText.Foreground = new SolidColorBrush(Color.FromRgb(0x1C, 0x16, 0x06));
-            _badge.Background = new SolidColorBrush(Gold);
+            _badgeText.Foreground = accent == Gold ? new SolidColorBrush(Color.FromRgb(0x1C, 0x16, 0x06)) : Brushes.White;
+            _badge.Background = new SolidColorBrush(accent);
             _badge.BorderThickness = new Thickness(0);
         }
         else
         {
-            _detail.Text = L.T("Overlay_Back");
-            _badgeText.Text = L.T("Overlay_Off");
             _badgeText.Foreground = new SolidColorBrush(Color.FromArgb(0xD0, 0xFF, 0xFF, 0xFF));
             _badge.Background = Brushes.Transparent;
             _badge.BorderBrush = new SolidColorBrush(Color.FromArgb(0x70, 0xFF, 0xFF, 0xFF));
             _badge.BorderThickness = new Thickness(1);
         }
-        AnimateBar(r, settings);
+        _card.BorderBrush = new SolidColorBrush(Color.FromArgb(0x80, accent.R, accent.G, accent.B));
+        _fill.Background = new SolidColorBrush(accent);
+        _track.Visibility = _fill.Visibility = showBar ? Visibility.Visible : Visibility.Collapsed;
+        _detail.TextWrapping = showBar ? TextWrapping.NoWrap : TextWrapping.Wrap;
 
-        ApplyStyle(settings.OverlayStyle);
-
-        var scale = settings.OverlaySize switch
-        {
-            OverlaySize.Small => 0.9,
-            OverlaySize.Large => 1.35,
-            _ => 1.0,
-        };
+        // Eine Einstellung „Größe“: Klein = kompakt, Mittel = normal, Groß = normal ×1,3
+        ApplyStyle(settings.OverlaySize == OverlaySize.Small ? OverlayStyle.Compact : OverlayStyle.Normal);
+        var scale = settings.OverlaySize == OverlaySize.Large ? 1.3 : 1.0;
         _sizeScale.ScaleX = _sizeScale.ScaleY = scale;
 
         BeginAnimation(OpacityProperty, null);

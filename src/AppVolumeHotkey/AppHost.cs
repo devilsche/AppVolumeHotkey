@@ -13,6 +13,9 @@ using AppVolumeHotkey.Core.Localization;
 
 namespace AppVolumeHotkey;
 
+/// <summary>Ein Eintrag der Statusanzeige; <see cref="Alert"/> = rot (z. B. Mikrofon stumm).</summary>
+public sealed record StatusItem(string Text, bool Alert);
+
 /// <summary>Verdrahtet Konfiguration, Audio, Hotkeys, Overlay, Tray und Fenster.</summary>
 public sealed class AppHost : IDisposable
 {
@@ -24,8 +27,24 @@ public sealed class AppHost : IDisposable
     private MainWindow? _main;
     private bool _exiting;
 
+    private const int MicHotkeyId = 9001;
+    private const int DuckingHotkeyId = 9002;
+    private readonly System.Windows.Threading.DispatcherTimer _duckTimer;
+    private readonly System.Windows.Threading.DispatcherTimer _micPoll;
+    private bool? _lastMicMuted;
+
     public AppConfig Config { get; private set; }
     public CoreAudioBackend Audio { get; }
+    public MicBackend MicAudio { get; }
+    public MicController Mic { get; }
+    public DuckingController Ducking { get; }
+
+    /// <summary>Mikrofon-/Ducking-Hotkey ließ sich nicht registrieren (belegt).</summary>
+    public bool MicHotkeyFailed { get; private set; }
+    public bool DuckingHotkeyFailed { get; private set; }
+
+    /// <summary>Mikrofon stumm/an hat sich geändert (auch von außen, z. B. in Windows).</summary>
+    public event Action? MicStateChanged;
     public VolumeController Volume { get; }
     public HotkeyManager Hotkeys { get; }
     public TrayController Tray { get; }
@@ -48,6 +67,12 @@ public sealed class AppHost : IDisposable
         Volume.RestorePersistedBaselines();
         Audio.SessionAdded += Volume.OnSessionAdded;
 
+        MicAudio = new MicBackend(fake: snapshotConfig is not null) { Scope = Config.Mic.Scope };
+        Mic = new MicController(MicAudio);
+        Mic.SetSettings(Config.Mic);
+        Ducking = new DuckingController(Audio, Audio);
+        Ducking.SetConfig(Config);
+
         Hotkeys = new HotkeyManager();
         Hotkeys.Pressed += OnHotkeyPressed;
         Hotkeys.Released += OnHotkeyReleased;
@@ -61,21 +86,72 @@ public sealed class AppHost : IDisposable
         Volume.StateChanged += UpdateStatusIndicator;
         ConfigChanged += UpdateStatusIndicator;
         L.Changed += UpdateStatusIndicator;
+        Mic.StateChanged += OnMicChanged;
+        Ducking.StateChanged += () => { UpdateStatusIndicator(); Tray.Rebuild(); };
+
+        // Ducking: Pegel regelmäßig prüfen (nur wenn eingeschaltet und Regeln vorhanden)
+        _duckTimer = new System.Windows.Threading.DispatcherTimer(TimeSpan.FromMilliseconds(50), System.Windows.Threading.DispatcherPriority.Background,
+            (_, _) => { if (Config.Ducking.Enabled && Config.Ducking.Rules.Count > 0) Ducking.Tick(); },
+            System.Windows.Threading.Dispatcher.CurrentDispatcher);
+        // Mikrofon-Zustand auch bei Änderungen außerhalb der App mitbekommen
+        _micPoll = new System.Windows.Threading.DispatcherTimer(TimeSpan.FromSeconds(1), System.Windows.Threading.DispatcherPriority.Background,
+            (_, _) => OnMicChanged(), System.Windows.Threading.Dispatcher.CurrentDispatcher);
+        if (snapshotConfig is not null)
+        {
+            _duckTimer.Stop();
+            _micPoll.Stop();
+        }
+        OnMicChanged();
         UpdateStatusIndicator();
     }
 
-    /// <summary>Kurzbeschreibung je aktiver Gruppe, z. B. „Voice 20 %“.</summary>
-    public IReadOnlyList<string> ActiveStatusItems()
+    private void OnMicChanged()
     {
-        var list = new List<string>();
+        var muted = Mic.IsMuted;
+        if (muted == _lastMicMuted)
+            return;
+        _lastMicMuted = muted;
+        UpdateStatusIndicator();
+        Tray.Rebuild();
+        MicStateChanged?.Invoke();
+    }
+
+    /// <summary>
+    /// Ist der Hotkey schon vergeben? Liefert die Fehlermeldung oder null.
+    /// <paramref name="self"/>: das gerade bearbeitete Element (Profil-Id, "mic" oder "ducking"), das sich nicht selbst blockiert.
+    /// </summary>
+    public string? HotkeyConflict(Hotkey hotkey, object? self)
+    {
+        foreach (var (g, p) in Config.AllProfiles())
+        {
+            if (p.Hotkey == hotkey && !Equals(self, p.Id))
+                return L.F("Profile_ErrHotkeyUsed", KeyNames.Format(hotkey), p.Name, g.Name);
+        }
+        if (Config.Mic.Hotkey == hotkey && !Equals(self, "mic"))
+            return L.F("Hotkey_UsedByMic", KeyNames.Format(hotkey));
+        if (Config.Ducking.ToggleHotkey == hotkey && !Equals(self, "ducking"))
+            return L.F("Hotkey_UsedByDucking", KeyNames.Format(hotkey));
+        return null;
+    }
+
+    /// <summary>Kurzbeschreibung je aktiver Gruppe, z. B. „Voice 20 %“.</summary>
+    public IReadOnlyList<StatusItem> ActiveStatusItems()
+    {
+        var list = new List<StatusItem>();
+        if (Config.Mic.ShowInStatus && _lastMicMuted == true)
+            list.Add(new StatusItem(L.T("Status_MicMuted"), Alert: true));
+        if (!Config.Settings.StatusIndicator)
+            return list;
         foreach (var g in Config.Groups)
         {
             if (Volume.GetActive(g.Id) is not { } a)
                 continue;
             var p = g.Profiles.FirstOrDefault(x => x.Id == a.ProfileId);
             if (p is not null)
-                list.Add(L.F("Status_Item", g.Name, p.Steps[a.StepIndex].Label));
+                list.Add(new StatusItem(L.F("Status_Item", g.Name, p.Steps[a.StepIndex].Label), Alert: false));
         }
+        if (Ducking.IsDucking)
+            list.Add(new StatusItem(L.T("Status_Ducking"), Alert: false));
         return list;
     }
 
@@ -84,7 +160,7 @@ public sealed class AppHost : IDisposable
         if (_exiting)
             return;
         var items = ActiveStatusItems();
-        if (items.Count == 0 || !Config.Settings.StatusIndicator)
+        if (items.Count == 0)
         {
             _status?.Hide();
             return;
@@ -111,6 +187,7 @@ public sealed class AppHost : IDisposable
         {
             Audio.FadeDurationMs = 0;
             Audio.CompleteFades();
+            Ducking.RestoreAll();
             Volume.ResetAll();
         }
         catch (Exception) { }
@@ -156,8 +233,12 @@ public sealed class AppHost : IDisposable
         }
         Audio.FadeDurationMs = Config.Settings.FadeDurationMs;
         Volume.SetConfig(Config);
+        MicAudio.Scope = Config.Mic.Scope;
+        Mic.SetSettings(Config.Mic);
+        Ducking.SetConfig(Config);
         RegisterAllHotkeys();
         ConfigChanged?.Invoke();
+        OnMicChanged();
     }
 
     public IEnumerable<string> ActiveProfileDescriptions()
@@ -191,6 +272,7 @@ public sealed class AppHost : IDisposable
             return;
         _exiting = true;
         EmergencyReset();
+        try { Mic.OnExit(); } catch (Exception) { }
         _main?.SavePlacementPublic();
         _main?.ForceClose();
         Dispose();
@@ -212,6 +294,7 @@ public sealed class AppHost : IDisposable
         Hotkeys.UnregisterAll();
         _profileByHotkeyId.Clear();
         FailedHotkeys.Clear();
+        MicHotkeyFailed = DuckingHotkeyFailed = false;
         if (_hotkeysPaused || _suspendCount > 0)
             return;
 
@@ -234,12 +317,42 @@ public sealed class AppHost : IDisposable
                     newFailures.Add($"{KeyNames.Format(profile.Hotkey)} ({profile.Name})");
             }
         }
+        if (Config.Mic.Hotkey is { } micKey && !Hotkeys.Register(MicHotkeyId, micKey, Config.Mic.PassThrough))
+        {
+            MicHotkeyFailed = true;
+            newFailures.Add($"{KeyNames.Format(micKey)} ({L.T("Mic_Title")})");
+        }
+        if (Config.Ducking.ToggleHotkey is { } duckKey && !Hotkeys.Register(DuckingHotkeyId, duckKey))
+        {
+            DuckingHotkeyFailed = true;
+            newFailures.Add($"{KeyNames.Format(duckKey)} (Ducking)");
+        }
         if (newFailures.Count > 0)
             Tray.ShowNotification(L.T("Msg_HotkeyTakenTitle"), L.F("Msg_HotkeyTaken", string.Join(", ", newFailures)));
     }
 
+    /// <summary>Ducking an/aus (Hotkey, Infobereich-Menü oder Oberfläche).</summary>
+    public void ToggleDucking()
+    {
+        var on = Ducking.Toggle();
+        SaveSettingsOnly();
+        ConfigChanged?.Invoke();
+        _overlay.HandleDucking(on, Config.Settings);
+    }
+
     private void OnHotkeyPressed(int id)
     {
+        if (id == MicHotkeyId)
+        {
+            if (Mic.OnPressed() is { } mic)
+                _overlay.HandleMic(mic, Config.Mic, Config.Settings);
+            return;
+        }
+        if (id == DuckingHotkeyId)
+        {
+            ToggleDucking();
+            return;
+        }
         if (!_profileByHotkeyId.TryGetValue(id, out var profileId))
             return;
         if (Volume.OnHotkey(profileId) is { } result)
@@ -248,6 +361,12 @@ public sealed class AppHost : IDisposable
 
     private void OnHotkeyReleased(int id)
     {
+        if (id == MicHotkeyId)
+        {
+            if (Mic.OnReleased() is { } mic)
+                _overlay.HandleMic(mic, Config.Mic, Config.Settings);
+            return;
+        }
         if (!_profileByHotkeyId.TryGetValue(id, out var profileId))
             return;
         if (Volume.OnHotkeyReleased(profileId) is { } result)
@@ -256,6 +375,8 @@ public sealed class AppHost : IDisposable
 
     public void Dispose()
     {
+        _duckTimer.Stop();
+        _micPoll.Stop();
         Hotkeys.Dispose();
         Audio.Dispose();
         Tray.Dispose();

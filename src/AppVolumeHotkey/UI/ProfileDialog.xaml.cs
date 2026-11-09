@@ -185,10 +185,9 @@ public partial class ProfileDialog : Window
         string? hotkeyError = null;
         if (HotkeyInput.Hotkey is { } hk)
         {
-            var other = _host.Config.AllProfiles().FirstOrDefault(x => x.Profile.Id != _profile.Id && x.Profile.Hotkey == hk);
-            if (other.Profile is not null)
-                hotkeyError = L.F("Profile_ErrHotkeyUsed", KeyNames.Format(hk), other.Profile.Name, other.Group.Name);
-            else if (!_host.Hotkeys.IsAvailable(hk))
+            // Kollision mit anderen Profilen, dem Mikrofon- oder dem Ducking-Hotkey
+            hotkeyError = _host.HotkeyConflict(hk, _profile.Id);
+            if (hotkeyError is null && !_host.Hotkeys.IsAvailable(hk))
                 hotkeyError = L.F("Profile_ErrHotkeyTaken", KeyNames.Format(hk));
         }
         ok &= SetError(HotkeyInput, HotkeyError, hotkeyError);

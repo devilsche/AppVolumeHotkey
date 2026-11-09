@@ -67,6 +67,7 @@ internal sealed class NotifyIcon : IDisposable
     private readonly uint _taskbarCreated;
     private readonly IntPtr _iconNormal;
     private IntPtr _iconActive;
+    private IntPtr _iconAlert;
     private IntPtr _icon;
     private string _tip;
     private bool _added;
@@ -100,9 +101,14 @@ internal sealed class NotifyIcon : IDisposable
     /// <summary>Optionales zweites Symbol (z. B. mit grünem Punkt) für den Zustand „aktiv“.</summary>
     public void SetActiveIcon(Stream ico) => _iconActive = LoadSmallIcon(ico);
 
-    public void SetActive(bool active)
+    /// <summary>Drittes Symbol für Warnzustände (z. B. Mikrofon stumm) – hat Vorrang vor „aktiv“.</summary>
+    public void SetAlertIcon(Stream ico) => _iconAlert = LoadSmallIcon(ico);
+
+    public void SetActive(bool active, bool alert = false)
     {
-        var target = active && _iconActive != IntPtr.Zero ? _iconActive : _iconNormal;
+        var target = alert && _iconAlert != IntPtr.Zero ? _iconAlert
+            : active && _iconActive != IntPtr.Zero ? _iconActive
+            : _iconNormal;
         if (target == _icon)
             return;
         _icon = target;
@@ -217,6 +223,8 @@ internal sealed class NotifyIcon : IDisposable
             DestroyIcon(_iconNormal);
         if (_iconActive != IntPtr.Zero)
             DestroyIcon(_iconActive);
+        if (_iconAlert != IntPtr.Zero)
+            DestroyIcon(_iconAlert);
         _window.RemoveHook(WndProc);
         _window.Dispose();
     }

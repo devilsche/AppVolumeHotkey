@@ -27,6 +27,7 @@
     <Resource Include="Assets\Sounds\*.wav" />
     <Resource Include="Assets\app-96.png" />
     <Resource Include="Assets\app-active.ico" />
+    <Resource Include="Assets\app-mic.ico" />
     <EmbeddedResource Include="..\..\THIRD-PARTY-NOTICES.txt" LogicalName="THIRD-PARTY-NOTICES.txt" />
   </ItemGroup>
 

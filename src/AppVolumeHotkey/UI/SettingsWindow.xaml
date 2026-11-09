@@ -107,8 +107,6 @@
                     <TextBlock Text="{l:T Settings_NavOverlay}" Style="{StaticResource PageHeading}" />
                     <TextBlock Text="{l:T Settings_OverlayHint}" Style="{StaticResource Caption}" Margin="0,0,0,24" />
 
-                    <Label Content="{l:T Settings_Style}" Target="{Binding ElementName=StyleBox}" Style="{StaticResource FieldLabel}" />
-                    <ComboBox x:Name="StyleBox" MinWidth="240" MaxWidth="360" HorizontalAlignment="Left" Margin="0,0,0,16" AutomationProperties.Name="{l:T Settings_StyleA11y}" />
                     <Label Content="{l:T Settings_Position}" Target="{Binding ElementName=CornerBox}" Style="{StaticResource FieldLabel}" />
                     <ComboBox x:Name="CornerBox" MinWidth="240" MaxWidth="360" HorizontalAlignment="Left" Margin="0,0,0,16" AutomationProperties.Name="{l:T Settings_PositionA11y}" />
                     <Label Content="{l:T Settings_Size}" Target="{Binding ElementName=SizeBox}" Style="{StaticResource FieldLabel}" />

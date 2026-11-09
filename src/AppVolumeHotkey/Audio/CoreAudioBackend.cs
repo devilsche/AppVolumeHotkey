@@ -16,9 +16,11 @@ namespace AppVolumeHotkey.Audio;
 /// (robuster als COM-Benachrichtigungen) und blendet Lautstärkeänderungen linear über <see cref="FadeDurationMs"/> ein.
 /// Nur auf dem UI-Thread verwenden.
 /// </summary>
-public sealed class CoreAudioBackend : IAudioBackend, IDisposable
+public sealed class CoreAudioBackend : IAudioBackend, IPeakMeter, IDisposable
 {
-    private sealed record SessionEntry(string Id, string Exe, uint Pid, ISimpleAudioVolume Volume);
+    private sealed record SessionEntry(string Id, string Exe, uint Pid, ISimpleAudioVolume Volume, IAudioMeterInformation? Meter);
+
+    private static readonly string OwnExe = Path.GetFileName(Environment.ProcessPath ?? "AppVolumeHotkey.exe");
 
     private sealed record Device(string Id, IAudioSessionManager2 Manager);
 
@@ -154,6 +156,31 @@ public sealed class CoreAudioBackend : IAudioBackend, IDisposable
         _fadeTimer.Start();
     }
 
+    /// <summary>Spitzenpegel der lautesten Session der App (0..1); null, wenn sie nicht läuft.</summary>
+    public float? GetPeak(string exe)
+    {
+        if (_fake is not null)
+            return _fake.ContainsKey(exe) ? 0f : null;
+        float? max = null;
+        foreach (var s in SessionsOf(exe))
+        {
+            try
+            {
+                if (s.Meter is not null && s.Meter.GetPeakValue(out var p) == CoreAudio.S_OK)
+                    max = Math.Max(max ?? 0f, p);
+                else
+                    max ??= 0f;
+            }
+            catch (Exception) { }
+        }
+        return max;
+    }
+
+    public IReadOnlyCollection<string> RunningExes() => _fake is not null
+        ? _fake.Keys.ToList()
+        : _sessions.Values.Select(s => s.Exe).Where(e => !string.Equals(e, OwnExe, StringComparison.OrdinalIgnoreCase))
+            .Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+
     public IReadOnlyList<RunningApp> GetRunningApps() => _fake is not null
         ? _fake.Values.Select(f => f.App).OrderBy(a => a.DisplayName).ToList()
         : _sessions.Values
@@ -249,7 +276,7 @@ public sealed class CoreAudioBackend : IAudioBackend, IDisposable
                                 continue;
                             var id = device.Id + "|" + instanceId;
                             // ISimpleAudioVolume per QueryInterface vom selben Session-Objekt
-                            newSessions[id] = new SessionEntry(id, exe, pid, (ISimpleAudioVolume)control);
+                            newSessions[id] = new SessionEntry(id, exe, pid, (ISimpleAudioVolume)control, control as IAudioMeterInformation);
                         }
                         catch (Exception) { }
                     }
