@@ -134,15 +134,19 @@ public partial class MainWindow
 
     private void UpdateFeatureBadges()
     {
+        // Dezent: Symbol + kleiner Zustandstext (nicht nur Farbe)
         var muted = _host.Mic.IsMuted == true;
-        MicFeatureBadge.Visibility = muted ? Visibility.Visible : Visibility.Collapsed;
-        MicFeatureState.Text = L.T("State_Muted");
-        AutomationSetName(MicFeatureItem, L.T("Main_FeatureMic") + (muted ? ", " + L.T("State_Muted") : ""));
+        MicFeatureIcon.Text = muted ? "\uEC54" : "\uE720";
+        if (muted)
+            MicFeatureIcon.Foreground = new SolidColorBrush(Color.FromRgb(0xDC, 0x26, 0x26));
+        else
+            MicFeatureIcon.ClearValue(TextBlock.ForegroundProperty);
+        MicFeatureState.Text = muted ? L.T("Feature_Muted") : "";
+        AutomationSetName(MicFeatureItem, L.T("Main_FeatureMic") + (muted ? ", " + L.T("Feature_Muted") : ""));
 
         var on = _host.Config.Ducking.Enabled;
-        DuckingFeatureBadge.Visibility = on ? Visibility.Visible : Visibility.Collapsed;
-        DuckingFeatureState.Text = L.T("State_On");
-        AutomationSetName(DuckingFeatureItem, L.T("Main_FeatureDucking") + (on ? ", " + L.T("State_On") : ""));
+        DuckingFeatureState.Text = on ? L.T("Feature_On") : "";
+        AutomationSetName(DuckingFeatureItem, L.T("Main_FeatureDucking") + (on ? ", " + L.T("Feature_On") : ""));
         if (!_loadingFeatures && DuckingOnBox.IsChecked != on)
         {
             _loadingFeatures = true;

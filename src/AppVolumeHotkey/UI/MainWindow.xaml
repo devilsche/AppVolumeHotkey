@@ -39,10 +39,10 @@
             <Setter Property="VerticalAlignment" Value="Center" />
         </Style>
         <!-- Screenreader: Name direkt am Listeneintrag -->
-        <Style x:Key="A11yItem" TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
+        <Style x:Key="A11yItem" TargetType="ListBoxItem" BasedOn="{StaticResource RoundedListItem}">
             <Setter Property="AutomationProperties.Name" Value="{Binding AccessibleName}" />
         </Style>
-        <Style x:Key="GroupItem" TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
+        <Style x:Key="GroupItem" TargetType="ListBoxItem" BasedOn="{StaticResource RoundedListItem}">
             <Setter Property="AutomationProperties.Name" Value="{Binding Name}" />
         </Style>
         <ControlTemplate x:Key="SplitterTemplate" TargetType="GridSplitter">
@@ -135,28 +135,23 @@
                         <RowDefinition Height="*" />
                         <RowDefinition Height="Auto" />
                     </Grid.RowDefinitions>
-                    <ListBox x:Name="GroupList" DisplayMemberPath="Name" SelectionChanged="GroupList_SelectionChanged"
+                    <ListBox x:Name="GroupList" Style="{StaticResource PlainList}" DisplayMemberPath="Name" SelectionChanged="GroupList_SelectionChanged"
                              ItemContainerStyle="{StaticResource GroupItem}"
                              KeyDown="GroupList_KeyDown" AutomationProperties.Name="{l:T Main_GroupsName}" />
                     <StackPanel Grid.Row="1" Margin="0,16,0,0">
-                        <TextBlock Text="{l:T Main_Features}" Style="{StaticResource Caption}" FontWeight="SemiBold" Margin="0,0,0,4" />
-                        <ListBox x:Name="FeatureList" SelectionChanged="FeatureList_SelectionChanged" HorizontalContentAlignment="Stretch" AutomationProperties.Name="{l:T Main_Features}">
-                            <ListBoxItem x:Name="MicFeatureItem" Padding="10,8">
+                        <TextBlock Text="{l:T Main_Features}" FontSize="14" FontWeight="SemiBold" Margin="0,0,0,8" />
+                        <ListBox x:Name="FeatureList" Style="{StaticResource PlainList}" ItemContainerStyle="{StaticResource RoundedListItem}" SelectionChanged="FeatureList_SelectionChanged" HorizontalContentAlignment="Stretch" AutomationProperties.Name="{l:T Main_Features}">
+                            <ListBoxItem x:Name="MicFeatureItem">
                                 <DockPanel>
-                                    <TextBlock DockPanel.Dock="Left" Style="{StaticResource Icon}" Text="&#xE720;" Margin="0,0,10,0" />
-                                    <Border x:Name="MicFeatureBadge" DockPanel.Dock="Right" CornerRadius="8" Padding="6,0" Visibility="Collapsed" Background="#DC2626">
-                                        <TextBlock x:Name="MicFeatureState" FontSize="11" FontWeight="Bold" Foreground="White" />
-                                    </Border>
+                                    <TextBlock x:Name="MicFeatureIcon" DockPanel.Dock="Left" Style="{StaticResource Icon}" Text="&#xE720;" Margin="0,0,10,0" />
+                                    <TextBlock x:Name="MicFeatureState" DockPanel.Dock="Right" Style="{StaticResource Caption}" VerticalAlignment="Center" />
                                     <TextBlock Text="{l:T Main_FeatureMic}" VerticalAlignment="Center" />
                                 </DockPanel>
                             </ListBoxItem>
-                            <ListBoxItem x:Name="DuckingFeatureItem" Padding="10,8">
+                            <ListBoxItem x:Name="DuckingFeatureItem">
                                 <DockPanel>
                                     <TextBlock DockPanel.Dock="Left" Style="{StaticResource Icon}" Text="&#xE995;" Margin="0,0,10,0" />
-                                    <Border x:Name="DuckingFeatureBadge" DockPanel.Dock="Right" CornerRadius="8" Padding="6,0" Visibility="Collapsed"
-                                            Background="{StaticResource GoldBrush}">
-                                        <TextBlock x:Name="DuckingFeatureState" FontSize="11" FontWeight="Bold" Foreground="{StaticResource OnGoldBrush}" />
-                                    </Border>
+                                    <TextBlock x:Name="DuckingFeatureState" DockPanel.Dock="Right" Style="{StaticResource Caption}" VerticalAlignment="Center" />
                                     <TextBlock Text="{l:T Main_FeatureDucking}" VerticalAlignment="Center" />
                                 </DockPanel>
                             </ListBoxItem>
@@ -298,7 +293,7 @@
                             </Button>
                         </DockPanel>
                         <Grid>
-                            <ListBox x:Name="ProfileList" HorizontalContentAlignment="Stretch" KeyDown="ProfileList_KeyDown"
+                            <ListBox x:Name="ProfileList" Style="{StaticResource PlainList}" HorizontalContentAlignment="Stretch" KeyDown="ProfileList_KeyDown"
                                      ScrollViewer.HorizontalScrollBarVisibility="Disabled" ItemContainerStyle="{StaticResource A11yItem}"
                                      MouseDoubleClick="ProfileList_MouseDoubleClick" AutomationProperties.Name="{l:T Main_ProfilesName}">
                                 <ListBox.ItemTemplate>
@@ -361,7 +356,7 @@
                 <Button DockPanel.Dock="Bottom" x:Name="AddRunningButton" Content="{l:T Main_AddToGroup}" Click="AddRunning_Click"
                         HorizontalAlignment="Stretch" MinHeight="32" Margin="0,12,0,0" />
                 <Grid>
-                    <ListBox x:Name="RunningList" AutomationProperties.Name="{l:T Main_RunningName}" ItemContainerStyle="{StaticResource A11yItem}"
+                    <ListBox x:Name="RunningList" Style="{StaticResource PlainList}" AutomationProperties.Name="{l:T Main_RunningName}" ItemContainerStyle="{StaticResource A11yItem}"
                              HorizontalContentAlignment="Stretch" ScrollViewer.HorizontalScrollBarVisibility="Disabled" SelectionChanged="RunningList_SelectionChanged"
                              PreviewMouseLeftButtonDown="RunningList_PreviewMouseLeftButtonDown" PreviewMouseMove="RunningList_PreviewMouseMove"
                              MouseDoubleClick="RunningList_MouseDoubleClick">

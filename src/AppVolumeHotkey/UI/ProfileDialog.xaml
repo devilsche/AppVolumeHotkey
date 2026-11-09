@@ -48,7 +48,8 @@
             <Setter Property="VerticalAlignment" Value="Center" />
             <Setter Property="HorizontalAlignment" Value="Center" />
         </Style>
-        <Style x:Key="StepItem" TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
+        <Style x:Key="StepItem" TargetType="ListBoxItem" BasedOn="{StaticResource RoundedListItem}">
+            <Setter Property="Padding" Value="8,4" />
             <Setter Property="AutomationProperties.Name" Value="{Binding AccessibleName}" />
         </Style>
     </Window.Resources>
@@ -116,7 +117,7 @@
                             <Button Content="{l:T Profile_PresetThree}" Click="PresetThree_Click" MinHeight="32" Padding="12,4" Margin="0,0,0,4"
                                     ToolTip="{l:T Profile_PresetThreeTip}" />
                         </WrapPanel>
-                        <ListBox x:Name="StepList" MaxHeight="240" HorizontalContentAlignment="Stretch" AllowDrop="True"
+                        <ListBox x:Name="StepList" Style="{StaticResource PlainList}" MaxHeight="240" HorizontalContentAlignment="Stretch" AllowDrop="True"
                                  ScrollViewer.HorizontalScrollBarVisibility="Disabled" ItemContainerStyle="{StaticResource StepItem}"
                                  KeyDown="StepList_KeyDown" Drop="StepList_Drop" DragOver="StepList_DragOver"
                                  AutomationProperties.Name="{l:T Profile_SequenceA11y}">

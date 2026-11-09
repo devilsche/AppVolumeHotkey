@@ -9,5 +9,49 @@
         <SolidColorBrush x:Key="OnGoldBrush" Color="#1C1606" />
         <!-- Windows-Symbolschrift (Windows 11, Fallback Windows 10) -->
         <FontFamily x:Key="IconFont">Segoe Fluent Icons, Segoe MDL2 Assets</FontFamily>
+
+        <!-- Listeneinträge mit abgerundeter Fläche, Akzentstrich bei Auswahl und deutlichem Tastaturfokus -->
+        <Style x:Key="RoundedListItem" TargetType="ListBoxItem">
+            <Setter Property="Padding" Value="12,8" />
+            <Setter Property="Margin" Value="0,1" />
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="Foreground" Value="{DynamicResource TextFillColorPrimaryBrush}" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListBoxItem">
+                        <Grid SnapsToDevicePixels="True">
+                            <Border x:Name="Bg" CornerRadius="6" Background="Transparent" />
+                            <Border x:Name="Pill" Width="3" Height="16" CornerRadius="1.5" HorizontalAlignment="Left" VerticalAlignment="Center"
+                                    Background="{DynamicResource {x:Static SystemColors.AccentColorBrushKey}}" Visibility="Collapsed" />
+                            <ContentPresenter Margin="{TemplateBinding Padding}" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalAlignment="Center" />
+                            <Border x:Name="Focus" CornerRadius="6" BorderThickness="2" Visibility="Collapsed"
+                                    BorderBrush="{DynamicResource {x:Static SystemColors.AccentColorBrushKey}}" />
+                        </Grid>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bg" Property="Background" Value="{DynamicResource SubtleFillColorSecondaryBrush}" />
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="Bg" Property="Background" Value="{DynamicResource SubtleFillColorSecondaryBrush}" />
+                                <Setter TargetName="Pill" Property="Visibility" Value="Visible" />
+                            </Trigger>
+                            <Trigger Property="IsKeyboardFocused" Value="True">
+                                <Setter TargetName="Focus" Property="Visibility" Value="Visible" />
+                            </Trigger>
+                            <Trigger Property="IsEnabled" Value="False">
+                                <Setter Property="Opacity" Value="0.5" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style x:Key="PlainList" TargetType="ListBox">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Padding" Value="0" />
+        </Style>
     </Application.Resources>
 </Application>

@@ -56,21 +56,21 @@
         <!-- Bereiche links -->
         <Border DockPanel.Dock="Left" Width="220" Padding="12,24,12,12" BorderThickness="0,0,1,0"
                 BorderBrush="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}">
-            <ListBox x:Name="NavList" SelectionChanged="NavList_SelectionChanged" BorderThickness="0" Background="Transparent"
+            <ListBox x:Name="NavList" SelectionChanged="NavList_SelectionChanged" Style="{StaticResource PlainList}" ItemContainerStyle="{StaticResource RoundedListItem}"
                      AutomationProperties.Name="{l:T Settings_NavA11y}">
-                <ListBoxItem AutomationProperties.Name="{l:T Settings_NavGeneral}" Padding="10,8">
+                <ListBoxItem AutomationProperties.Name="{l:T Settings_NavGeneral}">
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Style="{StaticResource Icon}" Text="&#xE713;" Margin="0,0,12,0" />
                         <TextBlock Text="{l:T Settings_NavGeneral}" VerticalAlignment="Center" />
                     </StackPanel>
                 </ListBoxItem>
-                <ListBoxItem AutomationProperties.Name="{l:T Settings_NavOverlay}" Padding="10,8">
+                <ListBoxItem AutomationProperties.Name="{l:T Settings_NavOverlay}">
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Style="{StaticResource Icon}" Text="&#xE7F4;" Margin="0,0,12,0" />
                         <TextBlock Text="{l:T Settings_NavOverlay}" VerticalAlignment="Center" />
                     </StackPanel>
                 </ListBoxItem>
-                <ListBoxItem AutomationProperties.Name="{l:T Settings_NavStatus}" Padding="10,8">
+                <ListBoxItem AutomationProperties.Name="{l:T Settings_NavStatus}">
                     <StackPanel Orientation="Horizontal">
                         <TextBlock Style="{StaticResource Icon}" Text="&#xE9D9;" Margin="0,0,12,0" />
                         <TextBlock Text="{l:T Settings_NavStatus}" VerticalAlignment="Center" />
