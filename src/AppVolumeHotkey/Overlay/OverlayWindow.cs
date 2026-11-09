@@ -20,10 +20,10 @@ public sealed class OverlayWindow : Window
 {
     private static readonly Color Gold = Color.FromRgb(0xE8, 0xB8, 0x4A);
 
-    private readonly TextBlock _name = new() { Foreground = Brushes.White, FontWeight = FontWeights.SemiBold, FontSize = 13, TextTrimming = TextTrimming.CharacterEllipsis };
-    private readonly TextBlock _detail = new() { Foreground = new SolidColorBrush(Color.FromArgb(0xD0, 0xFF, 0xFF, 0xFF)), FontSize = 11.5, Margin = new Thickness(0, 1, 0, 0) };
+    private readonly TextBlock _name = new() { Foreground = Brushes.White, FontWeight = FontWeights.SemiBold, FontSize = 14, TextTrimming = TextTrimming.CharacterEllipsis };
+    private readonly TextBlock _detail = new() { Foreground = new SolidColorBrush(Color.FromArgb(0xD0, 0xFF, 0xFF, 0xFF)), FontSize = 12.5, Margin = new Thickness(0, 1, 0, 0) };
     private readonly Border _badge = new() { CornerRadius = new CornerRadius(8), Padding = new Thickness(6, 0, 6, 1), Margin = new Thickness(10, 0, 0, 0), VerticalAlignment = VerticalAlignment.Center };
-    private readonly TextBlock _badgeText = new() { FontSize = 9.5, FontWeight = FontWeights.Bold };
+    private readonly TextBlock _badgeText = new() { FontSize = 11, FontWeight = FontWeights.Bold };
     private readonly ScaleTransform _barScale = new(1, 1);
     private readonly ScaleTransform _sizeScale = new(1, 1);
     private readonly Image _icon;
@@ -134,7 +134,7 @@ public sealed class OverlayWindow : Window
 
         var scale = settings.OverlaySize switch
         {
-            OverlaySize.Small => 0.85,
+            OverlaySize.Small => 0.9,
             OverlaySize.Large => 1.35,
             _ => 1.0,
         };
@@ -180,9 +180,9 @@ public sealed class OverlayWindow : Window
         var normal = style == OverlayStyle.Normal;
         _icon.Width = _icon.Height = normal ? 36 : 28;
         _icon.Margin = new Thickness(0, 0, normal ? 12 : 10, 0);
-        _name.FontSize = normal ? 15 : 13;
-        _detail.FontSize = normal ? 13 : 11.5;
-        _badgeText.FontSize = normal ? 10.5 : 9.5;
+        _name.FontSize = normal ? 16 : 14;
+        _detail.FontSize = normal ? 14 : 12.5;
+        _badgeText.FontSize = normal ? 12 : 11;
         _track.Height = _fill.Height = normal ? 4 : 3;
         _card.Padding = normal ? new Thickness(14, 10, 14, 11) : new Thickness(10, 7, 12, 8);
         _card.CornerRadius = new CornerRadius(normal ? 12 : 10);

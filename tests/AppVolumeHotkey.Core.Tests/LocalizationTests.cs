@@ -65,3 +65,37 @@ public sealed class LocalizationTests : IDisposable
     [Fact]
     public void LanguageSetting_DefaultsToAuto() => Assert.Equal("auto", new AppSettings().Language);
 }
+
+public sealed class AccessKeyTests
+{
+    // Texte mit Alt-Kürzel (_X), die gleichzeitig in einem Fenster bzw. einer Einstellungsseite sichtbar sind
+    public static TheoryData<string, string[]> Windows => new()
+    {
+        { "Hauptfenster", new[] { "Main_Settings", "Main_About", "Main_Groups", "Main_NewGroup", "Main_AddExe", "Main_Profiles", "Main_NewProfile", "Main_Running", "Main_AddToGroup" } },
+        { "Profil-Dialog", new[] { "Profile_Name", "Profile_Hotkey", "Profile_PassThrough", "Profile_TriggerToggle", "Profile_TriggerHold", "Profile_ModeRelative", "Profile_ModeAbsolute", "Profile_Sequence", "Profile_AddPercent", "Profile_AddBaseline", "Profile_OverlayOn", "Profile_OverlayOff", "Profile_Sound", "Profile_SoundLabel", "Common_Save" } },
+        { "Einstellungen/Allgemein", new[] { "Settings_Language", "Settings_StartWithWindows", "Settings_StartMinimized", "Settings_MinimizeToTray", "Settings_RunAsAdmin", "Settings_Fade", "Common_Save" } },
+        { "Einstellungen/Overlay", new[] { "Settings_Style", "Settings_Position", "Settings_Size", "Settings_Duration", "Settings_TestOverlay", "Common_Save" } },
+        { "Einstellungen/Statusanzeige", new[] { "Settings_StatusOn", "Settings_StatusStyle", "Settings_StatusCorner", "Settings_StatusOpacity", "Settings_TrayBadge", "Common_Save" } },
+        { "Infobereich-Menü", new[] { "Tray_ResetAll", "Tray_Pause", "Tray_Open", "Tray_About", "Tray_Exit" } },
+        { "Über", new[] { "About_OpenData", "Common_Close" } },
+    };
+
+    [Theory]
+    [MemberData(nameof(Windows))]
+    public void AccessKeys_AreUniquePerWindow(string window, string[] keys)
+    {
+        foreach (var table in new[] { Strings.De, Strings.En })
+        {
+            var letters = keys.Select(k => (Key: k, Letter: AccessLetter(table[k]))).ToList();
+            Assert.All(letters, l => Assert.True(l.Letter is not null, $"{window}: {l.Key} hat kein Alt-Kürzel"));
+            var dupes = letters.GroupBy(l => l.Letter).Where(g => g.Count() > 1).Select(g => $"{g.Key}: {string.Join(", ", g.Select(x => x.Key))}").ToList();
+            Assert.True(dupes.Count == 0, $"{window}: doppelte Alt-Kürzel – {string.Join("; ", dupes)}");
+        }
+    }
+
+    private static char? AccessLetter(string text)
+    {
+        var i = text.IndexOf('_');
+        return i >= 0 && i + 1 < text.Length ? char.ToLowerInvariant(text[i + 1]) : null;
+    }
+}

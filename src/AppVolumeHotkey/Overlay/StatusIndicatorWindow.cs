@@ -15,7 +15,7 @@ namespace AppVolumeHotkey.Overlay;
 /// </summary>
 public sealed class StatusIndicatorWindow : Window
 {
-    private static readonly Color Gold = Color.FromRgb(0xF2, 0xC9, 0x4C);
+    private static readonly Color Gold = Color.FromRgb(0xE8, 0xB8, 0x4A); // Produktfarbe, wie Overlay und App-Ressource „GoldBrush“
     private static readonly Color Green = Color.FromRgb(0x16, 0xA3, 0x4A);
 
     public StatusIndicatorWindow()
@@ -57,7 +57,7 @@ public sealed class StatusIndicatorWindow : Window
             StatusStyle.IconText => BuildPill(string.Join("  ·  ", activeItems)),
             _ => BuildMiniText(string.Join("  ·  ", activeItems)),
         };
-        Opacity = Math.Clamp(settings.StatusOpacity, 30, 100) / 100.0;
+        Opacity = Math.Clamp(settings.StatusOpacity, 50, 100) / 100.0;
 
         if (!IsVisible)
         {

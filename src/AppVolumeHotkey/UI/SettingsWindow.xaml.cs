@@ -70,6 +70,8 @@ public partial class SettingsWindow : Window
         SizeBox.ItemsSource = Sizes.Select(c => L.T(c.Label)).ToList();
         SizeBox.SelectedIndex = Array.FindIndex(Sizes, c => c.Value == s.OverlaySize);
         MaxHeight = SystemParameters.WorkArea.Height - 40;
+        Height = Math.Min(Height, MaxHeight);
+        NavList.SelectedIndex = 0;
         StatusOnBox.IsChecked = s.StatusIndicator;
         StatusStyleBox.ItemsSource = StatusStyles.Select(c => L.T(c.Label)).ToList();
         StatusStyleBox.SelectedIndex = Math.Max(0, Array.FindIndex(StatusStyles, c => c.Value == s.StatusStyle));
@@ -89,7 +91,12 @@ public partial class SettingsWindow : Window
     }
 
     /// <summary>Nur für --ui-snapshots.</summary>
-    internal static SettingsWindow CreateForSnapshot(Window owner, AppHost host) => new(owner, host) { MaxHeight = double.PositiveInfinity };
+    internal static SettingsWindow CreateForSnapshot(Window owner, AppHost host, int page = 0)
+    {
+        var w = new SettingsWindow(owner, host) { MaxHeight = double.PositiveInfinity, Height = 600 };
+        w.NavList.SelectedIndex = page;
+        return w;
+    }
 
     public static void Open(Window owner, AppHost host) => new SettingsWindow(owner, host).ShowDialog();
 
@@ -117,7 +124,7 @@ public partial class SettingsWindow : Window
             return ShowError(DurationBox, L.T("Settings_ErrDuration"));
         if (!int.TryParse(FadeBox.Text.Trim(), out var fade) || fade is < 0 or > 1000)
             return ShowError(FadeBox, L.T("Settings_ErrFade"));
-        if (!int.TryParse(StatusOpacityBox.Text.Trim(), out var opacity) || opacity is < 30 or > 100)
+        if (!int.TryParse(StatusOpacityBox.Text.Trim(), out var opacity) || opacity is < 50 or > 100)
             return ShowError(StatusOpacityBox, L.T("Settings_ErrOpacity"));
         settings.StatusOpacity = opacity;
         settings.OverlayDurationMs = duration;
@@ -125,8 +132,19 @@ public partial class SettingsWindow : Window
         return true;
     }
 
+    private void NavList_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e) => ShowPage(NavList.SelectedIndex);
+
+    private void ShowPage(int index)
+    {
+        GeneralPage.Visibility = index == 0 ? Visibility.Visible : Visibility.Collapsed;
+        OverlayPage.Visibility = index == 1 ? Visibility.Visible : Visibility.Collapsed;
+        StatusPage.Visibility = index == 2 ? Visibility.Visible : Visibility.Collapsed;
+    }
+
     private bool ShowError(System.Windows.Controls.TextBox box, string message)
     {
+        // Seite mit dem fehlerhaften Feld anzeigen
+        NavList.SelectedIndex = box == FadeBox ? 0 : box == DurationBox ? 1 : 2;
         ErrorText.Text = "⚠ " + message;
         ErrorText.Visibility = Visibility.Visible;
         AutomationProperties.SetHelpText(box, message);

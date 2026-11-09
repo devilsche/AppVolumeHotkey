@@ -37,7 +37,12 @@ public sealed class TrayController : IDisposable
         else
         {
             foreach (var line in active)
-                menu.Items.Add(new MenuItem { Header = "● " + line, IsEnabled = false });
+            {
+                // Bedienbar (nicht ausgegraut), damit Tastatur und Screenreader sie erreichen – öffnet das Hauptfenster
+                var item = new MenuItem { Header = line };
+                item.Click += (_, _) => _host.ShowMainWindow();
+                menu.Items.Add(item);
+            }
         }
         menu.Items.Add(new Separator());
 

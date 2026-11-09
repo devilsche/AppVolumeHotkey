@@ -27,7 +27,7 @@ public partial class MainWindow : Window
         InitializeComponent();
         Title = $"AppVolumeHotkey {Platform.AppInfo.Version}";
         RestorePlacement();
-        VersionLabel.Text = "v" + Platform.AppInfo.Version;
+        VersionLabel.Text = Platform.AppInfo.Version;
 
         _host.ConfigChanged += Refresh;
         _host.Volume.StateChanged += RefreshProfiles;
@@ -206,6 +206,7 @@ public partial class MainWindow : Window
         var selectedId = (ProfileList.SelectedItem as ProfileRow)?.Profile.Id;
         var rows = g.Profiles.Select(p => new ProfileRow(p, active, _host.FailedHotkeys.Contains(p.Id))).ToList();
         ProfileList.ItemsSource = rows;
+        NoProfilesHint.Visibility = rows.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
         if (selectedId is not null)
             ProfileList.SelectedItem = rows.FirstOrDefault(r => r.Profile.Id == selectedId);
     }
@@ -226,6 +227,7 @@ public partial class MainWindow : Window
             if (existing is null)
                 _running.Insert(Math.Min(i, _running.Count), new RunningAppRow(apps[i]));
         }
+        NoRunningHint.Visibility = _running.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
         UpdateRunningVolumes();
     }
 
@@ -283,7 +285,7 @@ public partial class MainWindow : Window
 
     private void NewGroup_Click(object sender, RoutedEventArgs e)
     {
-        var name = InputDialog.Ask(this, L.T("Main_NewGroupTitle"), L.T("Main_GroupNameLabel"), "Voice");
+        var name = InputDialog.Ask(this, L.T("Main_NewGroupTitle"), L.T("Main_GroupNameLabel"), "Voice", L.T("Input_Create"));
         if (name is null)
             return;
         var g = new AppGroup { Name = name };
@@ -299,7 +301,7 @@ public partial class MainWindow : Window
     {
         if (SelectedGroup is not { } g)
             return;
-        var name = InputDialog.Ask(this, L.T("Main_RenameGroupTitle"), L.T("Main_GroupNameLabel"), g.Name);
+        var name = InputDialog.Ask(this, L.T("Main_RenameGroupTitle"), L.T("Main_GroupNameLabel"), g.Name, L.T("Input_Rename"));
         if (name is null)
             return;
         g.Name = name;

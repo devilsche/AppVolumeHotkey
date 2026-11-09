@@ -24,6 +24,7 @@ public partial class ProfileDialog : Window
         _host = host;
         _profile = profile;
         InitializeComponent();
+        MaxHeight = SystemParameters.WorkArea.Height - 40;
 
         Title = isNew ? L.T("Profile_TitleNew") : L.T("Profile_TitleEdit");
         Heading.Text = isNew ? L.F("Profile_HeadingNew", group.Name) : L.F("Profile_HeadingEdit", profile.Name, group.Name);
@@ -201,7 +202,6 @@ public partial class ProfileDialog : Window
             stepsError = L.T("Profile_ErrHoldNeedsPercent");
         ok &= SetError(StepList, StepsError, stepsError);
 
-        SaveButton.IsEnabled = ok;
         return ok;
     }
 
@@ -318,7 +318,15 @@ public partial class ProfileDialog : Window
     private void Save_Click(object sender, RoutedEventArgs e)
     {
         if (!Validate())
+        {
+            // Speichern bleibt klickbar; bei Fehlern zum ersten fehlerhaften Feld springen
+            Control first = NameError.Visibility == Visibility.Visible ? NameBox
+                : HotkeyError.Visibility == Visibility.Visible ? HotkeyInput
+                : StepList;
+            first.Focus();
+            first.BringIntoView();
             return;
+        }
         _profile.Name = NameBox.Text.Trim();
         _profile.Hotkey = HotkeyInput.Hotkey;
         _profile.Steps = _steps.Select(s => { s.TryGetStep(out var step); return step; }).ToList();

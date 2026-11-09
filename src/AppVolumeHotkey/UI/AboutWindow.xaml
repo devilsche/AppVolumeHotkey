@@ -3,9 +3,9 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:l="clr-namespace:AppVolumeHotkey.Localization"
         Title="{l:T About_Title}"
-        Width="600" Height="760" MinWidth="480" MinHeight="520"
+        Width="600" Height="680" MinWidth="480" MinHeight="520"
         WindowStartupLocation="CenterOwner" ShowInTaskbar="False">
-    <DockPanel Margin="20">
+    <DockPanel Margin="24">
         <StackPanel DockPanel.Dock="Top">
             <StackPanel Orientation="Horizontal">
                 <Image Source="/Assets/app-96.png" Width="56" Height="56" RenderOptions.BitmapScalingMode="HighQuality" Margin="0,0,14,0" AutomationProperties.Name="" />

@@ -3,8 +3,8 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:l="clr-namespace:AppVolumeHotkey.Localization"
         Title="{l:T Settings_Title}"
-        Width="580" SizeToContent="Height"
-        ResizeMode="NoResize" WindowStartupLocation="CenterOwner" ShowInTaskbar="False">
+        Width="840" Height="600" MinWidth="640" MinHeight="420"
+        WindowStartupLocation="CenterOwner" ShowInTaskbar="False">
     <Window.Resources>
         <!-- Lange Beschriftungen umbrechen statt abschneiden (Fluent-Stil bleibt erhalten) -->
         <DataTemplate x:Key="WrapContent">
@@ -12,96 +12,137 @@
         </DataTemplate>
         <Style TargetType="CheckBox" BasedOn="{StaticResource {x:Type CheckBox}}">
             <Setter Property="ContentTemplate" Value="{StaticResource WrapContent}" />
+            <Setter Property="Margin" Value="0,0,0,12" />
         </Style>
-        <Style TargetType="RadioButton" BasedOn="{StaticResource {x:Type RadioButton}}">
-            <Setter Property="ContentTemplate" Value="{StaticResource WrapContent}" />
+        <Style x:Key="PageHeading" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="20" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Margin" Value="0,0,0,8" />
+        </Style>
+        <Style x:Key="SectionHeading" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Margin" Value="0,24,0,12" />
+        </Style>
+        <Style x:Key="Caption" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Foreground" Value="{DynamicResource TextFillColorSecondaryBrush}" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
+        <Style x:Key="FieldLabel" TargetType="Label" BasedOn="{StaticResource {x:Type Label}}">
+            <Setter Property="Padding" Value="0,0,0,4" />
+        </Style>
+        <Style x:Key="Field" TargetType="FrameworkElement">
+            <Setter Property="MaxWidth" Value="360" />
+            <Setter Property="HorizontalAlignment" Value="Left" />
+            <Setter Property="MinWidth" Value="240" />
+            <Setter Property="Margin" Value="0,0,0,16" />
+        </Style>
+        <Style x:Key="Icon" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="{StaticResource IconFont}" />
+            <Setter Property="FontSize" Value="16" />
+            <Setter Property="VerticalAlignment" Value="Center" />
         </Style>
     </Window.Resources>
-    <ScrollViewer VerticalScrollBarVisibility="Auto" Focusable="False">
-    <StackPanel Margin="20">
-        <TextBlock Text="{l:T Settings_Title}" FontSize="20" FontWeight="SemiBold" Margin="0,0,0,16" />
 
-        <Grid Margin="0,0,0,12">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="170" />
-                <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
-            <Label Content="{l:T Settings_Language}" Target="{Binding ElementName=LanguageBox}" VerticalAlignment="Center" />
-            <ComboBox Grid.Column="1" x:Name="LanguageBox" AutomationProperties.Name="{l:T Settings_LanguageA11y}" />
-        </Grid>
+    <DockPanel>
+        <!-- Knopfzeile bleibt immer sichtbar -->
+        <Border DockPanel.Dock="Bottom" Padding="24,16" BorderThickness="0,1,0,0"
+                BorderBrush="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}">
+            <DockPanel>
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                    <Button Content="{l:T Common_Save}" IsDefault="True" Click="Save_Click" MinWidth="100" MinHeight="32" Margin="0,0,8,0" />
+                    <Button Content="{l:T Common_Cancel}" IsCancel="True" MinWidth="100" MinHeight="32" />
+                </StackPanel>
+                <TextBlock x:Name="ErrorText" TextWrapping="Wrap" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,0,16,0"
+                           Visibility="Collapsed" Foreground="{DynamicResource SystemFillColorCriticalBrush}" />
+            </DockPanel>
+        </Border>
 
-        <TextBlock Text="{l:T Settings_Start}" FontWeight="SemiBold" Margin="0,0,0,6" />
-        <CheckBox x:Name="StartWithWindowsBox" Content="{l:T Settings_StartWithWindows}" Margin="0,0,0,6" />
-        <CheckBox x:Name="StartMinimizedBox" Content="{l:T Settings_StartMinimized}" Margin="0,0,0,6" />
-        <CheckBox x:Name="MinimizeToTrayBox" Content="{l:T Settings_MinimizeToTray}" Margin="0,0,0,6" />
-        <CheckBox x:Name="RunAsAdminBox" Content="{l:T Settings_RunAsAdmin}" />
-        <TextBlock x:Name="RunAsAdminHint" Text="{l:T Settings_RunAsAdminHint}"
-                   Opacity="0.75" FontSize="12" TextWrapping="Wrap" Margin="26,2,0,0" />
+        <!-- Bereiche links -->
+        <Border DockPanel.Dock="Left" Width="220" Padding="12,24,12,12" BorderThickness="0,0,1,0"
+                BorderBrush="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}">
+            <ListBox x:Name="NavList" SelectionChanged="NavList_SelectionChanged" BorderThickness="0" Background="Transparent"
+                     AutomationProperties.Name="{l:T Settings_NavA11y}">
+                <ListBoxItem AutomationProperties.Name="{l:T Settings_NavGeneral}" Padding="10,8">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Style="{StaticResource Icon}" Text="&#xE713;" Margin="0,0,12,0" />
+                        <TextBlock Text="{l:T Settings_NavGeneral}" VerticalAlignment="Center" />
+                    </StackPanel>
+                </ListBoxItem>
+                <ListBoxItem AutomationProperties.Name="{l:T Settings_NavOverlay}" Padding="10,8">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Style="{StaticResource Icon}" Text="&#xE7F4;" Margin="0,0,12,0" />
+                        <TextBlock Text="{l:T Settings_NavOverlay}" VerticalAlignment="Center" />
+                    </StackPanel>
+                </ListBoxItem>
+                <ListBoxItem AutomationProperties.Name="{l:T Settings_NavStatus}" Padding="10,8">
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock Style="{StaticResource Icon}" Text="&#xE9D9;" Margin="0,0,12,0" />
+                        <TextBlock Text="{l:T Settings_NavStatus}" VerticalAlignment="Center" />
+                    </StackPanel>
+                </ListBoxItem>
+            </ListBox>
+        </Border>
 
-        <TextBlock Text="{l:T Settings_Overlay}" FontWeight="SemiBold" Margin="0,18,0,2" />
-        <TextBlock Text="{l:T Settings_OverlayHint}"
-                   Opacity="0.75" FontSize="12" TextWrapping="Wrap" Margin="0,0,0,8" />
         <Grid>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="170" />
-                <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-            </Grid.RowDefinitions>
-            <Label Grid.Row="3" Content="{l:T Settings_Style}" Target="{Binding ElementName=StyleBox}" VerticalAlignment="Center" />
-            <ComboBox Grid.Row="3" Grid.Column="1" x:Name="StyleBox" Margin="0,6,0,0" AutomationProperties.Name="{l:T Settings_StyleA11y}" />
-            <Label Grid.Row="0" Content="{l:T Settings_Position}" Target="{Binding ElementName=CornerBox}" VerticalAlignment="Center" />
-            <ComboBox Grid.Row="0" Grid.Column="1" x:Name="CornerBox" Margin="0,0,0,6" AutomationProperties.Name="{l:T Settings_PositionA11y}" />
-            <Label Grid.Row="1" Content="{l:T Settings_Size}" Target="{Binding ElementName=SizeBox}" VerticalAlignment="Center" />
-            <ComboBox Grid.Row="1" Grid.Column="1" x:Name="SizeBox" Margin="0,0,0,6" AutomationProperties.Name="{l:T Settings_SizeA11y}" />
-            <Label Grid.Row="2" Content="{l:T Settings_Duration}" Target="{Binding ElementName=DurationBox}" VerticalAlignment="Center" />
-            <TextBox Grid.Row="2" Grid.Column="1" x:Name="DurationBox" AutomationProperties.Name="{l:T Settings_DurationA11y}" />
+            <!-- Allgemein -->
+            <ScrollViewer x:Name="GeneralPage" VerticalScrollBarVisibility="Auto" Focusable="False">
+                <StackPanel Margin="32,24,32,24">
+                    <TextBlock Text="{l:T Settings_NavGeneral}" Style="{StaticResource PageHeading}" />
+
+                    <Label Content="{l:T Settings_Language}" Target="{Binding ElementName=LanguageBox}" Style="{StaticResource FieldLabel}" Margin="0,16,0,0" />
+                    <ComboBox x:Name="LanguageBox" Style="{StaticResource Field}" AutomationProperties.Name="{l:T Settings_LanguageA11y}" />
+
+                    <TextBlock Text="{l:T Settings_Start}" Style="{StaticResource SectionHeading}" />
+                    <CheckBox x:Name="StartWithWindowsBox" Content="{l:T Settings_StartWithWindows}" />
+                    <CheckBox x:Name="StartMinimizedBox" Content="{l:T Settings_StartMinimized}" />
+                    <CheckBox x:Name="MinimizeToTrayBox" Content="{l:T Settings_MinimizeToTray}" />
+                    <CheckBox x:Name="RunAsAdminBox" Content="{l:T Settings_RunAsAdmin}" Margin="0,0,0,4" />
+                    <TextBlock x:Name="RunAsAdminHint" Text="{l:T Settings_RunAsAdminHint}" Style="{StaticResource Caption}" Margin="28,0,0,0" />
+
+                    <TextBlock Text="{l:T Settings_Transition}" Style="{StaticResource SectionHeading}" />
+                    <Label Content="{l:T Settings_Fade}" Target="{Binding ElementName=FadeBox}" Style="{StaticResource FieldLabel}" />
+                    <TextBox x:Name="FadeBox" Style="{StaticResource Field}" AutomationProperties.Name="{l:T Settings_FadeA11y}" />
+                </StackPanel>
+            </ScrollViewer>
+
+            <!-- Overlay -->
+            <ScrollViewer x:Name="OverlayPage" VerticalScrollBarVisibility="Auto" Focusable="False" Visibility="Collapsed">
+                <StackPanel Margin="32,24,32,24">
+                    <TextBlock Text="{l:T Settings_NavOverlay}" Style="{StaticResource PageHeading}" />
+                    <TextBlock Text="{l:T Settings_OverlayHint}" Style="{StaticResource Caption}" Margin="0,0,0,24" />
+
+                    <Label Content="{l:T Settings_Style}" Target="{Binding ElementName=StyleBox}" Style="{StaticResource FieldLabel}" />
+                    <ComboBox x:Name="StyleBox" Style="{StaticResource Field}" AutomationProperties.Name="{l:T Settings_StyleA11y}" />
+                    <Label Content="{l:T Settings_Position}" Target="{Binding ElementName=CornerBox}" Style="{StaticResource FieldLabel}" />
+                    <ComboBox x:Name="CornerBox" Style="{StaticResource Field}" AutomationProperties.Name="{l:T Settings_PositionA11y}" />
+                    <Label Content="{l:T Settings_Size}" Target="{Binding ElementName=SizeBox}" Style="{StaticResource FieldLabel}" />
+                    <ComboBox x:Name="SizeBox" Style="{StaticResource Field}" AutomationProperties.Name="{l:T Settings_SizeA11y}" />
+                    <Label Content="{l:T Settings_Duration}" Target="{Binding ElementName=DurationBox}" Style="{StaticResource FieldLabel}" />
+                    <TextBox x:Name="DurationBox" Style="{StaticResource Field}" AutomationProperties.Name="{l:T Settings_DurationA11y}" />
+
+                    <Button Content="{l:T Settings_TestOverlay}" Click="TestOverlay_Click" HorizontalAlignment="Left" MinHeight="32" Padding="12,4" Margin="0,8,0,0" />
+                </StackPanel>
+            </ScrollViewer>
+
+            <!-- Statusanzeige -->
+            <ScrollViewer x:Name="StatusPage" VerticalScrollBarVisibility="Auto" Focusable="False" Visibility="Collapsed">
+                <StackPanel Margin="32,24,32,24">
+                    <TextBlock Text="{l:T Settings_NavStatus}" Style="{StaticResource PageHeading}" />
+                    <TextBlock Text="{l:T Settings_StatusHint}" Style="{StaticResource Caption}" Margin="0,0,0,24" />
+
+                    <CheckBox x:Name="StatusOnBox" Content="{l:T Settings_StatusOn}" Margin="0,0,0,24" />
+                    <Label Content="{l:T Settings_StatusStyle}" Target="{Binding ElementName=StatusStyleBox}" Style="{StaticResource FieldLabel}" />
+                    <ComboBox x:Name="StatusStyleBox" Style="{StaticResource Field}" AutomationProperties.Name="{l:T Settings_StatusStyleA11y}" />
+                    <Label Content="{l:T Settings_StatusCorner}" Target="{Binding ElementName=StatusCornerBox}" Style="{StaticResource FieldLabel}" />
+                    <ComboBox x:Name="StatusCornerBox" Style="{StaticResource Field}" AutomationProperties.Name="{l:T Settings_StatusCornerA11y}" />
+                    <Label Content="{l:T Settings_StatusOpacity}" Target="{Binding ElementName=StatusOpacityBox}" Style="{StaticResource FieldLabel}" />
+                    <TextBox x:Name="StatusOpacityBox" Style="{StaticResource Field}" AutomationProperties.Name="{l:T Settings_StatusOpacityA11y}" />
+
+                    <CheckBox x:Name="TrayBadgeBox" Content="{l:T Settings_TrayBadge}" Margin="0,8,0,0" />
+                </StackPanel>
+            </ScrollViewer>
         </Grid>
-        <Button Content="{l:T Settings_TestOverlay}" Click="TestOverlay_Click" HorizontalAlignment="Left" MinHeight="32" Padding="12,4" Margin="0,8,0,0" />
-
-        <TextBlock Text="{l:T Settings_Status}" FontWeight="SemiBold" Margin="0,18,0,2" />
-        <TextBlock Text="{l:T Settings_StatusHint}" Opacity="0.75" FontSize="12" TextWrapping="Wrap" Margin="0,0,0,8" />
-        <CheckBox x:Name="StatusOnBox" Content="{l:T Settings_StatusOn}" Margin="0,0,0,6" />
-        <Grid Margin="0,0,0,6">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="170" />
-                <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-            </Grid.RowDefinitions>
-            <Label Grid.Row="0" Content="{l:T Settings_StatusStyle}" Target="{Binding ElementName=StatusStyleBox}" VerticalAlignment="Center" />
-            <ComboBox Grid.Row="0" Grid.Column="1" x:Name="StatusStyleBox" Margin="0,0,0,6" AutomationProperties.Name="{l:T Settings_StatusStyleA11y}" />
-            <Label Grid.Row="1" Content="{l:T Settings_StatusCorner}" Target="{Binding ElementName=StatusCornerBox}" VerticalAlignment="Center" />
-            <ComboBox Grid.Row="1" Grid.Column="1" x:Name="StatusCornerBox" Margin="0,0,0,6" AutomationProperties.Name="{l:T Settings_StatusCornerA11y}" />
-            <Label Grid.Row="2" Content="{l:T Settings_StatusOpacity}" Target="{Binding ElementName=StatusOpacityBox}" VerticalAlignment="Center" />
-            <TextBox Grid.Row="2" Grid.Column="1" x:Name="StatusOpacityBox" AutomationProperties.Name="{l:T Settings_StatusOpacityA11y}" />
-        </Grid>
-        <CheckBox x:Name="TrayBadgeBox" Content="{l:T Settings_TrayBadge}" Margin="0,4,0,0" />
-
-        <TextBlock Text="{l:T Settings_Transition}" FontWeight="SemiBold" Margin="0,18,0,6" />
-        <Grid>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="170" />
-                <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
-            <Label Content="{l:T Settings_Fade}" Target="{Binding ElementName=FadeBox}" VerticalAlignment="Center" />
-            <TextBox Grid.Column="1" x:Name="FadeBox" AutomationProperties.Name="{l:T Settings_FadeA11y}" />
-        </Grid>
-
-        <TextBlock x:Name="ErrorText" Margin="0,10,0,0" TextWrapping="Wrap" FontWeight="SemiBold" Visibility="Collapsed"
-                   Foreground="{DynamicResource SystemFillColorCriticalBrush}" />
-
-        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
-            <Button Content="{l:T Common_Save}" IsDefault="True" Click="Save_Click" MinWidth="100" MinHeight="32" Margin="0,0,8,0" />
-            <Button Content="{l:T Common_Cancel}" IsCancel="True" MinWidth="100" MinHeight="32" />
-        </StackPanel>
-    </StackPanel>
-    </ScrollViewer>
+    </DockPanel>
 </Window>

@@ -4,9 +4,10 @@
         xmlns:l="clr-namespace:AppVolumeHotkey.Localization"
         xmlns:ui="clr-namespace:AppVolumeHotkey.UI"
         Title="{l:T Profile_TitleEdit}"
-        Width="560" SizeToContent="Height" MinHeight="420"
+        Width="680" SizeToContent="Height"
         ResizeMode="NoResize" WindowStartupLocation="CenterOwner" ShowInTaskbar="False">
     <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis" />
         <!-- Lange Beschriftungen umbrechen statt abschneiden (Fluent-Stil bleibt erhalten) -->
         <DataTemplate x:Key="WrapContent">
             <AccessText Text="{Binding}" TextWrapping="Wrap" />
@@ -17,7 +18,23 @@
         <Style TargetType="RadioButton" BasedOn="{StaticResource {x:Type RadioButton}}">
             <Setter Property="ContentTemplate" Value="{StaticResource WrapContent}" />
         </Style>
-        <BooleanToVisibilityConverter x:Key="BoolToVis" />
+        <Style x:Key="Card" TargetType="Border">
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="BorderBrush" Value="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}" />
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="Padding" Value="16" />
+            <Setter Property="Margin" Value="0,0,0,16" />
+        </Style>
+        <Style x:Key="CardHeading" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Margin" Value="0,0,0,12" />
+        </Style>
+        <Style x:Key="Caption" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="Foreground" Value="{DynamicResource TextFillColorSecondaryBrush}" />
+            <Setter Property="TextWrapping" Value="Wrap" />
+        </Style>
         <Style x:Key="Error" TargetType="TextBlock">
             <Setter Property="Margin" Value="0,4,0,0" />
             <Setter Property="TextWrapping" Value="Wrap" />
@@ -25,122 +42,183 @@
             <Setter Property="Foreground" Value="{DynamicResource SystemFillColorCriticalBrush}" />
             <Setter Property="Visibility" Value="Collapsed" />
         </Style>
+        <Style x:Key="Icon" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="{StaticResource IconFont}" />
+            <Setter Property="FontSize" Value="14" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+        </Style>
+        <Style x:Key="StepItem" TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
+            <Setter Property="AutomationProperties.Name" Value="{Binding AccessibleName}" />
+        </Style>
     </Window.Resources>
 
-    <StackPanel Margin="20">
-        <TextBlock x:Name="Heading" FontSize="20" FontWeight="SemiBold" Margin="0,0,0,16" />
-
-        <!-- Name -->
-        <Label Content="{l:T Profile_Name}" Target="{Binding ElementName=NameBox}" Padding="0,0,0,4" />
-        <TextBox x:Name="NameBox" TextChanged="Any_Changed" AutomationProperties.Name="{l:T Profile_NameA11y}" />
-        <TextBlock x:Name="NameError" Style="{StaticResource Error}" />
-
-        <!-- Hotkey -->
-        <Label Content="{l:T Profile_Hotkey}" Target="{Binding ElementName=HotkeyInput}" Padding="0,14,0,4" />
-        <ui:HotkeyBox x:Name="HotkeyInput" AutomationProperties.Name="{l:T Profile_HotkeyA11y}" />
-        <TextBlock Text="{l:T Profile_HotkeyHint}"
-                   Opacity="0.75" FontSize="12" Margin="0,4,0,0" TextWrapping="Wrap" />
-        <TextBlock x:Name="HotkeyError" Style="{StaticResource Error}" />
-        <CheckBox x:Name="PassThroughBox" Margin="0,8,0,0"
-                  Content="{l:T Profile_PassThrough}" />
-        <TextBlock x:Name="PassThroughHint" Opacity="0.75" FontSize="12" Margin="26,2,0,0" TextWrapping="Wrap" /> 
-
-        <!-- Auslösen -->
-        <TextBlock Text="{l:T Profile_TriggerHeading}" FontWeight="SemiBold" Margin="0,16,0,6" />
-        <RadioButton x:Name="ToggleRadio" GroupName="Trigger" Checked="Mode_Changed" Margin="0,0,0,4" Content="{l:T Profile_TriggerToggle}" />
-        <RadioButton x:Name="HoldRadio" GroupName="Trigger" Checked="Mode_Changed" Margin="0,0,0,4" Content="{l:T Profile_TriggerHold}" />
-        <TextBlock Text="{l:T Profile_TriggerHoldHint}" Opacity="0.75" FontSize="12" Margin="26,0,0,0" TextWrapping="Wrap" />
-
-        <!-- Bezug -->
-        <TextBlock Text="{l:T Profile_ModeHeading}" FontWeight="SemiBold" Margin="0,16,0,6" />
-        <RadioButton x:Name="RelativeRadio" GroupName="Mode" Checked="Mode_Changed" Margin="0,0,0,4"
-                     Content="{l:T Profile_ModeRelative}" />
-        <TextBlock Text="{l:T Profile_ModeRelativeHint}"
-                   Opacity="0.75" FontSize="12" Margin="26,0,0,6" TextWrapping="Wrap" />
-        <RadioButton x:Name="AbsoluteRadio" GroupName="Mode" Checked="Mode_Changed" Margin="0,0,0,4"
-                     Content="{l:T Profile_ModeAbsolute}" />
-        <TextBlock Text="{l:T Profile_ModeAbsoluteHint}"
-                   Opacity="0.75" FontSize="12" Margin="26,0,0,0" TextWrapping="Wrap" />
-
-        <!-- Abfolge -->
-        <Label Content="{l:T Profile_Sequence}" Target="{Binding ElementName=StepList}" Padding="0,16,0,4" FontWeight="SemiBold" />
-        <StackPanel Orientation="Horizontal" Margin="0,0,0,8">
-            <TextBlock Text="{l:T Profile_Preset}" VerticalAlignment="Center" Margin="0,0,8,0" />
-            <Button Content="{l:T Profile_PresetToggle}" Click="PresetToggle_Click" MinHeight="32" Padding="10,2" Margin="0,0,6,0"
-                    ToolTip="{l:T Profile_PresetToggleTip}" />
-            <Button Content="{l:T Profile_PresetTwo}" Click="PresetTwoValues_Click" MinHeight="32" Padding="10,2" Margin="0,0,6,0"
-                    ToolTip="20 % → 50 %" />
-            <Button Content="{l:T Profile_PresetThree}" Click="PresetThree_Click" MinHeight="32" Padding="10,2"
-                    ToolTip="{l:T Profile_PresetThreeTip}" />
-        </StackPanel>
-        <ListBox x:Name="StepList" MaxHeight="260" HorizontalContentAlignment="Stretch" AllowDrop="True"
-                 KeyDown="StepList_KeyDown" Drop="StepList_Drop" DragOver="StepList_DragOver"
-                 AutomationProperties.Name="{l:T Profile_SequenceA11y}">
-            <ListBox.ItemTemplate>
-                <DataTemplate DataType="{x:Type ui:StepItem}">
-                    <Grid AutomationProperties.Name="{Binding AccessibleName}">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-                        <TextBlock Grid.Column="0" Text="⠿" FontSize="16" Margin="0,0,8,0" VerticalAlignment="Center" Cursor="SizeAll"
-                                   PreviewMouseLeftButtonDown="Grip_MouseDown" ToolTip="{l:T Profile_DragTip}" />
-                        <TextBlock Grid.Column="1" Text="{Binding Number}" VerticalAlignment="Center" Margin="0,0,8,0" MinWidth="20" />
-                        <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center"
-                                    Visibility="{Binding IsPercent, Converter={StaticResource BoolToVis}}">
-                            <TextBox Text="{Binding PercentText, UpdateSourceTrigger=PropertyChanged}" Width="70"
-                                     AutomationProperties.Name="{Binding PercentName}" />
-                            <TextBlock Text="%" VerticalAlignment="Center" Margin="6,0,0,0" />
-                        </StackPanel>
-                        <Border Grid.Column="2" HorizontalAlignment="Left" BorderThickness="2" CornerRadius="12" Padding="10,3"
-                                BorderBrush="{DynamicResource {x:Static SystemColors.AccentColorBrushKey}}"
-                                Visibility="{Binding IsBaseline, Converter={StaticResource BoolToVis}}">
-                            <TextBlock Text="{l:T Profile_BaselineChip}" FontWeight="SemiBold" />
-                        </Border>
-                        <StackPanel Grid.Column="3" Orientation="Horizontal">
-                            <Button Content="↑" Click="MoveUp_Click" Tag="{Binding}" MinWidth="32" MinHeight="32" Margin="4,0,0,0"
-                                    AutomationProperties.Name="{Binding UpName}" ToolTip="{l:T Profile_UpTip}" />
-                            <Button Content="↓" Click="MoveDown_Click" Tag="{Binding}" MinWidth="32" MinHeight="32" Margin="4,0,0,0"
-                                    AutomationProperties.Name="{Binding DownName}" ToolTip="{l:T Profile_DownTip}" />
-                            <Button Content="✕" Click="RemoveStep_Click" Tag="{Binding}" MinWidth="32" MinHeight="32" Margin="4,0,0,0"
-                                    AutomationProperties.Name="{Binding RemoveName}" ToolTip="{l:T Common_Remove}" />
-                        </StackPanel>
-                    </Grid>
-                </DataTemplate>
-            </ListBox.ItemTemplate>
-        </ListBox>
-        <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
-            <Button Content="{l:T Profile_AddPercent}" Click="AddPercent_Click" MinHeight="32" Padding="12,4" Margin="0,0,8,0" />
-            <Button Content="{l:T Profile_AddBaseline}" Click="AddBaseline_Click" MinHeight="32" Padding="12,4" />
-        </StackPanel>
-        <TextBlock x:Name="StepsError" Style="{StaticResource Error}" />
-        <Border BorderThickness="1" CornerRadius="6" Padding="10,8" Margin="0,10,0,0"
+    <DockPanel>
+        <!-- Knopfzeile bleibt immer sichtbar -->
+        <Border DockPanel.Dock="Bottom" Padding="24,16" BorderThickness="0,1,0,0"
                 BorderBrush="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}">
-            <StackPanel>
-                <TextBlock Text="{l:T Profile_PreviewHeading}" FontWeight="SemiBold" />
-                <TextBlock x:Name="PreviewText" TextWrapping="Wrap" Margin="0,4,0,0" AutomationProperties.LiveSetting="Polite" />
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button x:Name="SaveButton" Content="{l:T Common_Save}" IsDefault="True" Click="Save_Click" MinWidth="100" MinHeight="32" Margin="0,0,8,0" />
+                <Button Content="{l:T Common_Cancel}" IsCancel="True" MinWidth="100" MinHeight="32" />
             </StackPanel>
         </Border>
 
-        <!-- Rückmeldung -->
-        <TextBlock Text="{l:T Profile_Feedback}" FontWeight="SemiBold" Margin="0,16,0,6" />
-        <CheckBox x:Name="OverlayOnBox" Content="{l:T Profile_OverlayOn}" Margin="0,0,0,6" />
-        <CheckBox x:Name="OverlayOffBox" Content="{l:T Profile_OverlayOff}" Margin="0,0,0,6" />
-        <CheckBox x:Name="SoundBox" Content="{l:T Profile_Sound}" />
-        <StackPanel Orientation="Horizontal" Margin="26,6,0,0">
-            <Label Content="{l:T Profile_SoundLabel}" Target="{Binding ElementName=SoundCombo}" Padding="0,0,8,0" VerticalAlignment="Center" />
-            <ComboBox x:Name="SoundCombo" MinWidth="140" AutomationProperties.Name="{l:T Profile_SoundA11y}" />
-            <Button Content="{l:T Profile_SoundOn}" Click="PreviewSoundOn_Click" MinHeight="32" MinWidth="60" Margin="8,0,0,0"
-                    AutomationProperties.Name="{l:T Profile_SoundOnTip}" ToolTip="{l:T Profile_SoundOnTip}" />
-            <Button Content="{l:T Profile_SoundOff}" Click="PreviewSoundOff_Click" MinHeight="32" MinWidth="60" Margin="6,0,0,0"
-                    AutomationProperties.Name="{l:T Profile_SoundOffTip}" ToolTip="{l:T Profile_SoundOffTip}" />
-        </StackPanel>
+        <ScrollViewer x:Name="Scroller" VerticalScrollBarVisibility="Auto" Focusable="False">
+            <StackPanel Margin="24,24,24,8">
+                <TextBlock x:Name="Heading" FontSize="20" FontWeight="SemiBold" Margin="0,0,0,16" TextWrapping="Wrap" />
 
-        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
-            <Button x:Name="SaveButton" Content="{l:T Common_Save}" IsDefault="True" Click="Save_Click" MinWidth="100" MinHeight="32" Margin="0,0,8,0" />
-            <Button Content="{l:T Common_Cancel}" IsCancel="True" MinWidth="100" MinHeight="32" />
-        </StackPanel>
-    </StackPanel>
+                <!-- Name und Hotkey -->
+                <Border Style="{StaticResource Card}">
+                    <StackPanel>
+                        <TextBlock Text="{l:T Profile_CardGeneral}" Style="{StaticResource CardHeading}" />
+                        <Label Content="{l:T Profile_Name}" Target="{Binding ElementName=NameBox}" Padding="0,0,0,4" />
+                        <TextBox x:Name="NameBox" TextChanged="Any_Changed" AutomationProperties.Name="{l:T Profile_NameA11y}" />
+                        <TextBlock x:Name="NameError" Style="{StaticResource Error}" />
+
+                        <Label Content="{l:T Profile_Hotkey}" Target="{Binding ElementName=HotkeyInput}" Padding="0,16,0,4" />
+                        <ui:HotkeyBox x:Name="HotkeyInput" AutomationProperties.Name="{l:T Profile_HotkeyA11y}" />
+                        <TextBlock Text="{l:T Profile_HotkeyHint}" Style="{StaticResource Caption}" Margin="0,4,0,0" />
+                        <TextBlock x:Name="HotkeyError" Style="{StaticResource Error}" />
+                        <CheckBox x:Name="PassThroughBox" Margin="0,12,0,0" Content="{l:T Profile_PassThrough}" />
+                        <TextBlock x:Name="PassThroughHint" Style="{StaticResource Caption}" Margin="28,4,0,0" />
+                    </StackPanel>
+                </Border>
+
+                <!-- Verhalten -->
+                <Border Style="{StaticResource Card}">
+                    <StackPanel>
+                        <TextBlock Text="{l:T Profile_CardBehavior}" Style="{StaticResource CardHeading}" />
+                        <TextBlock Text="{l:T Profile_TriggerHeading}" FontWeight="SemiBold" Margin="0,0,0,8" />
+                        <RadioButton x:Name="ToggleRadio" GroupName="Trigger" Checked="Mode_Changed" Margin="0,0,0,8" Content="{l:T Profile_TriggerToggle}" />
+                        <RadioButton x:Name="HoldRadio" GroupName="Trigger" Checked="Mode_Changed" Margin="0,0,0,4" Content="{l:T Profile_TriggerHold}" />
+                        <TextBlock Text="{l:T Profile_TriggerHoldHint}" Style="{StaticResource Caption}" Margin="28,0,0,0" />
+
+                        <TextBlock Text="{l:T Profile_ModeHeading}" FontWeight="SemiBold" Margin="0,16,0,8" />
+                        <RadioButton x:Name="RelativeRadio" GroupName="Mode" Checked="Mode_Changed" Margin="0,0,0,4" Content="{l:T Profile_ModeRelative}" />
+                        <TextBlock Text="{l:T Profile_ModeRelativeHint}" Style="{StaticResource Caption}" Margin="28,0,0,8" />
+                        <RadioButton x:Name="AbsoluteRadio" GroupName="Mode" Checked="Mode_Changed" Margin="0,0,0,4" Content="{l:T Profile_ModeAbsolute}" />
+                        <TextBlock Text="{l:T Profile_ModeAbsoluteHint}" Style="{StaticResource Caption}" Margin="28,0,0,0" />
+                    </StackPanel>
+                </Border>
+
+                <!-- Abfolge -->
+                <Border Style="{StaticResource Card}">
+                    <StackPanel>
+                        <Label Target="{Binding ElementName=StepList}" Padding="0" Margin="0,0,0,12">
+                            <AccessText Text="{l:T Profile_Sequence}" FontSize="14" FontWeight="SemiBold" />
+                        </Label>
+                        <WrapPanel Margin="0,0,0,12">
+                            <TextBlock Text="{l:T Profile_Preset}" VerticalAlignment="Center" Margin="0,0,8,0" Style="{StaticResource Caption}" />
+                            <Button Content="{l:T Profile_PresetToggle}" Click="PresetToggle_Click" MinHeight="32" Padding="12,4" Margin="0,0,8,4"
+                                    ToolTip="{l:T Profile_PresetToggleTip}" />
+                            <Button Content="{l:T Profile_PresetTwo}" Click="PresetTwoValues_Click" MinHeight="32" Padding="12,4" Margin="0,0,8,4"
+                                    ToolTip="20 % → 50 %" />
+                            <Button Content="{l:T Profile_PresetThree}" Click="PresetThree_Click" MinHeight="32" Padding="12,4" Margin="0,0,0,4"
+                                    ToolTip="{l:T Profile_PresetThreeTip}" />
+                        </WrapPanel>
+                        <ListBox x:Name="StepList" MaxHeight="240" HorizontalContentAlignment="Stretch" AllowDrop="True"
+                                 ScrollViewer.HorizontalScrollBarVisibility="Disabled" ItemContainerStyle="{StaticResource StepItem}"
+                                 KeyDown="StepList_KeyDown" Drop="StepList_Drop" DragOver="StepList_DragOver"
+                                 AutomationProperties.Name="{l:T Profile_SequenceA11y}">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate DataType="{x:Type ui:StepItem}">
+                                    <Grid Margin="0,2">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Grid.Column="0" Style="{StaticResource Icon}" Text="&#xE784;" Margin="0,0,10,0" Cursor="SizeAll"
+                                                   PreviewMouseLeftButtonDown="Grip_MouseDown" ToolTip="{l:T Profile_DragTip}" />
+                                        <TextBlock Grid.Column="1" Text="{Binding Number}" VerticalAlignment="Center" Margin="0,0,10,0" MinWidth="16"
+                                                   Style="{StaticResource Caption}" />
+                                        <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center"
+                                                    Visibility="{Binding IsPercent, Converter={StaticResource BoolToVis}}">
+                                            <TextBox Text="{Binding PercentText, UpdateSourceTrigger=PropertyChanged}" Width="72"
+                                                     AutomationProperties.Name="{Binding PercentName}" />
+                                            <TextBlock Text="%" VerticalAlignment="Center" Margin="8,0,0,0" />
+                                        </StackPanel>
+                                        <Border Grid.Column="2" HorizontalAlignment="Left" VerticalAlignment="Center" BorderThickness="1.5" CornerRadius="14" Padding="10,3"
+                                                BorderBrush="{StaticResource GoldBrush}"
+                                                Visibility="{Binding IsBaseline, Converter={StaticResource BoolToVis}}">
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Style="{StaticResource Icon}" Text="&#xE7A7;" FontSize="12" Margin="0,0,6,0" />
+                                                <TextBlock Text="{l:T Profile_BaselineChip}" FontWeight="SemiBold" />
+                                            </StackPanel>
+                                        </Border>
+                                        <StackPanel Grid.Column="3" Orientation="Horizontal">
+                                            <Button Click="MoveUp_Click" Tag="{Binding}" Width="32" Height="32" MinWidth="32" MinHeight="32" Padding="0" Margin="4,0,0,0"
+                                                    AutomationProperties.Name="{Binding UpName}" ToolTip="{l:T Profile_UpTip}">
+                                                <TextBlock Style="{StaticResource Icon}" Text="&#xE74A;" FontSize="12" />
+                                            </Button>
+                                            <Button Click="MoveDown_Click" Tag="{Binding}" Width="32" Height="32" MinWidth="32" MinHeight="32" Padding="0" Margin="4,0,0,0"
+                                                    AutomationProperties.Name="{Binding DownName}" ToolTip="{l:T Profile_DownTip}">
+                                                <TextBlock Style="{StaticResource Icon}" Text="&#xE74B;" FontSize="12" />
+                                            </Button>
+                                            <Button Click="RemoveStep_Click" Tag="{Binding}" Width="32" Height="32" MinWidth="32" MinHeight="32" Padding="0" Margin="4,0,0,0"
+                                                    AutomationProperties.Name="{Binding RemoveName}" ToolTip="{l:T Common_Remove}">
+                                                <TextBlock Style="{StaticResource Icon}" Text="&#xE711;" FontSize="12" />
+                                            </Button>
+                                        </StackPanel>
+                                    </Grid>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                        <StackPanel Orientation="Horizontal" Margin="0,12,0,0">
+                            <Button Click="AddPercent_Click" MinHeight="32" Padding="12,4" Margin="0,0,8,0">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Style="{StaticResource Icon}" Text="&#xE710;" Margin="0,0,8,0" />
+                                    <AccessText Text="{l:T Profile_AddPercent}" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+                            <Button Click="AddBaseline_Click" MinHeight="32" Padding="12,4">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Style="{StaticResource Icon}" Text="&#xE710;" Margin="0,0,8,0" />
+                                    <AccessText Text="{l:T Profile_AddBaseline}" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
+                        <TextBlock x:Name="StepsError" Style="{StaticResource Error}" />
+                        <Border CornerRadius="6" Padding="12,10" Margin="0,16,0,0"
+                                Background="{DynamicResource CardBackgroundFillColorSecondaryBrush}"
+                                BorderThickness="1" BorderBrush="{DynamicResource {x:Static SystemColors.ActiveBorderBrushKey}}">
+                            <StackPanel>
+                                <TextBlock Text="{l:T Profile_PreviewHeading}" FontWeight="SemiBold" />
+                                <TextBlock x:Name="PreviewText" TextWrapping="Wrap" Margin="0,4,0,0" AutomationProperties.LiveSetting="Polite" />
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </Border>
+
+                <!-- Rückmeldung -->
+                <Border Style="{StaticResource Card}">
+                    <StackPanel>
+                        <TextBlock Text="{l:T Profile_Feedback}" Style="{StaticResource CardHeading}" />
+                        <CheckBox x:Name="OverlayOnBox" Content="{l:T Profile_OverlayOn}" Margin="0,0,0,8" />
+                        <CheckBox x:Name="OverlayOffBox" Content="{l:T Profile_OverlayOff}" Margin="0,0,0,8" />
+                        <CheckBox x:Name="SoundBox" Content="{l:T Profile_Sound}" />
+                        <StackPanel Orientation="Horizontal" Margin="28,8,0,0">
+                            <Label Content="{l:T Profile_SoundLabel}" Target="{Binding ElementName=SoundCombo}" Padding="0,0,8,0" VerticalAlignment="Center" />
+                            <ComboBox x:Name="SoundCombo" MinWidth="160" AutomationProperties.Name="{l:T Profile_SoundA11y}" />
+                            <Button Click="PreviewSoundOn_Click" MinHeight="32" Padding="12,4" Margin="8,0,0,0"
+                                    AutomationProperties.Name="{l:T Profile_SoundOnTip}" ToolTip="{l:T Profile_SoundOnTip}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Style="{StaticResource Icon}" Text="&#xE768;" FontSize="12" Margin="0,0,6,0" />
+                                    <TextBlock Text="{l:T Profile_SoundOn}" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+                            <Button Click="PreviewSoundOff_Click" MinHeight="32" Padding="12,4" Margin="8,0,0,0"
+                                    AutomationProperties.Name="{l:T Profile_SoundOffTip}" ToolTip="{l:T Profile_SoundOffTip}">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Style="{StaticResource Icon}" Text="&#xE768;" FontSize="12" Margin="0,0,6,0" />
+                                    <TextBlock Text="{l:T Profile_SoundOff}" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+    </DockPanel>
 </Window>

@@ -21,6 +21,8 @@ public sealed class HotkeyBox : TextBox
 
     public HotkeyBox()
     {
+        // Abgeleitete Controls bekommen den impliziten Fluent-Stil nicht automatisch
+        SetResourceReference(StyleProperty, typeof(TextBox));
         IsReadOnly = true;
         IsReadOnlyCaretVisible = false;
         IsUndoEnabled = false;

@@ -50,11 +50,14 @@ internal static class Snapshots
                 Save(profile, prefix + "02-profile.png", theme);
                 profile.Close();
 
-                var settings = SettingsWindow.CreateForSnapshot(main, host);
-                settings.Show();
-                Pump();
-                Save(settings, prefix + "03-settings.png", theme);
-                settings.Close();
+                foreach (var (page, name) in new[] { (0, "general"), (1, "overlay"), (2, "status") })
+                {
+                    var settings = SettingsWindow.CreateForSnapshot(main, host, page);
+                    settings.Show();
+                    Pump();
+                    Save(settings, prefix + $"03-settings-{name}.png", theme);
+                    settings.Close();
+                }
 
                 var about = AboutWindow.CreateForSnapshot();
                 about.Show();
@@ -175,8 +178,12 @@ internal static class Snapshots
                     ? solid
                     : new SolidColorBrush(theme == ThemeMode.Dark ? Color.FromRgb(0x20, 0x20, 0x20) : Color.FromRgb(0xF3, 0xF3, 0xF3));
             dc.DrawRectangle(background, null, rect);
-            dc.DrawRectangle(new VisualBrush(content) { Stretch = Stretch.None, AlignmentX = AlignmentX.Left, AlignmentY = AlignmentY.Top },
-                null, new Rect(pad, pad, w, h));
+            // Auch Schatten/Ränder außerhalb der Elementgrenzen erfassen (sonst rechts abgeschnitten)
+            var bounds = VisualTreeHelper.GetDescendantBounds(content);
+            bounds.Union(new Rect(0, 0, w, h));
+            dc.DrawRectangle(new VisualBrush(content) { Stretch = Stretch.None, ViewboxUnits = BrushMappingMode.Absolute, Viewbox = bounds,
+                    AlignmentX = AlignmentX.Left, AlignmentY = AlignmentY.Top },
+                null, new Rect(pad + bounds.X, pad + bounds.Y, bounds.Width, bounds.Height));
         }
 
         var bmp = new RenderTargetBitmap(
