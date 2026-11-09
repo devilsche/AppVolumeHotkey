@@ -3,6 +3,14 @@
 Jede Version auf Deutsch und Englisch. Der Abschnitt einer Version wird automatisch als Beschreibung des GitHub-Releases verwendet.
 Every version in German and English. A version's section is used automatically as the GitHub release description.
 
+## [0.16.2] – 2026-11-09
+
+### Deutsch
+- Über-Fenster: Lizenztext in einem gut lesbaren Feld (ca. 12 Zeilen), der übrige Inhalt scrollt; Knöpfe bleiben unten sichtbar.
+
+### English
+- About window: license text in a readable box (about 12 lines), the rest scrolls; buttons stay visible at the bottom.
+
 ## [0.16.1] – 2026-11-09
 
 ### Deutsch

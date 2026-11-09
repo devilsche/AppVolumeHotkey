@@ -12,7 +12,7 @@
     <RootNamespace>AppVolumeHotkey</RootNamespace>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <ApplicationIcon>Assets\app.ico</ApplicationIcon>
-    <Version>0.16.1</Version>
+    <Version>0.16.2</Version>
     <Product>AppVolumeHotkey</Product>
     <Authors>Dominic Ruschinski</Authors>
     <Copyright>© 2026 Dominic Ruschinski</Copyright>
