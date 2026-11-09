@@ -3,6 +3,14 @@
 Jede Version auf Deutsch und Englisch. Der Abschnitt einer Version wird automatisch als Beschreibung des GitHub-Releases verwendet.
 Every version in German and English. A version's section is used automatically as the GitHub release description.
 
+## [0.16.1] – 2026-11-09
+
+### Deutsch
+- Überarbeitetes App-Icon: Der Pfeil endet mit Abstand über dem lauten Balken, die leisen Balken links sind kleiner – klarer Unterschied zwischen leise und laut, auch in klein.
+
+### English
+- Reworked app icon: the arrow ends with a gap above the loud bar and the quiet bars on the left are smaller – a clearer difference between quiet and loud, even at small sizes.
+
 ## [0.16.0] – 2026-11-09
 
 ### Deutsch
