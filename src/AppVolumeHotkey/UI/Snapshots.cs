@@ -202,7 +202,7 @@ internal static class Snapshots
         {
             // Fenster auf Wunschbreite bringen (der Build-Rechner läuft dafür in 1920×1080) und den Inhalt
             // mit unbegrenzter Höhe anordnen – Scrollbereiche zeigen so ihren ganzen Inhalt.
-            window.Width = w0 + 16;
+            window.Width = Math.Min(w0, SystemParameters.WorkArea.Width - 8);
             window.UpdateLayout();
             content.Measure(new Size(content.ActualWidth, height ?? double.PositiveInfinity));
             var h0 = height ?? Math.Max(minHeight, Math.Ceiling(content.DesiredSize.Height));
