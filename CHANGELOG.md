@@ -3,6 +3,16 @@
 Jede Version auf Deutsch und Englisch. Der Abschnitt einer Version wird automatisch als Beschreibung des GitHub-Releases verwendet.
 Every version in German and English. A version's section is used automatically as the GitHub release description.
 
+## [0.16.0] – 2026-11-09
+
+### Deutsch
+- Profil-Dialog übersichtlicher: Bereiche links (Name und Hotkey, Verhalten, Abfolge, Rückmeldung) wie in den Einstellungen statt einer langen Seite; bei Fehlern springt der Dialog zum betroffenen Bereich.
+- Ducking: Hinweistext zur Empfindlichkeit korrigiert.
+
+### English
+- Clearer profile dialog: sections on the left (Name and hotkey, Behavior, Sequence, Feedback) like in the settings instead of one long page; on errors the dialog jumps to the affected section.
+- Ducking: corrected the sensitivity hint.
+
 ## [0.15.0] – 2026-11-09
 
 ### Deutsch

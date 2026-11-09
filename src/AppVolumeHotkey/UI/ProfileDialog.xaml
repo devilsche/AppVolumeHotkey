@@ -122,10 +122,10 @@
             </ScrollViewer>
             <ScrollViewer x:Name="SequencePage" VerticalScrollBarVisibility="Auto" Focusable="False" Visibility="Collapsed">
                 <StackPanel Margin="32,24,32,24">
-                    <TextBlock Text="{l:T Profile_SequenceNav}" FontSize="20" FontWeight="SemiBold" Margin="0,0,0,16" />
-                        <Label Target="{Binding ElementName=StepList}" Padding="0" Margin="0,0,0,8">
-                            <AccessText Text="{l:T Profile_Sequence}" FontWeight="SemiBold" />
-                        </Label>
+                    <Label Target="{Binding ElementName=StepList}" Padding="0" Margin="0,0,0,16">
+                        <AccessText Text="{l:T Profile_Sequence}" FontSize="20" FontWeight="SemiBold" />
+                    </Label>
+
                         <WrapPanel Margin="0,0,0,12">
                             <TextBlock Text="{l:T Profile_Preset}" VerticalAlignment="Center" Margin="0,0,8,0" Style="{StaticResource Caption}" />
                             <Button Content="{l:T Profile_PresetToggle}" Click="PresetToggle_Click" MinHeight="32" Padding="12,4" Margin="0,0,8,4"

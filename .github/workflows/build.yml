@@ -61,6 +61,9 @@ jobs:
           # Full HD, damit Fenster nicht vom kleinen Standard-Bildschirm (1024×768) beschnitten werden
           try { Set-DisplayResolution -Width 1920 -Height 1080 -Force } catch { Write-Host "Auflösung nicht änderbar: $_" }
           Start-Sleep -Seconds 2
+          # Andere Fenster (Konsole) minimieren, damit nur die App auf den Bildern ist
+          try { (New-Object -ComObject Shell.Application).MinimizeAll() } catch { }
+          Start-Sleep -Seconds 1
           $p = Start-Process -FilePath "out/$env:EXE_NAME" -ArgumentList '--ui-snapshots', "$PWD\ui-snapshots" -PassThru
           if (-not $p.WaitForExit(180000)) { $p.Kill(); throw "Snapshots: Zeitüberschreitung" }
           Get-ChildItem ui-snapshots | Format-Table Name, Length
