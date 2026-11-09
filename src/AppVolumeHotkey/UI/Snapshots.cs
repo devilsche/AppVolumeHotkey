@@ -48,16 +48,16 @@ internal static class Snapshots
                 Pump();
                 SelectFirstGroup(main);
                 Pump();
-                Save(main, prefix + "01-main.png", theme, width: 1400, height: 900);
+                Save(main, prefix + "01-main.png", theme, width: 1920, height: 1080);
 
                 if (main.FindName("FeatureList") is ListBox features)
                 {
                     features.SelectedIndex = 0;
                     Pump();
-                    Save(main, prefix + "01b-mic.png", theme, width: 1400);
+                    Save(main, prefix + "01b-mic.png", theme, width: 1920, minHeight: 1080);
                     features.SelectedIndex = 1;
                     Pump();
-                    Save(main, prefix + "01c-ducking.png", theme, width: 1400);
+                    Save(main, prefix + "01c-ducking.png", theme, width: 1920, minHeight: 1080);
                     features.SelectedIndex = -1;
                     SelectFirstGroup(main);
                     Pump();
@@ -192,20 +192,41 @@ internal static class Snapshots
 
     /// <param name="width">Feste Breite fürs Bild (unabhängig vom kleinen Bildschirm des Build-Rechners).</param>
     /// <param name="height">Feste Höhe; null = ganze Inhaltshöhe ohne Scrollen.</param>
-    private static void Save(Window window, string path, ThemeMode theme, bool gameScene = false, double? width = null, double? height = null)
+    private static void Save(Window window, string path, ThemeMode theme, bool gameScene = false, double? width = null, double? height = null,
+        double minHeight = 0)
     {
         window.UpdateLayout();
         if (window.Content is not FrameworkElement content)
             return;
         if (width is { } w0)
         {
-            // Inhalt in Wunschgröße neu anordnen – Scrollbereiche bekommen bei unbegrenzter Höhe ihren ganzen Inhalt
-            content.Measure(new Size(w0, height ?? double.PositiveInfinity));
-            var h0 = height ?? Math.Ceiling(content.DesiredSize.Height);
-            content.Arrange(new Rect(0, 0, w0, h0));
+            // Inhalt aus dem Fenster lösen (Fenster dürfen nicht größer als der Bildschirm sein) und frei anordnen.
+            // Fenster-Ressourcen mitnehmen, damit Stile erhalten bleiben.
+            var resources = window.Resources;
+            window.Content = null;
+            content.Resources.MergedDictionaries.Add(resources);
+            try
+            {
+                content.Measure(new Size(w0, height ?? double.PositiveInfinity));
+                var h0 = height ?? Math.Max(minHeight, Math.Ceiling(content.DesiredSize.Height));
+                content.Arrange(new Rect(0, 0, w0, h0));
+                content.UpdateLayout();
+                Render(content, window, path, theme, gameScene);
+            }
+            finally
+            {
+                content.Resources.MergedDictionaries.Remove(resources);
+                window.Content = content;
+            }
+            return;
         }
         if (content.ActualWidth < 1 || content.ActualHeight < 1)
             return;
+        Render(content, window, path, theme, gameScene);
+    }
+
+    private static void Render(FrameworkElement content, Window window, string path, ThemeMode theme, bool gameScene)
+    {
 
         var dpi = VisualTreeHelper.GetDpi(content);
         double w = content.ActualWidth, h = content.ActualHeight;
